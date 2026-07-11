@@ -1,0 +1,257 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Nunito:wght@400;500;600;700&display=swap');
+
+  :root {
+    --bg: #F6F3EC;
+    --ink: #1F3324;
+    --sage: #8DA377;
+    --sage-light: #C4D97A;
+    --clay: #B5613C;
+    --clay-light: #D99A7D;
+    --soil: #4A3728;
+    --card: #FFFFFF;
+    --line: #E4DFD1;
+    --shadow: 0 2px 12px rgba(31,51,36,0.06);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Nunito', sans-serif;
+    min-height: 100vh;
+  }
+
+  .app {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 40px 28px 80px;
+  }
+
+  header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 36px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  h1 {
+    font-family: 'Fraunces', serif;
+    font-optical-sizing: auto;
+    font-weight: 600;
+    font-size: 34px;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+
+  .tagline {
+    font-size: 13px;
+    color: var(--soil);
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    letter-spacing: 0.02em;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 28px;
+  }
+
+  @media (max-width: 800px) {
+    .layout { grid-template-columns: 1fr; }
+  }
+
+  .shelf {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .plant-card {
+    background: var(--card);
+    border-radius: 14px;
+    padding: 14px;
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: border-color 0.15s ease, transform 0.1s ease;
+  }
+
+  .plant-card:hover { transform: translateY(-1px); }
+  .plant-card.active { border-color: var(--sage); }
+
+  .plant-card .info { flex: 1; min-width: 0; }
+  .plant-card .name {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 17px;
+    margin: 0 0 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .plant-card .species {
+    font-size: 12px;
+    color: var(--soil);
+    font-style: italic;
+  }
+
+  .ring-wrap { position: relative; width: 54px; height: 54px; flex-shrink: 0; }
+  .ring-wrap svg { transform: rotate(-90deg); }
+  .ring-bg { fill: none; stroke: var(--line); stroke-width: 5; }
+  .ring-fg { fill: none; stroke-width: 5; stroke-linecap: round; transition: stroke-dashoffset 0.4s ease; }
+  .ring-label {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 11px;
+    font-weight: 500;
+  }
+
+  .add-btn {
+    background: transparent;
+    border: 2px dashed var(--line);
+    border-radius: 14px;
+    padding: 16px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--soil);
+    cursor: pointer;
+    text-align: center;
+  }
+  .add-btn:hover { border-color: var(--sage); color: var(--ink); }
+
+  .panel {
+    background: var(--card);
+    border-radius: 18px;
+    box-shadow: var(--shadow);
+    padding: 32px;
+    min-height: 420px;
+  }
+
+  .empty-panel {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--soil);
+    text-align: center;
+    gap: 8px;
+    padding: 60px 20px;
+  }
+  .empty-panel .big-ring { width: 90px; height: 90px; opacity: 0.5; margin-bottom: 8px; }
+
+  .detail-header {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+
+  .big-ring-wrap { position: relative; width: 120px; height: 120px; flex-shrink: 0; }
+  .big-ring-wrap svg { transform: rotate(-90deg); }
+  .big-ring-bg { fill: none; stroke: var(--line); stroke-width: 8; }
+  .big-ring-fg { fill: none; stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset 0.4s ease; }
+  .big-ring-label {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+  }
+  .big-ring-label .num { font-size: 22px; font-weight: 500; }
+  .big-ring-label .unit { font-size: 10px; color: var(--soil); }
+
+  .detail-title h2 {
+    font-family: 'Fraunces', serif;
+    font-size: 28px;
+    font-weight: 600;
+    margin: 0 0 4px;
+  }
+  .detail-title .species { font-style: italic; color: var(--soil); font-size: 14px; }
+
+  .row-actions { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+
+  button.primary, button.secondary {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 500;
+    font-size: 13px;
+    border-radius: 8px;
+    padding: 10px 16px;
+    cursor: pointer;
+    border: none;
+  }
+  button.primary { background: var(--sage); color: #fff; }
+  button.primary:hover { background: #7A9066; }
+  button.secondary { background: transparent; border: 1.5px solid var(--line); color: var(--ink); }
+  button.secondary:hover { border-color: var(--clay); color: var(--clay); }
+
+  .section-label {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 11px;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--soil);
+    margin: 28px 0 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--line);
+  }
+
+  /* Modal */
+  .modal-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(31,51,36,0.35);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 10;
+  }
+  .modal {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 28px;
+    width: 360px;
+    max-width: 90vw;
+  }
+  .modal h3 {
+    font-family: 'Fraunces', serif;
+    margin: 0 0 18px;
+    font-size: 20px;
+  }
+  .field { margin-bottom: 14px; }
+  .field label {
+    display: block;
+    font-size: 12px;
+    color: var(--soil);
+    margin-bottom: 4px;
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+  }
+  .field input {
+    width: 100%;
+    padding: 9px 10px;
+    border-radius: 8px;
+    border: 1.5px solid var(--line);
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px;
+  }
+  .field input:focus { outline: 2px solid var(--sage); border-color: transparent; }
+  .modal-actions { display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end; }
+
+  .freq-hint { font-size: 11px; color: var(--sage); margin-top: 4px; }

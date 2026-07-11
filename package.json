@@ -1,0 +1,6 @@
+{
+  "name": "plant-parent",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A shelf that keeps time for your plants — installable PWA with AI photo diagnosis"
+}
