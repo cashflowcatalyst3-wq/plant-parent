@@ -265,6 +265,21 @@
 
   .freq-hint { font-size: 11px; color: var(--sage); margin-top: 4px; }
 
+  .notes-input {
+    width: 100%;
+    min-height: 70px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1.5px solid var(--line);
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px;
+    color: var(--ink);
+    background: #FBFAF6;
+    resize: vertical;
+  }
+  .notes-input:focus { outline: 2px solid var(--sage); border-color: transparent; }
+  .notes-input::placeholder { color: #A99E8C; }
+
   .id-photo-btn {
     width: 100%;
     border: 1.5px dashed var(--line);

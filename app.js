@@ -170,6 +170,9 @@ function renderDetail(p) {
       ${left} day${left===1?'':'s'} left
     </div>
 
+    <div class="section-label">notes</div>
+    <textarea class="notes-input" id="notesInput" placeholder="e.g. repot in spring, keep away from cold drafts…">${p.notes || ''}</textarea>
+
     <div class="section-label">streak</div>
     <div class="streak-row">
       <span class="streak-count">${streak}</span>
@@ -208,6 +211,12 @@ function renderDetail(p) {
     render();
     savePlants();
   };
+
+  const notesInput = div.querySelector('#notesInput');
+  notesInput.addEventListener('blur', () => {
+    p.notes = notesInput.value;
+    savePlants();
+  });
 
   return div;
 }
@@ -313,7 +322,8 @@ document.addEventListener('click', (e) => {
       frequency: freq,
       lastWatered: now,
       waterLog: [],
-      photo: state.pendingModalPhoto || null
+      photo: state.pendingModalPhoto || null,
+      notes: ''
     };
     state.plants.push(p);
     state.activeId = p.id;
