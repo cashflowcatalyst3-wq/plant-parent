@@ -31,7 +31,7 @@
 
   header {
     display: flex;
-    align-items: baseline;
+    align-items: center;
     justify-content: space-between;
     margin-bottom: 36px;
     flex-wrap: wrap;
@@ -103,17 +103,26 @@
     font-style: italic;
   }
 
-  .ring-wrap { position: relative; width: 54px; height: 54px; flex-shrink: 0; }
-  .ring-wrap svg { transform: rotate(-90deg); }
-  .ring-bg { fill: none; stroke: var(--line); stroke-width: 5; }
-  .ring-fg { fill: none; stroke-width: 5; stroke-linecap: round; transition: stroke-dashoffset 0.4s ease; }
-  .ring-label {
-    position: absolute; inset: 0;
+  .ring-wrap { position: relative; flex-shrink: 0; }
+  .ring-wrap svg { position: absolute; top: 0; left: 0; transform: rotate(-90deg); }
+  .ring-bg { fill: none; stroke: var(--line); }
+  .ring-fg { fill: none; stroke-linecap: round; transition: stroke-dashoffset 0.4s ease; }
+  .ring-photo {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    border-radius: 50%; object-fit: cover; display: block;
+  }
+  .ring-photo-placeholder {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+    border-radius: 50%; background: #EFEBDD;
     display: flex; align-items: center; justify-content: center;
+  }
+
+  .days-badge {
     font-family: 'Fraunces', serif;
     font-style: italic;
-    font-size: 11px;
-    font-weight: 500;
+    font-size: 12px;
+    color: var(--soil);
+    flex-shrink: 0;
   }
 
   .add-btn {
@@ -163,14 +172,14 @@
   .big-ring-wrap svg { transform: rotate(-90deg); }
   .big-ring-bg { fill: none; stroke: var(--line); stroke-width: 8; }
   .big-ring-fg { fill: none; stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset 0.4s ease; }
-  .big-ring-label {
-    position: absolute; inset: 0;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    font-family: 'Fraunces', serif;
-    font-style: italic;
+
+  .detail-ring-click { cursor: pointer; position: relative; }
+  .detail-ring-click:hover::after {
+    content: '📷 change photo';
+    position: absolute; bottom: -20px; left: 50%; transform: translateX(-50%);
+    font-family: 'Fraunces', serif; font-style: italic; font-size: 11px;
+    color: var(--soil); white-space: nowrap;
   }
-  .big-ring-label .num { font-size: 22px; font-weight: 500; }
-  .big-ring-label .unit { font-size: 10px; color: var(--soil); }
 
   .detail-title h2 {
     font-family: 'Fraunces', serif;
@@ -255,3 +264,58 @@
   .modal-actions { display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end; }
 
   .freq-hint { font-size: 11px; color: var(--sage); margin-top: 4px; }
+
+  .id-photo-btn {
+    width: 100%;
+    border: 1.5px dashed var(--line);
+    border-radius: 8px;
+    padding: 10px;
+    background: transparent;
+    font-family: 'Nunito', sans-serif;
+    font-size: 13px;
+    color: var(--soil);
+    cursor: pointer;
+    text-align: center;
+  }
+  .id-photo-btn:hover { border-color: var(--sage); color: var(--ink); }
+
+  .modal-photo-preview {
+    display: block;
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-top: 10px;
+  }
+
+  .streak-row {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+  .streak-count {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 30px;
+    color: var(--clay);
+  }
+  .streak-label {
+    font-size: 13px;
+    color: var(--soil);
+  }
+
+  .history-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .history-list li {
+    font-size: 13px;
+    color: var(--ink);
+    padding: 8px 12px;
+    background: #FBFAF6;
+    border-radius: 8px;
+    border-left: 3px solid var(--sage-light);
+  }

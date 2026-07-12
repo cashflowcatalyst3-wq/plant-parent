@@ -1,6 +1,11 @@
 {
   "name": "plant-parent",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "private": true,
-  "description": "A shelf that keeps time for your plants — installable PWA with AI photo diagnosis"
+  "type": "module",
+  "description": "A shelf that keeps time for your plants — with photos, care history, and push reminders",
+  "dependencies": {
+    "web-push": "^3.6.7",
+    "@vercel/kv": "^2.0.0"
+  }
 }

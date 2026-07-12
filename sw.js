@@ -30,3 +30,24 @@ self.addEventListener('fetch', (event) => {
     caches.match(event.request).then((cached) => cached || fetch(event.request))
   );
 });
+
+self.addEventListener('push', (event) => {
+  let data = { title: 'Plant Parent', body: 'One of your plants needs attention.' };
+  try {
+    if (event.data) data = event.data.json();
+  } catch (err) {
+    // fall back to default text above
+  }
+  event.waitUntil(
+    self.registration.showNotification(data.title, {
+      body: data.body,
+      icon: 'icons/icon-192.png',
+      badge: 'icons/icon-192.png'
+    })
+  );
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  event.waitUntil(clients.openWindow('/'));
+});
