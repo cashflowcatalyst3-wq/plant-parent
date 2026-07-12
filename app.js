@@ -63,6 +63,7 @@ const state = {
   notificationsEnabled: false,
   pendingModalPhoto: null, // dataURL waiting to be attached on save
   pendingSpecies: null, // selected SPECIES_DICTIONARY entry for the plant being added
+  editingPlantId: null, // if set, the Add Plant modal is in edit mode for this plant
   unlockedAchievements: [],
   gameHighScore: 0,
   celebrationQueue: [],
@@ -384,7 +385,7 @@ function render() {
     const addBtn = document.createElement('div');
     addBtn.className = 'add-btn';
     addBtn.textContent = '+ Add a plant';
-    addBtn.onclick = () => { state.pendingModalPhoto = null; state.pendingSpecies = null; state.showAddModal = true; render(); };
+    addBtn.onclick = () => { state.pendingModalPhoto = null; state.pendingSpecies = null; state.editingPlantId = null; state.showAddModal = true; render(); };
     shelf.appendChild(addBtn);
 
     const panel = document.getElementById('panel');
@@ -456,6 +457,7 @@ function renderDictionary() {
       const entry = SPECIES_DICTIONARY.find(s => s.id === btn.dataset.id);
       state.pendingSpecies = entry;
       state.pendingModalPhoto = null;
+      state.editingPlantId = null;
       state.showAddModal = true;
       render();
     };
@@ -612,6 +614,7 @@ function renderDetail(p) {
         <div class="species">${p.species || 'species unlabeled'}</div>
         <div class="row-actions">
           <button class="primary" id="waterBtn">Water now</button>
+          <button class="secondary" id="editBtn">✏️ Edit</button>
           <button class="secondary" id="removeBtn">Remove plant</button>
         </div>
       </div>
@@ -653,6 +656,13 @@ function renderDetail(p) {
     playWaterSound();
     render();
     savePlants();
+  };
+  div.querySelector('#editBtn').onclick = () => {
+    state.editingPlantId = p.id;
+    state.pendingModalPhoto = p.photo || null;
+    state.pendingSpecies = SPECIES_DICTIONARY.find(s => s.id === p.speciesId) || null;
+    state.showAddModal = true;
+    render();
   };
   div.querySelector('#removeBtn').onclick = () => {
     state.plants = state.plants.filter(x => x.id !== p.id);
@@ -701,10 +711,12 @@ function renderModal() {
     ? `<img src="${state.pendingModalPhoto}" class="modal-photo-preview">`
     : '';
   const species = state.pendingSpecies;
+  const editingPlant = state.editingPlantId ? state.plants.find(p => p.id === state.editingPlantId) : null;
+  const isEditing = !!editingPlant;
   return `
   <div class="modal-backdrop" id="modalBackdrop">
     <div class="modal">
-      <h3>Add a plant</h3>
+      <h3>${isEditing ? 'Edit plant' : 'Add a plant'}</h3>
       <div class="field">
         <label>Photo (optional)</label>
         <button class="id-photo-btn" id="modalPhotoBtn" type="button">📷 ${state.pendingModalPhoto ? 'Change photo' : 'Add a photo'}</button>
@@ -713,26 +725,26 @@ function renderModal() {
       </div>
       <div class="field">
         <label>Name</label>
-        <input id="modalNameInput" placeholder="e.g. Fig in the corner">
+        <input id="modalNameInput" placeholder="e.g. Fig in the corner" value="${isEditing ? editingPlant.name : ''}">
       </div>
       <div class="field">
         <label>Species</label>
         <button class="species-picker-btn" id="openSpeciesPicker" type="button">
-          ${species ? `<span class="species-picker-emoji">${species.emoji}</span> ${species.name}` : '🔍 Choose from the guide (optional)'}
+          ${species ? `<span class="species-picker-emoji">${species.emoji}</span> ${species.name}` : (isEditing && editingPlant.species ? editingPlant.species : '🔍 Choose from the guide (optional)')}
         </button>
       </div>
       <div class="field">
         <label>Room (optional)</label>
-        <input id="modalRoomInput" placeholder="e.g. Kitchen, Bedroom, Balcony">
+        <input id="modalRoomInput" placeholder="e.g. Kitchen, Bedroom, Balcony" value="${isEditing ? (editingPlant.room || '') : ''}">
       </div>
       <div class="field">
         <label>Water every how many days?</label>
-        <input id="modalFreqInput" type="number" min="1" value="${species ? species.freq : 7}">
+        <input id="modalFreqInput" type="number" min="1" value="${isEditing ? editingPlant.frequency : (species ? species.freq : 7)}">
         <div class="freq-hint">Most houseplants: 5–10 days. Succulents: 14–21.</div>
       </div>
       <div class="modal-actions">
         <button class="secondary" id="cancelModal">Cancel</button>
-        <button class="primary" id="saveModal">Add plant</button>
+        <button class="primary" id="saveModal">${isEditing ? 'Save changes' : 'Add plant'}</button>
       </div>
     </div>
   </div>`;
@@ -805,8 +817,8 @@ function resizeImageToDataUrl(file, maxDim) {
 // ---------- add / cancel plant ----------
 
 document.addEventListener('click', (e) => {
-  if (e.target.id === 'modalBackdrop') { state.showAddModal = false; render(); }
-  if (e.target.id === 'cancelModal') { state.showAddModal = false; render(); }
+  if (e.target.id === 'modalBackdrop') { state.showAddModal = false; state.editingPlantId = null; render(); }
+  if (e.target.id === 'cancelModal') { state.showAddModal = false; state.editingPlantId = null; render(); }
   if (e.target.id === 'badgesBackdrop') { state.showBadgesModal = false; render(); }
   if (e.target.id === 'closeBadges') { state.showBadgesModal = false; render(); }
   if (e.target.id === 'speciesPickerBackdrop') { state.showSpeciesPicker = false; render(); }
@@ -817,22 +829,40 @@ document.addEventListener('click', (e) => {
     const room = document.getElementById('modalRoomInput').value.trim();
     if (!name) return;
     const species = state.pendingSpecies;
-    const now = new Date(Date.now() - (freq-1)*24*60*60*1000).toISOString();
-    const p = {
-      id: nextId++,
-      name,
-      species: species ? species.name : '',
-      speciesId: species ? species.id : null,
-      speciesDesc: species ? species.desc : '',
-      room,
-      frequency: freq,
-      lastWatered: now,
-      waterLog: [],
-      photo: state.pendingModalPhoto || null,
-      notes: ''
-    };
-    state.plants.push(p);
-    state.activeId = p.id;
+
+    if (state.editingPlantId) {
+      const p = state.plants.find(x => x.id === state.editingPlantId);
+      if (p) {
+        p.name = name;
+        p.frequency = freq;
+        p.room = room;
+        p.photo = state.pendingModalPhoto || null;
+        if (species) {
+          p.species = species.name;
+          p.speciesId = species.id;
+          p.speciesDesc = species.desc;
+        }
+      }
+      state.editingPlantId = null;
+    } else {
+      const now = new Date(Date.now() - (freq-1)*24*60*60*1000).toISOString();
+      const p = {
+        id: nextId++,
+        name,
+        species: species ? species.name : '',
+        speciesId: species ? species.id : null,
+        speciesDesc: species ? species.desc : '',
+        room,
+        frequency: freq,
+        lastWatered: now,
+        waterLog: [],
+        photo: state.pendingModalPhoto || null,
+        notes: ''
+      };
+      state.plants.push(p);
+      state.activeId = p.id;
+    }
+
     state.showAddModal = false;
     state.pendingModalPhoto = null;
     state.pendingSpecies = null;
