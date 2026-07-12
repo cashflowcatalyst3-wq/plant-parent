@@ -67,6 +67,8 @@ const state = {
   gameHighScore: 0,
   celebrationQueue: [],
   currentView: 'shelf', // 'shelf' | 'garden' | 'dictionary'
+  sortBy: 'urgent', // 'urgent' | 'az' | 'room'
+  filterRoom: null, // null = all rooms
 };
 
 let nextId = 1;
@@ -110,6 +112,27 @@ function calcStreak(plant) {
     else break;
   }
   return streak;
+}
+
+function getRoomList() {
+  const rooms = new Set();
+  state.plants.forEach(p => { if (p.room && p.room.trim()) rooms.add(p.room.trim()); });
+  return Array.from(rooms).sort();
+}
+
+function getVisiblePlants() {
+  let list = state.plants.slice();
+  if (state.filterRoom) {
+    list = list.filter(p => (p.room || '').trim() === state.filterRoom);
+  }
+  if (state.sortBy === 'az') {
+    list.sort((a, b) => a.name.localeCompare(b.name));
+  } else if (state.sortBy === 'room') {
+    list.sort((a, b) => (a.room || 'zzz').localeCompare(b.room || 'zzz') || a.name.localeCompare(b.name));
+  } else {
+    list.sort((a, b) => daysLeft(a) - daysLeft(b));
+  }
+  return list;
 }
 
 function moodEmoji(plant) {
@@ -291,7 +314,22 @@ function render() {
       ${state.currentView === 'dictionary' ? `<div id="dictionaryView"></div>` : ''}
       ${state.currentView === 'shelf' ? `
         <div class="layout">
-          <div class="shelf" id="shelf"></div>
+          <div class="shelf-column">
+            <div class="shelf-controls">
+              <select class="sort-select" id="sortSelect">
+                <option value="urgent" ${state.sortBy === 'urgent' ? 'selected' : ''}>Most urgent first</option>
+                <option value="az" ${state.sortBy === 'az' ? 'selected' : ''}>A–Z</option>
+                <option value="room" ${state.sortBy === 'room' ? 'selected' : ''}>By room</option>
+              </select>
+              ${getRoomList().length ? `
+                <div class="room-chips">
+                  <button class="room-chip ${!state.filterRoom ? 'room-chip-active' : ''}" data-room="">All</button>
+                  ${getRoomList().map(r => `<button class="room-chip ${state.filterRoom === r ? 'room-chip-active' : ''}" data-room="${r}">${r}</button>`).join('')}
+                </div>
+              ` : ''}
+            </div>
+            <div class="shelf" id="shelf"></div>
+          </div>
           <div class="panel" id="panel"></div>
         </div>
       ` : ''}
@@ -342,7 +380,7 @@ function render() {
     document.getElementById('dictionaryView').appendChild(renderDictionary());
   } else {
     const shelf = document.getElementById('shelf');
-    state.plants.forEach(p => shelf.appendChild(renderCard(p)));
+    getVisiblePlants().forEach(p => shelf.appendChild(renderCard(p)));
     const addBtn = document.createElement('div');
     addBtn.className = 'add-btn';
     addBtn.textContent = '+ Add a plant';
@@ -352,6 +390,11 @@ function render() {
     const panel = document.getElementById('panel');
     panel.innerHTML = '';
     panel.appendChild(active ? renderDetail(active) : renderEmpty());
+
+    document.getElementById('sortSelect').onchange = (e) => { state.sortBy = e.target.value; render(); };
+    document.querySelectorAll('.room-chip').forEach(chip => {
+      chip.onclick = () => { state.filterRoom = chip.dataset.room || null; render(); };
+    });
   }
 
 
@@ -533,7 +576,7 @@ function renderCard(p) {
     ${ringPortrait(p, 54, 5)}
     <div class="info">
       <p class="name">${p.name} <span class="mood">${moodEmoji(p)}</span></p>
-      <div class="species">${p.species || 'unlabeled'}</div>
+      <div class="species">${p.species || 'unlabeled'}${p.room ? ` · ${p.room}` : ''}</div>
     </div>
     <div class="days-badge">${left === 0 ? 'today!' : left + 'd'}</div>
   `;
@@ -580,6 +623,7 @@ function renderDetail(p) {
       last watered ${daysSince(p.lastWatered)} day${daysSince(p.lastWatered)===1?'':'s'} ago ·
       ${left} day${left===1?'':'s'} left
     </div>
+    <input class="room-input" id="roomInput" placeholder="📍 Add a room (e.g. Kitchen)" value="${p.room || ''}">
 
     <div class="section-label">notes</div>
     <textarea class="notes-input" id="notesInput" placeholder="e.g. repot in spring, keep away from cold drafts…">${p.notes || ''}</textarea>
@@ -634,6 +678,13 @@ function renderDetail(p) {
     savePlants();
   });
 
+  const roomInput = div.querySelector('#roomInput');
+  roomInput.addEventListener('blur', () => {
+    p.room = roomInput.value.trim();
+    render();
+    savePlants();
+  });
+
   return div;
 }
 
@@ -669,6 +720,10 @@ function renderModal() {
         <button class="species-picker-btn" id="openSpeciesPicker" type="button">
           ${species ? `<span class="species-picker-emoji">${species.emoji}</span> ${species.name}` : '🔍 Choose from the guide (optional)'}
         </button>
+      </div>
+      <div class="field">
+        <label>Room (optional)</label>
+        <input id="modalRoomInput" placeholder="e.g. Kitchen, Bedroom, Balcony">
       </div>
       <div class="field">
         <label>Water every how many days?</label>
@@ -759,6 +814,7 @@ document.addEventListener('click', (e) => {
   if (e.target.id === 'saveModal') {
     const name = document.getElementById('modalNameInput').value.trim();
     const freq = parseInt(document.getElementById('modalFreqInput').value, 10) || 7;
+    const room = document.getElementById('modalRoomInput').value.trim();
     if (!name) return;
     const species = state.pendingSpecies;
     const now = new Date(Date.now() - (freq-1)*24*60*60*1000).toISOString();
@@ -768,6 +824,7 @@ document.addEventListener('click', (e) => {
       species: species ? species.name : '',
       speciesId: species ? species.id : null,
       speciesDesc: species ? species.desc : '',
+      room,
       frequency: freq,
       lastWatered: now,
       waterLog: [],

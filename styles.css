@@ -692,3 +692,62 @@
   .dictionary-light { font-size: 12px; color: var(--soil); }
   .dictionary-desc { font-size: 13px; line-height: 1.5; color: var(--ink); margin: 6px 0 10px; flex: 1; }
   .dictionary-add-btn { align-self: flex-start; font-size: 12px; }
+
+  /* Shelf controls: sort + room filter */
+  .shelf-column {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .shelf-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .sort-select {
+    font-family: 'Nunito', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1.5px solid var(--line);
+    background: var(--card);
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .room-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .room-chip {
+    font-family: 'Nunito', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 999px;
+    border: 1.5px solid var(--line);
+    background: var(--card);
+    color: var(--soil);
+    cursor: pointer;
+  }
+  .room-chip:hover { border-color: var(--sage); color: var(--ink); }
+  .room-chip-active {
+    background: var(--sage);
+    border-color: var(--sage);
+    color: #fff;
+  }
+
+  /* Room field in detail view */
+  .room-input {
+    width: 100%;
+    margin-top: 8px;
+    padding: 8px 12px;
+    border-radius: 8px;
+    border: 1.5px solid var(--line);
+    font-family: 'Nunito', sans-serif;
+    font-size: 13px;
+    color: var(--ink);
+    background: #FBFAF6;
+  }
+  .room-input:focus { outline: 2px solid var(--sage); border-color: transparent; }
