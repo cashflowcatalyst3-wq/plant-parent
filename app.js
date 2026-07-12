@@ -1,5 +1,24 @@
 const VAPID_PUBLIC_KEY = 'BN4ieWQBco1u_esfncKASD5n51MKDrjGJoDafo4eJP7FwjzxIRUq-2xsJEGRoMzZ-tyipIrn8zh2Kzy1H5pukrQ';
 
+const SPECIES_DICTIONARY = [
+  { id: 'pothos', name: 'Pothos', latin: 'Epipremnum aureum', emoji: '🍃', light: 'Low to bright, indirect', freq: 7, desc: 'A hardy trailing vine that tolerates neglect and low light well. Let the soil dry out between waterings.' },
+  { id: 'fiddle-leaf-fig', name: 'Fiddle-leaf Fig', latin: 'Ficus lyrata', emoji: '🌳', light: 'Bright, indirect', freq: 7, desc: 'Loves consistent bright light and dislikes being moved around. Sensitive to overwatering and drafts.' },
+  { id: 'snake-plant', name: 'Snake Plant', latin: 'Sansevieria', emoji: '🗡️', light: 'Low to bright', freq: 14, desc: 'Extremely drought-tolerant with striking upright leaves. A forgiving choice for beginners.' },
+  { id: 'monstera', name: 'Monstera', latin: 'Monstera deliciosa', emoji: '🌿', light: 'Bright, indirect', freq: 7, desc: 'Known for its iconic split leaves. Enjoys humidity and steady, moderate watering.' },
+  { id: 'succulent', name: 'Succulent', latin: 'assorted species', emoji: '🌵', light: 'Bright, direct', freq: 18, desc: 'Stores water in thick leaves — thrives on bright sun and being left alone between waterings.' },
+  { id: 'zz-plant', name: 'ZZ Plant', latin: 'Zamioculcas zamiifolia', emoji: '🪴', light: 'Low to medium', freq: 16, desc: 'Nearly indestructible. Tolerates low light and infrequent watering better than almost anything.' },
+  { id: 'peace-lily', name: 'Peace Lily', latin: 'Spathiphyllum', emoji: '🌸', light: 'Low to medium', freq: 7, desc: 'Droops dramatically when thirsty, then perks right back up soon after watering — an easy read.' },
+  { id: 'spider-plant', name: 'Spider Plant', latin: 'Chlorophytum comosum', emoji: '🕷️', light: 'Medium to bright', freq: 7, desc: 'Fast-growing and forgiving. Produces little plantlets you can snip off and propagate.' },
+  { id: 'orchid', name: 'Orchid', latin: 'Phalaenopsis', emoji: '🌺', light: 'Bright, indirect', freq: 10, desc: 'Prefers infrequent, deep watering and good airflow around its roots rather than damp soil.' },
+  { id: 'aloe', name: 'Aloe Vera', latin: 'Aloe vera', emoji: '🪴', light: 'Bright, direct', freq: 21, desc: 'A succulent with soothing gel inside its leaves. Water sparingly and let it dry out fully.' },
+  { id: 'rubber-plant', name: 'Rubber Plant', latin: 'Ficus elastica', emoji: '🍂', light: 'Bright, indirect', freq: 9, desc: 'Glossy, sturdy leaves. Wiping them occasionally helps it photosynthesize better.' },
+  { id: 'philodendron', name: 'Philodendron', latin: 'Philodendron spp.', emoji: '🌿', light: 'Medium, indirect', freq: 7, desc: 'Easygoing trailing or climbing plant, forgiving of inconsistent watering schedules.' },
+  { id: 'cactus', name: 'Cactus', latin: 'assorted species', emoji: '🌵', light: 'Bright, direct', freq: 21, desc: 'Built for drought. Overwatering, not underwatering, is the most common way to lose one.' },
+  { id: 'fern', name: 'Boston Fern', latin: 'Nephrolepis exaltata', emoji: '🌿', light: 'Medium, indirect', freq: 4, desc: 'Loves humidity and consistently moist — but never soggy — soil.' },
+  { id: 'basil', name: 'Basil', latin: 'Ocimum basilicum', emoji: '🌱', light: 'Bright, direct', freq: 3, desc: 'A thirsty kitchen herb. Keep the soil consistently moist for the best flavor.' },
+  { id: 'other', name: 'Other / not sure', latin: '', emoji: '❓', light: 'Varies', freq: 7, desc: '' },
+];
+
 const ACHIEVEMENTS = [
   { id: 'first-sprout', emoji: '🌱', name: 'First Sprout', desc: 'Add your first plant' },
   { id: 'full-shelf', emoji: '🪴', name: 'Full Shelf', desc: 'Grow your collection to 5 plants' },
@@ -39,12 +58,14 @@ const state = {
   activeId: null,
   showAddModal: false,
   showBadgesModal: false,
+  showSpeciesPicker: false,
   notificationsEnabled: false,
   pendingModalPhoto: null, // dataURL waiting to be attached on save
+  pendingSpecies: null, // selected SPECIES_DICTIONARY entry for the plant being added
   unlockedAchievements: [],
   gameHighScore: 0,
   celebrationQueue: [],
-  currentView: 'shelf', // 'shelf' | 'garden'
+  currentView: 'shelf', // 'shelf' | 'garden' | 'dictionary'
 };
 
 let nextId = 1;
@@ -251,52 +272,70 @@ function render() {
   }
 
   app.innerHTML = `
-    <header>
-      <div>
-        <h1>Plant Parent</h1>
-        <div class="tagline">a shelf that keeps time for you</div>
-      </div>
-      <div class="header-actions">
-        <button class="pill-btn pill-badges" id="badgesBtn">🏆 ${state.unlockedAchievements.length}/${ACHIEVEMENTS.length}</button>
-        <button class="pill-btn pill-game" id="gameBtn">🎮 Play${state.gameHighScore ? ` · best ${state.gameHighScore}` : ''}</button>
-        <button class="secondary" id="notifBtn">${state.notificationsEnabled ? '🔔 Reminders on' : '🔕 Enable reminders'}</button>
-      </div>
-    </header>
+    <div class="app-shell">
+      <nav class="sidebar">
+        <div class="sidebar-brand">🌿</div>
+        <button class="sidebar-btn ${state.currentView === 'shelf' ? 'sidebar-active' : ''}" id="navShelf">
+          <span class="sidebar-icon">🪴</span><span class="sidebar-label">Plants</span>
+        </button>
+        <button class="sidebar-btn ${state.currentView === 'garden' ? 'sidebar-active' : ''}" id="navGarden">
+          <span class="sidebar-icon">🌻</span><span class="sidebar-label">Garden</span>
+        </button>
+        <button class="sidebar-btn ${state.currentView === 'dictionary' ? 'sidebar-active' : ''}" id="navDictionary">
+          <span class="sidebar-icon">📖</span><span class="sidebar-label">Guide</span>
+        </button>
+        <div class="sidebar-divider"></div>
+        <button class="sidebar-btn sidebar-badges" id="navBadges">
+          <span class="sidebar-icon">🏆</span><span class="sidebar-label">${state.unlockedAchievements.length}/${ACHIEVEMENTS.length}</span>
+        </button>
+        <button class="sidebar-btn sidebar-game" id="navGame">
+          <span class="sidebar-icon">🎮</span><span class="sidebar-label">Play</span>
+        </button>
+        <button class="sidebar-btn" id="navNotif">
+          <span class="sidebar-icon">${state.notificationsEnabled ? '🔔' : '🔕'}</span><span class="sidebar-label">${state.notificationsEnabled ? 'On' : 'Remind'}</span>
+        </button>
+      </nav>
 
-    <div class="daily-card ${taskDone ? 'daily-card-done' : ''}">
-      <div class="daily-emoji">${taskDone ? '✅' : task.emoji}</div>
-      <div class="daily-text">
-        <div class="daily-label">Today's little thing</div>
-        <div class="daily-task">${task.label}</div>
+      <div class="main-content">
+        <header>
+          <h1>Plant Parent</h1>
+          <div class="tagline">a shelf that keeps time for you</div>
+        </header>
+
+        <div class="daily-card ${taskDone ? 'daily-card-done' : ''}">
+          <div class="daily-emoji">${taskDone ? '✅' : task.emoji}</div>
+          <div class="daily-text">
+            <div class="daily-label">Today's little thing</div>
+            <div class="daily-task">${task.label}</div>
+          </div>
+        </div>
+
+        ${state.currentView === 'garden' ? `<div id="gardenView"></div>` : ''}
+        ${state.currentView === 'dictionary' ? `<div id="dictionaryView"></div>` : ''}
+        ${state.currentView === 'shelf' ? `
+          <div class="layout">
+            <div class="shelf" id="shelf"></div>
+            <div class="panel" id="panel"></div>
+          </div>
+        ` : ''}
       </div>
     </div>
-
-    <div class="view-tabs">
-      <button class="tab-btn ${state.currentView === 'shelf' ? 'tab-active' : ''}" id="tabShelf">🪴 My Plants</button>
-      <button class="tab-btn ${state.currentView === 'garden' ? 'tab-active' : ''}" id="tabGarden">🌻 Garden</button>
-    </div>
-
-    ${state.currentView === 'garden' ? `
-      <div id="gardenView"></div>
-    ` : `
-      <div class="layout">
-        <div class="shelf" id="shelf"></div>
-        <div class="panel" id="panel"></div>
-      </div>
-    `}
     ${state.showAddModal ? renderModal() : ''}
     ${state.showBadgesModal ? renderBadgesModal() : ''}
+    ${state.showSpeciesPicker ? renderSpeciesPicker() : ''}
   `;
 
   if (state.currentView === 'garden') {
     document.getElementById('gardenView').appendChild(renderGarden());
+  } else if (state.currentView === 'dictionary') {
+    document.getElementById('dictionaryView').appendChild(renderDictionary());
   } else {
     const shelf = document.getElementById('shelf');
     state.plants.forEach(p => shelf.appendChild(renderCard(p)));
     const addBtn = document.createElement('div');
     addBtn.className = 'add-btn';
     addBtn.textContent = '+ Add a plant';
-    addBtn.onclick = () => { state.pendingModalPhoto = null; state.showAddModal = true; render(); };
+    addBtn.onclick = () => { state.pendingModalPhoto = null; state.pendingSpecies = null; state.showAddModal = true; render(); };
     shelf.appendChild(addBtn);
 
     const panel = document.getElementById('panel');
@@ -304,21 +343,62 @@ function render() {
     panel.appendChild(active ? renderDetail(active) : renderEmpty());
   }
 
-  document.getElementById('notifBtn').onclick = enableNotifications;
-  document.getElementById('badgesBtn').onclick = () => { state.showBadgesModal = true; render(); };
-  document.getElementById('gameBtn').onclick = () => { if (window.openMiniGame) window.openMiniGame(); };
-  document.getElementById('tabShelf').onclick = () => { state.currentView = 'shelf'; render(); };
-  document.getElementById('tabGarden').onclick = () => {
+  document.getElementById('navNotif').onclick = enableNotifications;
+  document.getElementById('navBadges').onclick = () => { state.showBadgesModal = true; render(); };
+  document.getElementById('navGame').onclick = () => { if (window.openMiniGame) window.openMiniGame(); };
+  document.getElementById('navShelf').onclick = () => { state.currentView = 'shelf'; render(); };
+  document.getElementById('navGarden').onclick = () => {
     state.currentView = 'garden';
     localStorage.setItem('plant-parent-last-garden-date', todayStr());
     checkAchievements();
     render();
   };
+  document.getElementById('navDictionary').onclick = () => { state.currentView = 'dictionary'; render(); };
 
   if (state.showAddModal) {
     document.getElementById('modalNameInput')?.focus();
     wireModalPhoto();
+    const openBtn = document.getElementById('openSpeciesPicker');
+    if (openBtn) openBtn.onclick = () => { state.showSpeciesPicker = true; render(); };
   }
+  if (state.showSpeciesPicker) {
+    document.querySelectorAll('.species-picker-row').forEach(row => {
+      row.onclick = () => {
+        const entry = SPECIES_DICTIONARY.find(s => s.id === row.dataset.id);
+        state.pendingSpecies = entry;
+        state.showSpeciesPicker = false;
+        render();
+      };
+    });
+  }
+}
+
+function renderDictionary() {
+  const div = document.createElement('div');
+  div.className = 'dictionary-grid';
+  div.innerHTML = SPECIES_DICTIONARY.filter(s => s.id !== 'other').map(s => `
+    <div class="dictionary-card" data-id="${s.id}">
+      <div class="dictionary-emoji">${s.emoji}</div>
+      <div class="dictionary-name">${s.name}</div>
+      ${s.latin ? `<div class="dictionary-latin">${s.latin}</div>` : ''}
+      <div class="dictionary-light">☀️ ${s.light}</div>
+      <div class="dictionary-desc">${s.desc}</div>
+      <button class="secondary dictionary-add-btn" data-id="${s.id}">+ Add one like this</button>
+    </div>
+  `).join('');
+
+  div.querySelectorAll('.dictionary-add-btn').forEach(btn => {
+    btn.onclick = (e) => {
+      e.stopPropagation();
+      const entry = SPECIES_DICTIONARY.find(s => s.id === btn.dataset.id);
+      state.pendingSpecies = entry;
+      state.pendingModalPhoto = null;
+      state.showAddModal = true;
+      render();
+    };
+  });
+
+  return div;
 }
 
 function gardenTier(plant) {
@@ -483,6 +563,7 @@ function renderDetail(p) {
 
     <div class="section-label">notes</div>
     <textarea class="notes-input" id="notesInput" placeholder="e.g. repot in spring, keep away from cold drafts…">${p.notes || ''}</textarea>
+    ${p.speciesDesc ? `<div class="species-desc">🌿 <strong>${p.species}:</strong> ${p.speciesDesc}</div>` : ''}
 
     <div class="section-label">streak</div>
     <div class="streak-row">
@@ -548,6 +629,7 @@ function renderModal() {
   const preview = state.pendingModalPhoto
     ? `<img src="${state.pendingModalPhoto}" class="modal-photo-preview">`
     : '';
+  const species = state.pendingSpecies;
   return `
   <div class="modal-backdrop" id="modalBackdrop">
     <div class="modal">
@@ -563,17 +645,42 @@ function renderModal() {
         <input id="modalNameInput" placeholder="e.g. Fig in the corner">
       </div>
       <div class="field">
-        <label>Species (optional)</label>
-        <input id="modalSpeciesInput" placeholder="e.g. Fiddle-leaf fig">
+        <label>Species</label>
+        <button class="species-picker-btn" id="openSpeciesPicker" type="button">
+          ${species ? `<span class="species-picker-emoji">${species.emoji}</span> ${species.name}` : '🔍 Choose from the guide (optional)'}
+        </button>
       </div>
       <div class="field">
         <label>Water every how many days?</label>
-        <input id="modalFreqInput" type="number" min="1" value="7">
+        <input id="modalFreqInput" type="number" min="1" value="${species ? species.freq : 7}">
         <div class="freq-hint">Most houseplants: 5–10 days. Succulents: 14–21.</div>
       </div>
       <div class="modal-actions">
         <button class="secondary" id="cancelModal">Cancel</button>
         <button class="primary" id="saveModal">Add plant</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderSpeciesPicker() {
+  return `
+  <div class="modal-backdrop" id="speciesPickerBackdrop">
+    <div class="modal species-picker-modal">
+      <h3>Choose a species</h3>
+      <div class="species-picker-list">
+        ${SPECIES_DICTIONARY.map(s => `
+          <div class="species-picker-row" data-id="${s.id}">
+            <span class="species-picker-row-emoji">${s.emoji}</span>
+            <div>
+              <div class="species-picker-row-name">${s.name}</div>
+              ${s.latin ? `<div class="species-picker-row-latin">${s.latin}</div>` : ''}
+            </div>
+          </div>
+        `).join('')}
+      </div>
+      <div class="modal-actions">
+        <button class="secondary" id="cancelSpeciesPicker">Cancel</button>
       </div>
     </div>
   </div>`;
@@ -627,15 +734,20 @@ document.addEventListener('click', (e) => {
   if (e.target.id === 'cancelModal') { state.showAddModal = false; render(); }
   if (e.target.id === 'badgesBackdrop') { state.showBadgesModal = false; render(); }
   if (e.target.id === 'closeBadges') { state.showBadgesModal = false; render(); }
+  if (e.target.id === 'speciesPickerBackdrop') { state.showSpeciesPicker = false; render(); }
+  if (e.target.id === 'cancelSpeciesPicker') { state.showSpeciesPicker = false; render(); }
   if (e.target.id === 'saveModal') {
     const name = document.getElementById('modalNameInput').value.trim();
-    const species = document.getElementById('modalSpeciesInput').value.trim();
     const freq = parseInt(document.getElementById('modalFreqInput').value, 10) || 7;
     if (!name) return;
+    const species = state.pendingSpecies;
     const now = new Date(Date.now() - (freq-1)*24*60*60*1000).toISOString();
     const p = {
       id: nextId++,
-      name, species,
+      name,
+      species: species ? species.name : '',
+      speciesId: species ? species.id : null,
+      speciesDesc: species ? species.desc : '',
       frequency: freq,
       lastWatered: now,
       waterLog: [],
@@ -646,6 +758,7 @@ document.addEventListener('click', (e) => {
     state.activeId = p.id;
     state.showAddModal = false;
     state.pendingModalPhoto = null;
+    state.pendingSpecies = null;
     render();
     savePlants();
   }
@@ -751,9 +864,11 @@ async function enableNotifications() {
 
 const loaded = loadPlants();
 if (!loaded) {
+  const fig = SPECIES_DICTIONARY.find(s => s.id === 'fiddle-leaf-fig');
+  const pothos = SPECIES_DICTIONARY.find(s => s.id === 'pothos');
   state.plants.push(
-    { id: nextId++, name: 'Fig in the corner', species: 'Fiddle-leaf fig', frequency: 7, lastWatered: new Date(Date.now() - 5*24*60*60*1000).toISOString(), waterLog: [], photo: null },
-    { id: nextId++, name: 'Kitchen pothos', species: 'Epipremnum aureum', frequency: 6, lastWatered: new Date(Date.now() - 6*24*60*60*1000).toISOString(), waterLog: [], photo: null }
+    { id: nextId++, name: 'Fig in the corner', species: fig.name, speciesId: fig.id, speciesDesc: fig.desc, frequency: 7, lastWatered: new Date(Date.now() - 5*24*60*60*1000).toISOString(), waterLog: [], photo: null },
+    { id: nextId++, name: 'Kitchen pothos', species: pothos.name, speciesId: pothos.id, speciesDesc: pothos.desc, frequency: 6, lastWatered: new Date(Date.now() - 6*24*60*60*1000).toISOString(), waterLog: [], photo: null }
   );
   savePlants();
 }
