@@ -59,6 +59,7 @@ const state = {
   showAddModal: false,
   showBadgesModal: false,
   showSpeciesPicker: false,
+  showMoreMenu: false,
   notificationsEnabled: false,
   pendingModalPhoto: null, // dataURL waiting to be attached on save
   pendingSpecies: null, // selected SPECIES_DICTIONARY entry for the plant being added
@@ -272,54 +273,64 @@ function render() {
   }
 
   app.innerHTML = `
-    <div class="app-shell">
-      <nav class="sidebar">
-        <div class="sidebar-brand">🌿</div>
-        <button class="sidebar-btn ${state.currentView === 'shelf' ? 'sidebar-active' : ''}" id="navShelf">
-          <span class="sidebar-icon">🪴</span><span class="sidebar-label">Plants</span>
-        </button>
-        <button class="sidebar-btn ${state.currentView === 'garden' ? 'sidebar-active' : ''}" id="navGarden">
-          <span class="sidebar-icon">🌻</span><span class="sidebar-label">Garden</span>
-        </button>
-        <button class="sidebar-btn ${state.currentView === 'dictionary' ? 'sidebar-active' : ''}" id="navDictionary">
-          <span class="sidebar-icon">📖</span><span class="sidebar-label">Guide</span>
-        </button>
-        <div class="sidebar-divider"></div>
-        <button class="sidebar-btn sidebar-badges" id="navBadges">
-          <span class="sidebar-icon">🏆</span><span class="sidebar-label">${state.unlockedAchievements.length}/${ACHIEVEMENTS.length}</span>
-        </button>
-        <button class="sidebar-btn sidebar-game" id="navGame">
-          <span class="sidebar-icon">🎮</span><span class="sidebar-label">Play</span>
-        </button>
-        <button class="sidebar-btn" id="navNotif">
-          <span class="sidebar-icon">${state.notificationsEnabled ? '🔔' : '🔕'}</span><span class="sidebar-label">${state.notificationsEnabled ? 'On' : 'Remind'}</span>
-        </button>
-      </nav>
+    <div class="main-content">
+      <header>
+        <h1>Plant Parent</h1>
+        <div class="tagline">a shelf that keeps time for you</div>
+      </header>
 
-      <div class="main-content">
-        <header>
-          <h1>Plant Parent</h1>
-          <div class="tagline">a shelf that keeps time for you</div>
-        </header>
-
-        <div class="daily-card ${taskDone ? 'daily-card-done' : ''}">
-          <div class="daily-emoji">${taskDone ? '✅' : task.emoji}</div>
-          <div class="daily-text">
-            <div class="daily-label">Today's little thing</div>
-            <div class="daily-task">${task.label}</div>
-          </div>
+      <div class="daily-card ${taskDone ? 'daily-card-done' : ''}">
+        <div class="daily-emoji">${taskDone ? '✅' : task.emoji}</div>
+        <div class="daily-text">
+          <div class="daily-label">Today's little thing</div>
+          <div class="daily-task">${task.label}</div>
         </div>
-
-        ${state.currentView === 'garden' ? `<div id="gardenView"></div>` : ''}
-        ${state.currentView === 'dictionary' ? `<div id="dictionaryView"></div>` : ''}
-        ${state.currentView === 'shelf' ? `
-          <div class="layout">
-            <div class="shelf" id="shelf"></div>
-            <div class="panel" id="panel"></div>
-          </div>
-        ` : ''}
       </div>
+
+      ${state.currentView === 'garden' ? `<div id="gardenView"></div>` : ''}
+      ${state.currentView === 'dictionary' ? `<div id="dictionaryView"></div>` : ''}
+      ${state.currentView === 'shelf' ? `
+        <div class="layout">
+          <div class="shelf" id="shelf"></div>
+          <div class="panel" id="panel"></div>
+        </div>
+      ` : ''}
     </div>
+
+    <nav class="bottom-nav">
+      <button class="bottom-nav-btn ${state.currentView === 'shelf' ? 'bottom-nav-active' : ''}" id="navShelf">
+        <span class="bottom-nav-icon">🪴</span><span class="bottom-nav-label">Plants</span>
+      </button>
+      <button class="bottom-nav-btn ${state.currentView === 'garden' ? 'bottom-nav-active' : ''}" id="navGarden">
+        <span class="bottom-nav-icon">🌻</span><span class="bottom-nav-label">Garden</span>
+      </button>
+      <button class="bottom-nav-btn ${state.currentView === 'dictionary' ? 'bottom-nav-active' : ''}" id="navDictionary">
+        <span class="bottom-nav-icon">📖</span><span class="bottom-nav-label">Guide</span>
+      </button>
+      <button class="bottom-nav-btn ${state.showMoreMenu ? 'bottom-nav-active' : ''}" id="navMore">
+        <span class="bottom-nav-icon">⋯</span><span class="bottom-nav-label">More</span>
+      </button>
+    </nav>
+
+    ${state.showMoreMenu ? `
+      <div class="more-menu-backdrop" id="moreMenuBackdrop">
+        <div class="more-menu">
+          <button class="more-menu-item" id="navBadges">
+            <span class="more-menu-icon">🏆</span>
+            <span>Badges <strong>${state.unlockedAchievements.length}/${ACHIEVEMENTS.length}</strong></span>
+          </button>
+          <button class="more-menu-item" id="navGame">
+            <span class="more-menu-icon">🎮</span>
+            <span>Play${state.gameHighScore ? ` · best ${state.gameHighScore}` : ''}</span>
+          </button>
+          <button class="more-menu-item" id="navNotif">
+            <span class="more-menu-icon">${state.notificationsEnabled ? '🔔' : '🔕'}</span>
+            <span>${state.notificationsEnabled ? 'Reminders on' : 'Enable reminders'}</span>
+          </button>
+        </div>
+      </div>
+    ` : ''}
+
     ${state.showAddModal ? renderModal() : ''}
     ${state.showBadgesModal ? renderBadgesModal() : ''}
     ${state.showSpeciesPicker ? renderSpeciesPicker() : ''}
@@ -343,17 +354,26 @@ function render() {
     panel.appendChild(active ? renderDetail(active) : renderEmpty());
   }
 
-  document.getElementById('navNotif').onclick = enableNotifications;
-  document.getElementById('navBadges').onclick = () => { state.showBadgesModal = true; render(); };
-  document.getElementById('navGame').onclick = () => { if (window.openMiniGame) window.openMiniGame(); };
-  document.getElementById('navShelf').onclick = () => { state.currentView = 'shelf'; render(); };
+
+  document.getElementById('navShelf').onclick = () => { state.currentView = 'shelf'; state.showMoreMenu = false; render(); };
   document.getElementById('navGarden').onclick = () => {
     state.currentView = 'garden';
+    state.showMoreMenu = false;
     localStorage.setItem('plant-parent-last-garden-date', todayStr());
     checkAchievements();
     render();
   };
-  document.getElementById('navDictionary').onclick = () => { state.currentView = 'dictionary'; render(); };
+  document.getElementById('navDictionary').onclick = () => { state.currentView = 'dictionary'; state.showMoreMenu = false; render(); };
+  document.getElementById('navMore').onclick = () => { state.showMoreMenu = !state.showMoreMenu; render(); };
+
+  if (state.showMoreMenu) {
+    document.getElementById('navNotif').onclick = () => { state.showMoreMenu = false; enableNotifications(); };
+    document.getElementById('navBadges').onclick = () => { state.showMoreMenu = false; state.showBadgesModal = true; render(); };
+    document.getElementById('navGame').onclick = () => { state.showMoreMenu = false; render(); if (window.openMiniGame) window.openMiniGame(); };
+    document.getElementById('moreMenuBackdrop').addEventListener('click', (e) => {
+      if (e.target.id === 'moreMenuBackdrop') { state.showMoreMenu = false; render(); }
+    });
+  }
 
   if (state.showAddModal) {
     document.getElementById('modalNameInput')?.focus();
