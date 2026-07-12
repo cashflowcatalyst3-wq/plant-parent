@@ -38,6 +38,13 @@
     gap: 12px;
   }
 
+  .header-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .header-actions button { font-size: 12px; padding: 8px 12px; }
+
   h1 {
     font-family: 'Fraunces', serif;
     font-optical-sizing: auto;
@@ -199,11 +206,15 @@
     padding: 10px 16px;
     cursor: pointer;
     border: none;
+    transition: transform 0.1s ease;
   }
+  button.primary:active, button.secondary:active { transform: scale(0.95); }
   button.primary { background: var(--sage); color: #fff; }
   button.primary:hover { background: #7A9066; }
   button.secondary { background: transparent; border: 1.5px solid var(--line); color: var(--ink); }
   button.secondary:hover { border-color: var(--clay); color: var(--clay); }
+
+  .mood { font-size: 0.75em; }
 
   .section-label {
     font-family: 'Fraunces', serif;
@@ -333,4 +344,108 @@
     background: #FBFAF6;
     border-radius: 8px;
     border-left: 3px solid var(--sage-light);
+  }
+
+  /* Confetti */
+  @keyframes confetti-burst {
+    0% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+    100% { transform: translate(var(--dx), calc(var(--dy) + 160px)) rotate(var(--rot)); opacity: 0; }
+  }
+  .confetti-piece {
+    position: fixed;
+    width: 8px; height: 8px;
+    border-radius: 2px;
+    pointer-events: none;
+    z-index: 100;
+    animation: confetti-burst 0.9s ease-out forwards;
+  }
+
+  /* Celebration toast */
+  @keyframes celebration-in {
+    from { transform: translate(-50%, -20px); opacity: 0; }
+    to { transform: translate(-50%, 0); opacity: 1; }
+  }
+  .celebration-toast {
+    position: fixed;
+    top: 24px; left: 50%;
+    transform: translate(-50%, 0);
+    background: var(--card);
+    border-radius: 14px;
+    box-shadow: 0 8px 24px rgba(31,51,36,0.18);
+    padding: 14px 20px;
+    display: flex; align-items: center; gap: 12px;
+    z-index: 101;
+    animation: celebration-in 0.35s ease-out;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+  }
+  .celebration-toast-out { opacity: 0; transform: translate(-50%, -20px); }
+  .celebration-emoji { font-size: 32px; }
+  .celebration-title {
+    font-family: 'Fraunces', serif; font-style: italic;
+    font-size: 11px; color: var(--soil); text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  .celebration-name { font-family: 'Fraunces', serif; font-weight: 600; font-size: 16px; }
+
+  /* Badges modal */
+  .badges-modal { width: 420px; }
+  .badges-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 8px;
+  }
+  .badge-item {
+    background: #FBFAF6;
+    border-radius: 12px;
+    padding: 14px;
+    text-align: center;
+  }
+  .badge-item.badge-locked { opacity: 0.45; }
+  .badge-emoji { font-size: 28px; margin-bottom: 6px; }
+  .badge-name { font-family: 'Fraunces', serif; font-weight: 600; font-size: 13px; margin-bottom: 3px; }
+  .badge-desc { font-size: 11px; color: var(--soil); line-height: 1.3; }
+
+  /* Mini-game */
+  .game-modal { width: 380px; }
+  .game-hud {
+    display: flex; justify-content: space-between;
+    font-size: 13px; color: var(--soil);
+    margin-bottom: 10px;
+  }
+  .game-area {
+    position: relative;
+    height: 320px;
+    background: linear-gradient(180deg, #EAF1E3, #F6F3EC);
+    border-radius: 14px;
+    overflow: hidden;
+    margin-bottom: 10px;
+  }
+  .game-hint { font-size: 12px; color: var(--soil); text-align: center; margin-bottom: 6px; }
+
+  @keyframes drop-fall {
+    from { top: -30px; }
+    to { top: 100%; }
+  }
+  .raindrop {
+    position: absolute;
+    font-size: 26px;
+    top: -30px;
+    cursor: pointer;
+    user-select: none;
+    animation-name: drop-fall;
+    animation-timing-function: linear;
+    animation-fill-mode: forwards;
+  }
+  .raindrop-caught { transform: scale(1.6); opacity: 0; transition: all 0.15s ease; }
+
+  .game-result { text-align: center; padding: 20px 0; }
+  .game-result-score {
+    font-family: 'Fraunces', serif; font-weight: 600;
+    font-size: 48px; color: var(--sage);
+  }
+  .game-result-label { font-size: 13px; color: var(--soil); margin-top: 2px; }
+  .game-new-high {
+    margin-top: 10px;
+    font-family: 'Fraunces', serif; font-style: italic;
+    color: var(--clay); font-size: 14px;
   }

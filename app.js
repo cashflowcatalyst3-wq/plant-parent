@@ -1,11 +1,24 @@
 const VAPID_PUBLIC_KEY = 'BN4ieWQBco1u_esfncKASD5n51MKDrjGJoDafo4eJP7FwjzxIRUq-2xsJEGRoMzZ-tyipIrn8zh2Kzy1H5pukrQ';
 
+const ACHIEVEMENTS = [
+  { id: 'first-sprout', emoji: '🌱', name: 'First Sprout', desc: 'Add your first plant' },
+  { id: 'full-shelf', emoji: '🪴', name: 'Full Shelf', desc: 'Grow your collection to 5 plants' },
+  { id: 'green-thumb', emoji: '🔥', name: 'Green Thumb', desc: '7-day watering streak on one plant' },
+  { id: 'plant-parent-pro', emoji: '🏆', name: 'Plant Parent Pro', desc: '30-day watering streak on one plant' },
+  { id: 'note-taker', emoji: '📝', name: 'Note Taker', desc: 'Write your first plant note' },
+  { id: 'rainmaker', emoji: '💧', name: 'Rainmaker', desc: 'Score 15+ in Raindrop Catch' },
+];
+
 const state = {
   plants: [],
   activeId: null,
   showAddModal: false,
+  showBadgesModal: false,
   notificationsEnabled: false,
   pendingModalPhoto: null, // dataURL waiting to be attached on save
+  unlockedAchievements: [],
+  gameHighScore: 0,
+  celebrationQueue: [],
 };
 
 let nextId = 1;
@@ -51,6 +64,95 @@ function calcStreak(plant) {
   return streak;
 }
 
+function moodEmoji(plant) {
+  const pct = ringPercent(plant);
+  if (pct >= 1) return '😢';
+  if (pct >= 0.7) return '😌';
+  return '🌿';
+}
+
+function recordGameScore(score) {
+  if (score > state.gameHighScore) {
+    state.gameHighScore = score;
+    localStorage.setItem('plant-parent-game-highscore', String(score));
+  }
+  checkAchievements();
+}
+
+// ---------- celebrations ----------
+
+function fireConfetti(x, y) {
+  const colors = ['#8DA377', '#C4D97A', '#B5613C', '#D99A7D', '#F6F3EC'];
+  const originX = x ?? window.innerWidth / 2;
+  const originY = y ?? window.innerHeight / 3;
+  for (let i = 0; i < 26; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti-piece';
+    const angle = Math.random() * Math.PI * 2;
+    const distance = 60 + Math.random() * 120;
+    const dx = Math.cos(angle) * distance;
+    const dy = Math.sin(angle) * distance - 40;
+    piece.style.left = originX + 'px';
+    piece.style.top = originY + 'px';
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.setProperty('--dx', dx + 'px');
+    piece.style.setProperty('--dy', dy + 'px');
+    piece.style.setProperty('--rot', (Math.random() * 720 - 360) + 'deg');
+    piece.style.animationDelay = (Math.random() * 0.1) + 's';
+    document.body.appendChild(piece);
+    setTimeout(() => piece.remove(), 1000);
+  }
+}
+
+function checkAchievements() {
+  const unlocked = new Set(state.unlockedAchievements);
+  const newlyUnlocked = [];
+  const unlock = (id) => { if (!unlocked.has(id)) { unlocked.add(id); newlyUnlocked.push(id); } };
+
+  if (state.plants.length >= 1) unlock('first-sprout');
+  if (state.plants.length >= 5) unlock('full-shelf');
+  if (state.plants.some(p => calcStreak(p) >= 7)) unlock('green-thumb');
+  if (state.plants.some(p => calcStreak(p) >= 30)) unlock('plant-parent-pro');
+  if (state.plants.some(p => p.notes && p.notes.trim())) unlock('note-taker');
+  if (state.gameHighScore >= 15) unlock('rainmaker');
+
+  if (newlyUnlocked.length) {
+    state.unlockedAchievements = Array.from(unlocked);
+    localStorage.setItem('plant-parent-achievements', JSON.stringify(state.unlockedAchievements));
+    newlyUnlocked.forEach(id => state.celebrationQueue.push(id));
+    showNextCelebration();
+  }
+}
+
+function showNextCelebration() {
+  if (document.getElementById('celebrationToast')) return; // one at a time
+  const id = state.celebrationQueue.shift();
+  if (!id) return;
+  const badge = ACHIEVEMENTS.find(a => a.id === id);
+  if (!badge) return;
+
+  const toast = document.createElement('div');
+  toast.id = 'celebrationToast';
+  toast.className = 'celebration-toast';
+  toast.innerHTML = `
+    <div class="celebration-emoji">${badge.emoji}</div>
+    <div class="celebration-text">
+      <div class="celebration-title">Badge unlocked!</div>
+      <div class="celebration-name">${badge.name}</div>
+    </div>
+  `;
+  document.body.appendChild(toast);
+  fireConfetti(window.innerWidth / 2, 100);
+
+  setTimeout(() => {
+    toast.classList.add('celebration-toast-out');
+    setTimeout(() => {
+      toast.remove();
+      showNextCelebration();
+    }, 300);
+  }, 2400);
+}
+
 // ---------- rendering ----------
 
 function render() {
@@ -63,13 +165,18 @@ function render() {
         <h1>Plant Parent</h1>
         <div class="tagline">a shelf that keeps time for you</div>
       </div>
-      <button class="secondary" id="notifBtn">${state.notificationsEnabled ? '🔔 Reminders on' : '🔕 Enable reminders'}</button>
+      <div class="header-actions">
+        <button class="secondary" id="badgesBtn">🏆 ${state.unlockedAchievements.length}/${ACHIEVEMENTS.length}</button>
+        <button class="secondary" id="gameBtn">🎮 Play</button>
+        <button class="secondary" id="notifBtn">${state.notificationsEnabled ? '🔔 Reminders on' : '🔕 Enable reminders'}</button>
+      </div>
     </header>
     <div class="layout">
       <div class="shelf" id="shelf"></div>
       <div class="panel" id="panel"></div>
     </div>
     ${state.showAddModal ? renderModal() : ''}
+    ${state.showBadgesModal ? renderBadgesModal() : ''}
   `;
 
   const shelf = document.getElementById('shelf');
@@ -85,11 +192,37 @@ function render() {
   panel.appendChild(active ? renderDetail(active) : renderEmpty());
 
   document.getElementById('notifBtn').onclick = enableNotifications;
+  document.getElementById('badgesBtn').onclick = () => { state.showBadgesModal = true; render(); };
+  document.getElementById('gameBtn').onclick = () => { if (window.openMiniGame) window.openMiniGame(); };
 
   if (state.showAddModal) {
     document.getElementById('modalNameInput')?.focus();
     wireModalPhoto();
   }
+}
+
+function renderBadgesModal() {
+  return `
+  <div class="modal-backdrop" id="badgesBackdrop">
+    <div class="modal badges-modal">
+      <h3>Your badges</h3>
+      <div class="badges-grid">
+        ${ACHIEVEMENTS.map(a => {
+          const unlocked = state.unlockedAchievements.includes(a.id);
+          return `
+            <div class="badge-item ${unlocked ? '' : 'badge-locked'}">
+              <div class="badge-emoji">${unlocked ? a.emoji : '🔒'}</div>
+              <div class="badge-name">${a.name}</div>
+              <div class="badge-desc">${a.desc}</div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+      <div class="modal-actions">
+        <button class="primary" id="closeBadges">Close</button>
+      </div>
+    </div>
+  </div>`;
 }
 
 function ringPortrait(p, size, strokeWidth) {
@@ -121,10 +254,10 @@ function renderCard(p) {
   div.innerHTML = `
     ${ringPortrait(p, 54, 5)}
     <div class="info">
-      <p class="name">${p.name}</p>
+      <p class="name">${p.name} <span class="mood">${moodEmoji(p)}</span></p>
       <div class="species">${p.species || 'unlabeled'}</div>
     </div>
-    <div class="days-badge">${left}d</div>
+    <div class="days-badge">${left === 0 ? 'today!' : left + 'd'}</div>
   `;
   div.onclick = () => { state.activeId = p.id; render(); };
   return div;
@@ -154,7 +287,7 @@ function renderDetail(p) {
       </div>
       <input type="file" id="detailPhotoInput" accept="image/*" capture="environment" style="display:none;">
       <div class="detail-title">
-        <h2>${p.name}</h2>
+        <h2>${p.name} <span class="mood">${moodEmoji(p)}</span></h2>
         <div class="species">${p.species || 'species unlabeled'}</div>
         <div class="row-actions">
           <button class="primary" id="waterBtn">Water now</button>
@@ -187,11 +320,13 @@ function renderDetail(p) {
     ` : `<div style="font-size:13px;color:var(--soil);">No waterings logged yet.</div>`}
   `;
 
-  div.querySelector('#waterBtn').onclick = () => {
+  div.querySelector('#waterBtn').onclick = (e) => {
     p.lastWatered = new Date().toISOString();
     p.waterLog = p.waterLog || [];
     p.waterLog.push(p.lastWatered);
     if (p.waterLog.length > 30) p.waterLog = p.waterLog.slice(-30);
+    const rect = e.target.getBoundingClientRect();
+    fireConfetti(rect.left + rect.width / 2, rect.top);
     render();
     savePlants();
   };
@@ -310,6 +445,8 @@ function resizeImageToDataUrl(file, maxDim) {
 document.addEventListener('click', (e) => {
   if (e.target.id === 'modalBackdrop') { state.showAddModal = false; render(); }
   if (e.target.id === 'cancelModal') { state.showAddModal = false; render(); }
+  if (e.target.id === 'badgesBackdrop') { state.showBadgesModal = false; render(); }
+  if (e.target.id === 'closeBadges') { state.showBadgesModal = false; render(); }
   if (e.target.id === 'saveModal') {
     const name = document.getElementById('modalNameInput').value.trim();
     const species = document.getElementById('modalSpeciesInput').value.trim();
@@ -351,6 +488,7 @@ function savePlants() {
   } catch (err) {
     console.error('Could not save plants locally', err);
   }
+  checkAchievements();
   syncToServer();
 }
 
@@ -440,6 +578,12 @@ if (!loaded) {
 }
 state.activeId = state.plants[0]?.id ?? null;
 state.notificationsEnabled = localStorage.getItem('plant-parent-notifications-enabled') === '1';
+try {
+  state.unlockedAchievements = JSON.parse(localStorage.getItem('plant-parent-achievements') || '[]');
+} catch (err) {
+  state.unlockedAchievements = [];
+}
+state.gameHighScore = parseInt(localStorage.getItem('plant-parent-game-highscore') || '0', 10) || 0;
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch((err) => console.error('SW registration failed', err));
