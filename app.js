@@ -70,6 +70,8 @@ const state = {
   currentView: 'shelf', // 'shelf' | 'garden' | 'dictionary'
   sortBy: 'urgent', // 'urgent' | 'az' | 'room'
   filterRoom: null, // null = all rooms
+  weatherEnabled: false,
+  weatherNudge: null, // { text, emoji } once fetched
 };
 
 let nextId = 1;
@@ -284,6 +286,71 @@ function showNextCelebration() {
   }, 2400);
 }
 
+// ---------- weather-aware watering ----------
+
+function getWeatherNudge(precipMm, tempC, humidity) {
+  if (precipMm >= 8) {
+    return { emoji: '🌧️', text: `It's rained a fair amount nearby the last few days (${precipMm.toFixed(0)}mm). Your plants may need a bit less water than usual — check the soil before watering.` };
+  }
+  if (precipMm >= 2) {
+    return { emoji: '🌦️', text: `A little rain nearby lately. If any of your plants sit near an open window or balcony, they may not need their full usual watering.` };
+  }
+  if (tempC >= 28 && humidity <= 40) {
+    return { emoji: '☀️', text: `Hot and dry the last few days (${Math.round(tempC)}°C, ${Math.round(humidity)}% humidity). Thirsty plants may dry out faster than usual — worth checking a little early.` };
+  }
+  if (humidity <= 30) {
+    return { emoji: '🍂', text: `Low humidity lately (${Math.round(humidity)}%). Plants that like moisture, like ferns, may appreciate a light misting between waterings.` };
+  }
+  return { emoji: '🌤️', text: `Weather's been steady nearby — no changes needed to your usual watering routine.` };
+}
+
+async function fetchWeather() {
+  if (!('geolocation' in navigator)) {
+    alert("This browser doesn't support location, so weather tips aren't available.");
+    return;
+  }
+  navigator.geolocation.getCurrentPosition(async (position) => {
+    const { latitude, longitude } = position.coords;
+    try {
+      const url = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,relative_humidity_2m&daily=precipitation_sum&past_days=3&forecast_days=1&timezone=auto`;
+      const res = await fetch(url);
+      const data = await res.json();
+      const precipMm = (data.daily?.precipitation_sum || []).reduce((sum, v) => sum + (v || 0), 0);
+      const tempC = data.current?.temperature_2m ?? 20;
+      const humidity = data.current?.relative_humidity_2m ?? 50;
+      const nudge = getWeatherNudge(precipMm, tempC, humidity);
+      state.weatherNudge = nudge;
+      state.weatherEnabled = true;
+      localStorage.setItem('plant-parent-weather-enabled', '1');
+      localStorage.setItem('plant-parent-weather-date', todayStr());
+      localStorage.setItem('plant-parent-weather-nudge', JSON.stringify(nudge));
+      render();
+    } catch (err) {
+      alert("Couldn't fetch weather right now. Try again later.");
+    }
+  }, () => {
+    alert('Location access was not granted, so weather tips are unavailable.');
+  }, { timeout: 10000 });
+}
+
+function toggleWeather() {
+  if (state.weatherEnabled) {
+    state.weatherEnabled = false;
+    state.weatherNudge = null;
+    localStorage.setItem('plant-parent-weather-enabled', '0');
+    render();
+  } else {
+    fetchWeather();
+  }
+}
+
+function maybeRefreshWeather() {
+  if (!state.weatherEnabled) return;
+  if (localStorage.getItem('plant-parent-weather-date') !== todayStr()) {
+    fetchWeather();
+  }
+}
+
 // ---------- rendering ----------
 
 function render() {
@@ -310,6 +377,13 @@ function render() {
           <div class="daily-task">${task.label}</div>
         </div>
       </div>
+
+      ${state.weatherEnabled && state.weatherNudge ? `
+        <div class="weather-card">
+          <div class="weather-emoji">${state.weatherNudge.emoji}</div>
+          <div class="weather-text">${state.weatherNudge.text}</div>
+        </div>
+      ` : ''}
 
       ${state.currentView === 'garden' ? `<div id="gardenView"></div>` : ''}
       ${state.currentView === 'dictionary' ? `<div id="dictionaryView"></div>` : ''}
@@ -366,6 +440,10 @@ function render() {
             <span class="more-menu-icon">${state.notificationsEnabled ? '🔔' : '🔕'}</span>
             <span>${state.notificationsEnabled ? 'Reminders on' : 'Enable reminders'}</span>
           </button>
+          <button class="more-menu-item" id="navWeather">
+            <span class="more-menu-icon">${state.weatherEnabled ? '🌦️' : '⛅'}</span>
+            <span>${state.weatherEnabled ? 'Weather tips on' : 'Enable weather tips'}</span>
+          </button>
         </div>
       </div>
     ` : ''}
@@ -412,6 +490,7 @@ function render() {
 
   if (state.showMoreMenu) {
     document.getElementById('navNotif').onclick = () => { state.showMoreMenu = false; enableNotifications(); };
+    document.getElementById('navWeather').onclick = () => { state.showMoreMenu = false; render(); toggleWeather(); };
     document.getElementById('navBadges').onclick = () => { state.showMoreMenu = false; state.showBadgesModal = true; render(); };
     document.getElementById('navGame').onclick = () => { state.showMoreMenu = false; render(); if (window.openMiniGame) window.openMiniGame(); };
     document.getElementById('moreMenuBackdrop').addEventListener('click', (e) => {
@@ -987,9 +1066,16 @@ try {
   state.unlockedAchievements = [];
 }
 state.gameHighScore = parseInt(localStorage.getItem('plant-parent-game-highscore') || '0', 10) || 0;
+state.weatherEnabled = localStorage.getItem('plant-parent-weather-enabled') === '1';
+try {
+  state.weatherNudge = JSON.parse(localStorage.getItem('plant-parent-weather-nudge') || 'null');
+} catch (err) {
+  state.weatherNudge = null;
+}
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch((err) => console.error('SW registration failed', err));
 }
 
 render();
+maybeRefreshWeather();

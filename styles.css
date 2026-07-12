@@ -134,6 +134,19 @@
   }
   .daily-task { font-size: 14px; font-weight: 600; color: var(--ink); margin-top: 2px; }
 
+  .weather-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: linear-gradient(135deg, #E4EEF6, #F6F3EC);
+    border: 1.5px solid var(--line);
+    border-radius: 14px;
+    padding: 14px 18px;
+    margin-bottom: 24px;
+  }
+  .weather-emoji { font-size: 26px; flex-shrink: 0; }
+  .weather-text { font-size: 13px; line-height: 1.5; color: var(--ink); }
+
   /* Garden scene */
   .garden-scene {
     background: linear-gradient(180deg, #DCEAD4 0%, #F6F3EC 65%);
