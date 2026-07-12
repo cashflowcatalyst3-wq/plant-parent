@@ -13,6 +13,27 @@ const ACHIEVEMENTS = [
   { id: 'sharpshooter', emoji: '🎯', name: 'Sharpshooter', desc: 'Score 25+ in Raindrop Catch' },
 ];
 
+const DAILY_TASKS = [
+  { id: 'water-one', emoji: '💧', label: 'Water any one plant today', check: (s) => s.plants.some(p => daysSince(p.lastWatered) === 0) },
+  { id: 'play-game', emoji: '🎮', label: 'Play a round of Raindrop Catch', check: () => localStorage.getItem('plant-parent-last-game-date') === todayStr() },
+  { id: 'write-note', emoji: '📝', label: 'Add or update a note on a plant', check: (s) => s.plants.some(p => p.notesUpdatedAt && p.notesUpdatedAt.slice(0,10) === todayStr()) },
+  { id: 'visit-garden', emoji: '🌻', label: 'Visit your Garden view', check: () => localStorage.getItem('plant-parent-last-garden-date') === todayStr() },
+];
+
+function todayStr() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+function dayOfYear() {
+  const now = new Date();
+  const start = new Date(now.getFullYear(), 0, 0);
+  return Math.floor((now - start) / (1000*60*60*24));
+}
+
+function getTodayTask() {
+  return DAILY_TASKS[dayOfYear() % DAILY_TASKS.length];
+}
+
 const state = {
   plants: [],
   activeId: null,
@@ -23,6 +44,7 @@ const state = {
   unlockedAchievements: [],
   gameHighScore: 0,
   celebrationQueue: [],
+  currentView: 'shelf', // 'shelf' | 'garden'
 };
 
 let nextId = 1;
@@ -80,7 +102,9 @@ function recordGameScore(score) {
     state.gameHighScore = score;
     localStorage.setItem('plant-parent-game-highscore', String(score));
   }
+  localStorage.setItem('plant-parent-last-game-date', todayStr());
   checkAchievements();
+  render();
 }
 
 // ---------- sound effects ----------
@@ -219,6 +243,12 @@ function showNextCelebration() {
 function render() {
   const app = document.getElementById('app');
   const active = state.plants.find(p => p.id === state.activeId);
+  const task = getTodayTask();
+  const taskDone = task.check(state);
+  if (taskDone && localStorage.getItem('plant-parent-daily-celebrated') !== todayStr()) {
+    localStorage.setItem('plant-parent-daily-celebrated', todayStr());
+    setTimeout(() => { fireConfetti(window.innerWidth / 2, 80); playUnlockSound(); }, 100);
+  }
 
   app.innerHTML = `
     <header>
@@ -232,34 +262,121 @@ function render() {
         <button class="secondary" id="notifBtn">${state.notificationsEnabled ? '🔔 Reminders on' : '🔕 Enable reminders'}</button>
       </div>
     </header>
-    <div class="layout">
-      <div class="shelf" id="shelf"></div>
-      <div class="panel" id="panel"></div>
+
+    <div class="daily-card ${taskDone ? 'daily-card-done' : ''}">
+      <div class="daily-emoji">${taskDone ? '✅' : task.emoji}</div>
+      <div class="daily-text">
+        <div class="daily-label">Today's little thing</div>
+        <div class="daily-task">${task.label}</div>
+      </div>
     </div>
+
+    <div class="view-tabs">
+      <button class="tab-btn ${state.currentView === 'shelf' ? 'tab-active' : ''}" id="tabShelf">🪴 My Plants</button>
+      <button class="tab-btn ${state.currentView === 'garden' ? 'tab-active' : ''}" id="tabGarden">🌻 Garden</button>
+    </div>
+
+    ${state.currentView === 'garden' ? `
+      <div id="gardenView"></div>
+    ` : `
+      <div class="layout">
+        <div class="shelf" id="shelf"></div>
+        <div class="panel" id="panel"></div>
+      </div>
+    `}
     ${state.showAddModal ? renderModal() : ''}
     ${state.showBadgesModal ? renderBadgesModal() : ''}
   `;
 
-  const shelf = document.getElementById('shelf');
-  state.plants.forEach(p => shelf.appendChild(renderCard(p)));
-  const addBtn = document.createElement('div');
-  addBtn.className = 'add-btn';
-  addBtn.textContent = '+ Add a plant';
-  addBtn.onclick = () => { state.pendingModalPhoto = null; state.showAddModal = true; render(); };
-  shelf.appendChild(addBtn);
+  if (state.currentView === 'garden') {
+    document.getElementById('gardenView').appendChild(renderGarden());
+  } else {
+    const shelf = document.getElementById('shelf');
+    state.plants.forEach(p => shelf.appendChild(renderCard(p)));
+    const addBtn = document.createElement('div');
+    addBtn.className = 'add-btn';
+    addBtn.textContent = '+ Add a plant';
+    addBtn.onclick = () => { state.pendingModalPhoto = null; state.showAddModal = true; render(); };
+    shelf.appendChild(addBtn);
 
-  const panel = document.getElementById('panel');
-  panel.innerHTML = '';
-  panel.appendChild(active ? renderDetail(active) : renderEmpty());
+    const panel = document.getElementById('panel');
+    panel.innerHTML = '';
+    panel.appendChild(active ? renderDetail(active) : renderEmpty());
+  }
 
   document.getElementById('notifBtn').onclick = enableNotifications;
   document.getElementById('badgesBtn').onclick = () => { state.showBadgesModal = true; render(); };
   document.getElementById('gameBtn').onclick = () => { if (window.openMiniGame) window.openMiniGame(); };
+  document.getElementById('tabShelf').onclick = () => { state.currentView = 'shelf'; render(); };
+  document.getElementById('tabGarden').onclick = () => {
+    state.currentView = 'garden';
+    localStorage.setItem('plant-parent-last-garden-date', todayStr());
+    checkAchievements();
+    render();
+  };
 
   if (state.showAddModal) {
     document.getElementById('modalNameInput')?.focus();
     wireModalPhoto();
   }
+}
+
+function gardenTier(plant) {
+  const pct = ringPercent(plant);
+  const streak = calcStreak(plant);
+  const score = (1 - pct) * 0.65 + Math.min(streak / 10, 1) * 0.35;
+  if (score < 0.25) return { emoji: '🥀', size: 30, label: 'wilting' };
+  if (score < 0.5) return { emoji: '🌱', size: 38, label: 'sprouting' };
+  if (score < 0.75) return { emoji: '🌿', size: 48, label: 'growing' };
+  if (score < 0.92) return { emoji: '🪴', size: 58, label: 'thriving' };
+  return { emoji: '🌸', size: 64, label: 'blooming' };
+}
+
+function renderGarden() {
+  const div = document.createElement('div');
+  div.className = 'garden-scene';
+
+  if (state.plants.length === 0) {
+    div.innerHTML = `<div class="garden-empty">Your garden is empty — add a plant to watch it grow here.</div>`;
+    return div;
+  }
+
+  const avgScore = state.plants.reduce((sum, p) => {
+    const pct = ringPercent(p);
+    const streak = calcStreak(p);
+    return sum + ((1 - pct) * 0.65 + Math.min(streak / 10, 1) * 0.35);
+  }, 0) / state.plants.length;
+
+  let summary;
+  if (avgScore >= 0.75) summary = '🌻 Your garden is flourishing!';
+  else if (avgScore >= 0.45) summary = '🌿 Your garden is doing alright.';
+  else summary = '💧 A few plants could use some water.';
+
+  div.innerHTML = `
+    <div class="garden-summary">${summary}</div>
+    <div class="garden-bed">
+      ${state.plants.map(p => {
+        const tier = gardenTier(p);
+        return `
+          <div class="garden-plant" data-id="${p.id}" title="${p.name} — ${tier.label}">
+            <div class="garden-plant-emoji" style="font-size:${tier.size}px;">${tier.emoji}</div>
+            <div class="garden-plant-name">${p.name}</div>
+          </div>
+        `;
+      }).join('')}
+    </div>
+    <div class="garden-ground"></div>
+  `;
+
+  div.querySelectorAll('.garden-plant').forEach(el => {
+    el.onclick = () => {
+      state.activeId = parseInt(el.dataset.id, 10);
+      state.currentView = 'shelf';
+      render();
+    };
+  });
+
+  return div;
 }
 
 function renderBadgesModal() {
@@ -412,6 +529,7 @@ function renderDetail(p) {
   const notesInput = div.querySelector('#notesInput');
   notesInput.addEventListener('blur', () => {
     p.notes = notesInput.value;
+    p.notesUpdatedAt = new Date().toISOString();
     savePlants();
   });
 
