@@ -1,4 +1,6 @@
-import { kv } from '@vercel/kv';
+import { Redis } from '@upstash/redis';
+
+const redis = Redis.fromEnv();
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -10,8 +12,8 @@ export default async function handler(req, res) {
   }
 
   try {
-    await kv.set(`sub:${deviceId}`, subscription);
-    await kv.sadd('devices', deviceId);
+    await redis.set(`sub:${deviceId}`, subscription);
+    await redis.sadd('devices', deviceId);
     return res.status(200).json({ ok: true });
   } catch (err) {
     console.error(err);

@@ -1,5 +1,7 @@
-import { kv } from '@vercel/kv';
+import { Redis } from '@upstash/redis';
 import webpush from 'web-push';
+
+const redis = Redis.fromEnv();
 
 webpush.setVapidDetails(
   'mailto:plant-parent-app@example.com',
@@ -21,14 +23,14 @@ export default async function handler(req, res) {
   }
 
   try {
-    const deviceIds = await kv.smembers('devices');
+    const deviceIds = await redis.smembers('devices');
     const today = new Date().toISOString().slice(0, 10);
     let sent = 0;
 
     for (const deviceId of deviceIds || []) {
       const [plants, subscription] = await Promise.all([
-        kv.get(`plants:${deviceId}`),
-        kv.get(`sub:${deviceId}`)
+        redis.get(`plants:${deviceId}`),
+        redis.get(`sub:${deviceId}`)
       ]);
       if (!plants || !subscription) continue;
 
@@ -47,13 +49,13 @@ export default async function handler(req, res) {
           } catch (err) {
             // subscription may be expired/invalid — remove it so we stop retrying
             if (err.statusCode === 410 || err.statusCode === 404) {
-              await kv.del(`sub:${deviceId}`);
+              await redis.del(`sub:${deviceId}`);
             }
           }
           plant.lastNotified = today;
         }
       }
-      await kv.set(`plants:${deviceId}`, plants);
+      await redis.set(`plants:${deviceId}`, plants);
     }
 
     return res.status(200).json({ ok: true, checked: (deviceIds || []).length, sent });

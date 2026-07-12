@@ -6,6 +6,6 @@
   "description": "A shelf that keeps time for your plants — with photos, care history, and push reminders",
   "dependencies": {
     "web-push": "^3.6.7",
-    "@vercel/kv": "^2.0.0"
+    "@upstash/redis": "^1.34.3"
   }
 }

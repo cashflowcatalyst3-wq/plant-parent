@@ -21,8 +21,10 @@ An installable plant-watering tracker with plant photos, care streaks/history, a
 
 **3. Add a free database (for notifications to work)**
 - On your project's page in Vercel, click the **Storage** tab
-- Click **Create Database** → choose **KV** (this is Vercel's free Redis-based storage)
-- Follow the prompts to create it and connect it to this project — Vercel automatically adds the needed environment variables for you, no copying/pasting required
+- Click **"Marketplace Database Providers"** (or **"Browse Marketplace"** / **"Connect Database"** — wording varies slightly)
+- Find **Upstash** and select it → choose the **Redis** product
+- Follow the prompts: create a free database, then **connect it to this project**
+- Vercel automatically adds the needed environment variables for you — no copying/pasting required
 
 **4. Add the notification keys**
 - Still in your project settings, go to **Settings → Environment Variables**
