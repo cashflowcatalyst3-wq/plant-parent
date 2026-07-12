@@ -3,10 +3,14 @@ const VAPID_PUBLIC_KEY = 'BN4ieWQBco1u_esfncKASD5n51MKDrjGJoDafo4eJP7FwjzxIRUq-2
 const ACHIEVEMENTS = [
   { id: 'first-sprout', emoji: '🌱', name: 'First Sprout', desc: 'Add your first plant' },
   { id: 'full-shelf', emoji: '🪴', name: 'Full Shelf', desc: 'Grow your collection to 5 plants' },
+  { id: 'botanical-garden', emoji: '🌳', name: 'Botanical Garden', desc: 'Grow your collection to 10 plants' },
   { id: 'green-thumb', emoji: '🔥', name: 'Green Thumb', desc: '7-day watering streak on one plant' },
   { id: 'plant-parent-pro', emoji: '🏆', name: 'Plant Parent Pro', desc: '30-day watering streak on one plant' },
   { id: 'note-taker', emoji: '📝', name: 'Note Taker', desc: 'Write your first plant note' },
+  { id: 'snapshot', emoji: '📸', name: 'Snapshot', desc: 'Add a photo to a plant' },
+  { id: 'stay-alert', emoji: '🔔', name: 'Stay Alert', desc: 'Turn on push reminders' },
   { id: 'rainmaker', emoji: '💧', name: 'Rainmaker', desc: 'Score 15+ in Raindrop Catch' },
+  { id: 'sharpshooter', emoji: '🎯', name: 'Sharpshooter', desc: 'Score 25+ in Raindrop Catch' },
 ];
 
 const state = {
@@ -79,6 +83,58 @@ function recordGameScore(score) {
   checkAchievements();
 }
 
+// ---------- sound effects ----------
+
+let audioCtx = null;
+function getAudioCtx() {
+  if (!audioCtx) {
+    const Ctx = window.AudioContext || window.webkitAudioContext;
+    if (!Ctx) return null;
+    audioCtx = new Ctx();
+  }
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+
+function playTone(freq, duration, type, volume) {
+  const ctx = getAudioCtx();
+  if (!ctx) return;
+  try {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = type || 'sine';
+    osc.frequency.value = freq;
+    gain.gain.value = volume ?? 0.1;
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start();
+    gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
+    osc.stop(ctx.currentTime + duration);
+  } catch (err) {
+    // audio not available — fail silently
+  }
+}
+
+function playClickSound() { playTone(520, 0.07, 'sine', 0.07); }
+function playWaterSound() {
+  playTone(440, 0.09, 'sine', 0.09);
+  setTimeout(() => playTone(660, 0.12, 'sine', 0.08), 60);
+}
+function playCatchSound() { playTone(900, 0.1, 'sine', 0.11); }
+function playUnlockSound() {
+  playTone(523, 0.1, 'sine', 0.1);
+  setTimeout(() => playTone(659, 0.1, 'sine', 0.1), 90);
+  setTimeout(() => playTone(784, 0.16, 'sine', 0.1), 180);
+}
+
+document.addEventListener('click', (e) => {
+  if (e.target.closest && e.target.closest('button.primary, button.secondary, button.pill-btn')) {
+    playClickSound();
+  }
+}, true);
+
+window.playCatchSound = playCatchSound;
+
 // ---------- celebrations ----------
 
 function fireConfetti(x, y) {
@@ -111,10 +167,14 @@ function checkAchievements() {
 
   if (state.plants.length >= 1) unlock('first-sprout');
   if (state.plants.length >= 5) unlock('full-shelf');
+  if (state.plants.length >= 10) unlock('botanical-garden');
   if (state.plants.some(p => calcStreak(p) >= 7)) unlock('green-thumb');
   if (state.plants.some(p => calcStreak(p) >= 30)) unlock('plant-parent-pro');
   if (state.plants.some(p => p.notes && p.notes.trim())) unlock('note-taker');
+  if (state.plants.some(p => p.photo)) unlock('snapshot');
+  if (state.notificationsEnabled) unlock('stay-alert');
   if (state.gameHighScore >= 15) unlock('rainmaker');
+  if (state.gameHighScore >= 25) unlock('sharpshooter');
 
   if (newlyUnlocked.length) {
     state.unlockedAchievements = Array.from(unlocked);
@@ -143,6 +203,7 @@ function showNextCelebration() {
   `;
   document.body.appendChild(toast);
   fireConfetti(window.innerWidth / 2, 100);
+  playUnlockSound();
 
   setTimeout(() => {
     toast.classList.add('celebration-toast-out');
@@ -166,8 +227,8 @@ function render() {
         <div class="tagline">a shelf that keeps time for you</div>
       </div>
       <div class="header-actions">
-        <button class="secondary" id="badgesBtn">🏆 ${state.unlockedAchievements.length}/${ACHIEVEMENTS.length}</button>
-        <button class="secondary" id="gameBtn">🎮 Play</button>
+        <button class="pill-btn pill-badges" id="badgesBtn">🏆 ${state.unlockedAchievements.length}/${ACHIEVEMENTS.length}</button>
+        <button class="pill-btn pill-game" id="gameBtn">🎮 Play${state.gameHighScore ? ` · best ${state.gameHighScore}` : ''}</button>
         <button class="secondary" id="notifBtn">${state.notificationsEnabled ? '🔔 Reminders on' : '🔕 Enable reminders'}</button>
       </div>
     </header>
@@ -327,6 +388,7 @@ function renderDetail(p) {
     if (p.waterLog.length > 30) p.waterLog = p.waterLog.slice(-30);
     const rect = e.target.getBoundingClientRect();
     fireConfetti(rect.left + rect.width / 2, rect.top);
+    playWaterSound();
     render();
     savePlants();
   };
@@ -559,6 +621,7 @@ async function enableNotifications() {
     await syncToServer();
     state.notificationsEnabled = true;
     localStorage.setItem('plant-parent-notifications-enabled', '1');
+    checkAchievements();
     render();
   } catch (err) {
     console.error(err);

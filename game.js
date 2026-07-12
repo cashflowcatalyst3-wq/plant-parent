@@ -11,6 +11,7 @@
     timeLeft = 30;
     gameActive = true;
 
+    const highScore = (typeof state !== 'undefined' && state.gameHighScore) || 0;
     const backdrop = document.createElement('div');
     backdrop.className = 'modal-backdrop';
     backdrop.id = 'gameBackdrop';
@@ -19,6 +20,7 @@
         <h3>Raindrop Catch</h3>
         <div class="game-hud">
           <span>Score: <strong id="gameScore">0</strong></span>
+          <span>Best: <strong>${highScore}</strong></span>
           <span>Time: <strong id="gameTime">30</strong>s</span>
         </div>
         <div class="game-area" id="gameArea"></div>
@@ -72,6 +74,7 @@
     if (scoreEl) scoreEl.textContent = score;
     const rect = drop.getBoundingClientRect();
     if (window.fireConfetti) window.fireConfetti(rect.left, rect.top);
+    if (window.playCatchSound) window.playCatchSound();
     drop.classList.add('raindrop-caught');
     setTimeout(() => drop.remove(), 150);
   }
