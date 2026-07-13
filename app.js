@@ -416,6 +416,7 @@ function render() {
   app.innerHTML = `
     <div class="main-content">
       <header>
+        <div class="header-flourish">🌿</div>
         <h1>Plant Parent</h1>
         <div class="tagline">a shelf that keeps time for you</div>
       </header>
