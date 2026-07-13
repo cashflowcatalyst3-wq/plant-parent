@@ -286,6 +286,56 @@ function showNextCelebration() {
   }, 2400);
 }
 
+// ---------- backup / restore ----------
+
+function exportBackup() {
+  const backup = {
+    exportedAt: new Date().toISOString(),
+    plants: state.plants,
+    unlockedAchievements: state.unlockedAchievements,
+    gameHighScore: state.gameHighScore,
+  };
+  const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const dateStr = todayStr();
+  a.href = url;
+  a.download = `plant-parent-backup-${dateStr}.json`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+function importBackup(file) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    try {
+      const data = JSON.parse(reader.result);
+      if (!Array.isArray(data.plants)) throw new Error('Invalid backup file');
+      const confirmed = confirm(`This will replace your current ${state.plants.length} plant(s) with ${data.plants.length} plant(s) from the backup. Continue?`);
+      if (!confirmed) return;
+      state.plants = data.plants;
+      nextId = state.plants.length ? Math.max(...state.plants.map(p => p.id)) + 1 : 1;
+      if (Array.isArray(data.unlockedAchievements)) {
+        state.unlockedAchievements = data.unlockedAchievements;
+        localStorage.setItem('plant-parent-achievements', JSON.stringify(state.unlockedAchievements));
+      }
+      if (typeof data.gameHighScore === 'number') {
+        state.gameHighScore = data.gameHighScore;
+        localStorage.setItem('plant-parent-game-highscore', String(state.gameHighScore));
+      }
+      state.activeId = state.plants[0]?.id ?? null;
+      render();
+      savePlants();
+      alert('Backup restored!');
+    } catch (err) {
+      alert("Couldn't read that file — make sure it's a Plant Parent backup.");
+    }
+  };
+  reader.readAsText(file);
+}
+
 // ---------- weather-aware watering ----------
 
 function getWeatherNudge(precipMm, tempC, humidity) {
@@ -444,6 +494,16 @@ function render() {
             <span class="more-menu-icon">${state.weatherEnabled ? '🌦️' : '⛅'}</span>
             <span>${state.weatherEnabled ? 'Weather tips on' : 'Enable weather tips'}</span>
           </button>
+          <div class="more-menu-divider"></div>
+          <button class="more-menu-item" id="navExport">
+            <span class="more-menu-icon">⬇️</span>
+            <span>Back up my plants</span>
+          </button>
+          <button class="more-menu-item" id="navImport">
+            <span class="more-menu-icon">⬆️</span>
+            <span>Restore from backup</span>
+          </button>
+          <input type="file" id="importFileInput" accept="application/json" style="display:none;">
         </div>
       </div>
     ` : ''}
@@ -491,6 +551,14 @@ function render() {
   if (state.showMoreMenu) {
     document.getElementById('navNotif').onclick = () => { state.showMoreMenu = false; enableNotifications(); };
     document.getElementById('navWeather').onclick = () => { state.showMoreMenu = false; render(); toggleWeather(); };
+    document.getElementById('navExport').onclick = () => { state.showMoreMenu = false; render(); exportBackup(); };
+    document.getElementById('navImport').onclick = () => { document.getElementById('importFileInput').click(); };
+    document.getElementById('importFileInput').onchange = (e) => {
+      const file = e.target.files[0];
+      state.showMoreMenu = false;
+      render();
+      if (file) importBackup(file);
+    };
     document.getElementById('navBadges').onclick = () => { state.showMoreMenu = false; state.showBadgesModal = true; render(); };
     document.getElementById('navGame').onclick = () => { state.showMoreMenu = false; render(); if (window.openMiniGame) window.openMiniGame(); };
     document.getElementById('moreMenuBackdrop').addEventListener('click', (e) => {
