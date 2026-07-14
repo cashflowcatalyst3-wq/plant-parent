@@ -1,6 +1,14 @@
 import { Redis } from '@upstash/redis';
 import webpush from 'web-push';
 
+const redis = Redis.fromEnv();
+
+webpush.setVapidDetails(
+  'mailto:plant-parent-app@example.com',
+  process.env.VAPID_PUBLIC_KEY,
+  process.env.VAPID_PRIVATE_KEY
+);
+
 function daysSince(dateStr) {
   const then = new Date(dateStr);
   const now = new Date();
@@ -14,30 +22,8 @@ export default async function handler(req, res) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
-  const missing = [];
-  if (!process.env.VAPID_PUBLIC_KEY) missing.push('VAPID_PUBLIC_KEY');
-  if (!process.env.VAPID_PRIVATE_KEY) missing.push('VAPID_PRIVATE_KEY');
-  if (!process.env.UPSTASH_REDIS_REST_URL && !process.env.KV_REST_API_URL) missing.push('UPSTASH_REDIS_REST_URL (or KV_REST_API_URL)');
-  if (!process.env.UPSTASH_REDIS_REST_TOKEN && !process.env.KV_REST_API_TOKEN) missing.push('UPSTASH_REDIS_REST_TOKEN (or KV_REST_API_TOKEN)');
-  if (missing.length) {
-    return res.status(500).json({ error: `Missing environment variable(s): ${missing.join(', ')}. Add them in Vercel → Settings → Environment Variables, then redeploy.` });
-  }
-
-  let redis, deviceIds;
   try {
-    redis = Redis.fromEnv();
-    webpush.setVapidDetails(
-      'mailto:plant-parent-app@example.com',
-      process.env.VAPID_PUBLIC_KEY,
-      process.env.VAPID_PRIVATE_KEY
-    );
-    deviceIds = await redis.smembers('devices');
-  } catch (err) {
-    console.error('Setup failed:', err);
-    return res.status(500).json({ error: `Setup failed: ${err.message}` });
-  }
-
-  try {
+    const deviceIds = await redis.smembers('devices');
     const today = new Date().toISOString().slice(0, 10);
     let sent = 0;
 
@@ -74,7 +60,7 @@ export default async function handler(req, res) {
 
     return res.status(200).json({ ok: true, checked: (deviceIds || []).length, sent });
   } catch (err) {
-    console.error('Cron check failed:', err);
-    return res.status(500).json({ error: `Cron check failed: ${err.message}` });
+    console.error(err);
+    return res.status(500).json({ error: 'Cron check failed' });
   }
 }
