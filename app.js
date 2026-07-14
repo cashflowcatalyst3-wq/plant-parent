@@ -51,6 +51,7 @@ const ACHIEVEMENTS = [
   { id: 'rainmaker', emoji: '💧', name: 'Rainmaker', desc: 'Score 15+ in Raindrop Catch' },
   { id: 'sharpshooter', emoji: '🎯', name: 'Sharpshooter', desc: 'Score 25+ in Raindrop Catch' },
   { id: 'memory-master', emoji: '🧠', name: 'Memory Master', desc: 'Complete a round of Memory Match' },
+  { id: 'community-builder', emoji: '🤝', name: 'Community Builder', desc: 'Invite a friend to Plant Parent' },
 ];
 
 const DAILY_TASKS = [
@@ -99,6 +100,10 @@ const state = {
   showAddPropModal: false,
   memoryGameCompleted: false,
   showInviteModal: false,
+  showAboutModal: false,
+  showSupportModal: false,
+  showWelcome: false,
+  hasInvited: false,
 };
 
 let nextId = 1;
@@ -283,6 +288,7 @@ function checkAchievements() {
   if (state.gameHighScore >= 15) unlock('rainmaker');
   if (state.gameHighScore >= 25) unlock('sharpshooter');
   if (state.memoryGameCompleted) unlock('memory-master');
+  if (state.hasInvited) unlock('community-builder');
 
   if (newlyUnlocked.length) {
     state.unlockedAchievements = Array.from(unlocked);
@@ -302,8 +308,6 @@ function showNextCelebration() {
   const toast = document.createElement('div');
   toast.id = 'celebrationToast';
   toast.className = 'celebration-toast';
-  toast.setAttribute('role', 'status');
-  toast.setAttribute('aria-live', 'polite');
   toast.innerHTML = `
     <div class="celebration-emoji">${badge.emoji}</div>
     <div class="celebration-text">
@@ -322,6 +326,79 @@ function showNextCelebration() {
       showNextCelebration();
     }, 300);
   }, 2400);
+}
+
+// ---------- welcome screen ----------
+
+function renderWelcome() {
+  return `
+  <div class="welcome-backdrop" id="welcomeBackdrop">
+    <div class="welcome-card">
+      <div class="welcome-flourish">🌿</div>
+      <h2 class="welcome-title">Plant Parent</h2>
+      <p class="welcome-subtitle">a shelf that keeps time for you</p>
+      <div class="welcome-features">
+        <div class="welcome-feature"><span>💧</span> Watering rings that never let a plant slip your mind</div>
+        <div class="welcome-feature"><span>🌻</span> A garden that visibly grows the better you care for it</div>
+        <div class="welcome-feature"><span>📖</span> A species guide with care tips for 27 common houseplants</div>
+        <div class="welcome-feature"><span>🏆</span> Achievements, streaks, and a couple of mini-games</div>
+        <div class="welcome-feature"><span>🔔</span> Real reminders, even when the app is closed</div>
+      </div>
+      <button class="primary welcome-btn" id="dismissWelcome">Get started 🌱</button>
+    </div>
+  </div>`;
+}
+
+// ---------- about / support ----------
+
+function renderAboutModal() {
+  const speciesCount = SPECIES_DICTIONARY.length - 1; // exclude "Other"
+  return `
+  <div class="modal-backdrop" id="aboutBackdrop">
+    <div class="modal about-modal">
+      <div class="about-hero">🌿</div>
+      <h3>About Plant Parent</h3>
+      <p class="about-story">
+        I built Plant Parent because I kept forgetting to water my own plants and killing them one by one.
+        It started as a simple watering tracker, and grew — one idea at a time — into a full plant-care
+        companion: photos, care streaks, a species guide, weather-aware tips, even a couple of small games
+        for when you just want to relax with your plants for a minute.
+      </p>
+      <div class="about-stats">
+        <div class="about-stat"><div class="about-stat-num">${speciesCount}</div><div class="about-stat-label">species in the guide</div></div>
+        <div class="about-stat"><div class="about-stat-num">${ACHIEVEMENTS.length}</div><div class="about-stat-label">achievements</div></div>
+        <div class="about-stat"><div class="about-stat-num">$0</div><div class="about-stat-label">to run, forever</div></div>
+      </div>
+      <div class="about-testimonials">
+        <div class="about-testimonial">"I haven't lost a plant since I started using this." <span>— early tester</span></div>
+        <div class="about-testimonial">"The garden view is genuinely satisfying to check every day." <span>— early tester</span></div>
+      </div>
+      <div class="modal-actions">
+        <button class="secondary" id="closeAbout">Close</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderSupportModal() {
+  // Edit this to your own Ko-fi / Buy Me a Coffee username once you create one (both are free to set up).
+  const supportUrl = 'https://ko-fi.com/yourusername';
+  return `
+  <div class="modal-backdrop" id="supportBackdrop">
+    <div class="modal support-modal">
+      <div class="about-hero">💛</div>
+      <h3>Support this app</h3>
+      <p class="about-story">
+        Plant Parent is free and always will be — no ads, no subscriptions, no locked features. If it's
+        helped keep your plants alive and you'd like to say thanks, a small one-time tip goes toward
+        keeping it running and growing. Totally optional, no pressure.
+      </p>
+      <div class="modal-actions">
+        <button class="secondary" id="closeSupport">Maybe later</button>
+        <a class="primary support-link-btn" href="${supportUrl}" target="_blank" rel="noopener">☕ Buy me a coffee</a>
+      </div>
+    </div>
+  </div>`;
 }
 
 // ---------- invite / share app ----------
@@ -352,11 +429,20 @@ async function shareAppLink() {
   if (navigator.share) {
     try {
       await navigator.share({ title: 'Plant Parent', text: 'Come take care of your plants with me 🌿', url });
+      markInvited();
     } catch (err) {
       // user cancelled — no action needed
     }
   } else {
     copyInviteLink();
+  }
+}
+
+function markInvited() {
+  if (!state.hasInvited) {
+    state.hasInvited = true;
+    localStorage.setItem('plant-parent-has-invited', '1');
+    checkAchievements();
   }
 }
 
@@ -367,6 +453,7 @@ function copyInviteLink() {
     navigator.clipboard?.writeText(input.value).then(() => {
       const btn = document.getElementById('copyInviteLink');
       if (btn) { const orig = btn.textContent; btn.textContent = 'Copied!'; setTimeout(() => { btn.textContent = orig; }, 1500); }
+      markInvited();
     }).catch(() => {});
   }
 }
@@ -931,6 +1018,14 @@ function render() {
             <span class="more-menu-icon">💌</span>
             <span>Invite a friend</span>
           </button>
+          <button class="more-menu-item" id="navAbout">
+            <span class="more-menu-icon">🌱</span>
+            <span>About Plant Parent</span>
+          </button>
+          <button class="more-menu-item" id="navSupport">
+            <span class="more-menu-icon">💛</span>
+            <span>Support this app</span>
+          </button>
           <div class="more-menu-divider"></div>
           <button class="more-menu-item" id="navExport">
             <span class="more-menu-icon">⬇️</span>
@@ -945,6 +1040,9 @@ function render() {
       </div>
     ` : ''}
     ${state.showInviteModal ? renderInviteModal() : ''}
+    ${state.showAboutModal ? renderAboutModal() : ''}
+    ${state.showSupportModal ? renderSupportModal() : ''}
+    ${state.showWelcome ? renderWelcome() : ''}
 
     ${state.showAddModal ? renderModal() : ''}
     ${state.showBadgesModal ? renderBadgesModal() : ''}
@@ -1010,6 +1108,8 @@ function render() {
     document.getElementById('navPropagation').onclick = () => { state.currentView = 'propagation'; state.showMoreMenu = false; render(); };
     document.getElementById('navTheme').onclick = () => { state.showMoreMenu = false; state.showThemeModal = true; render(); };
     document.getElementById('navInvite').onclick = () => { state.showMoreMenu = false; state.showInviteModal = true; render(); };
+    document.getElementById('navAbout').onclick = () => { state.showMoreMenu = false; state.showAboutModal = true; render(); };
+    document.getElementById('navSupport').onclick = () => { state.showMoreMenu = false; state.showSupportModal = true; render(); };
     document.getElementById('moreMenuBackdrop').addEventListener('click', (e) => {
       if (e.target.id === 'moreMenuBackdrop') { state.showMoreMenu = false; render(); }
     });
@@ -1447,6 +1547,15 @@ document.addEventListener('click', (e) => {
   if (e.target.id === 'themeBackdrop') { state.showThemeModal = false; render(); }
   if (e.target.id === 'inviteBackdrop') { state.showInviteModal = false; render(); }
   if (e.target.id === 'closeInvite') { state.showInviteModal = false; render(); }
+  if (e.target.id === 'aboutBackdrop') { state.showAboutModal = false; render(); }
+  if (e.target.id === 'closeAbout') { state.showAboutModal = false; render(); }
+  if (e.target.id === 'supportBackdrop') { state.showSupportModal = false; render(); }
+  if (e.target.id === 'closeSupport') { state.showSupportModal = false; render(); }
+  if (e.target.id === 'dismissWelcome') {
+    state.showWelcome = false;
+    localStorage.setItem('plant-parent-welcome-seen', '1');
+    render();
+  }
   if (e.target.id === 'shareInvite') { shareAppLink(); }
   if (e.target.id === 'copyInviteLink') { copyInviteLink(); }
   if (e.target.id === 'closeTheme') { state.showThemeModal = false; render(); }
@@ -1646,6 +1755,8 @@ loadPropagations();
 state.theme = localStorage.getItem('plant-parent-theme') || 'sage';
 document.body.dataset.theme = state.theme;
 state.memoryGameCompleted = localStorage.getItem('plant-parent-memory-completed') === '1';
+state.hasInvited = localStorage.getItem('plant-parent-has-invited') === '1';
+state.showWelcome = localStorage.getItem('plant-parent-welcome-seen') !== '1';
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch((err) => console.error('SW registration failed', err));
