@@ -41,7 +41,30 @@ An installable plant-watering tracker with plant photos, care streaks/history, a
 
 That's it — once enabled, the app checks once a day and sends you a real notification for any plant that's overdue for water, even if the app is closed.
 
+## Random check-in notifications (every 5 hours)
+
+Heads up on a real platform limit: Vercel's free plan only allows cron jobs to run **once per day** — a schedule like "every 5 hours" isn't allowed there and fails at deploy time. To get real 5-hour notifications without paying for anything, this uses a free external scheduler (cron-job.org) to call a new endpoint on that schedule instead.
+
+**1. Add one more environment variable**
+- In Vercel: **Settings → Environment Variables**
+- Add: Name: `CRON_SECRET` → Value: `382cc14e3e193d325dc04096faa4f04fd2869afac4bcc459`
+- Redeploy (same **⋯ → Redeploy** step as before) so it takes effect
+
+**2. Set up the free scheduler**
+- Go to https://cron-job.org and create a free account (no credit card)
+- Click **Create cronjob**
+- Title: anything, e.g. "Plant Parent check-in"
+- URL: `https://YOUR-APP-NAME.vercel.app/api/random-notification?secret=382cc14e3e193d325dc04096faa4f04fd2869afac4bcc459`
+  (replace `YOUR-APP-NAME` with your actual Vercel URL)
+- Schedule: choose "Every 5 hours" (or use the custom cron expression `0 */5 * * *`)
+- Save
+
+That's it — every 5 hours, cron-job.org pings your app, which picks a random plant tip or check-in message and sends it as a real push notification to everyone who's enabled reminders.
+
 ## What's new in this version
+- **Random check-ins**: a rotating pool of plant tips and gentle nudges, sent every 5 hours via a free external scheduler
+
+## What's new in previous versions
 - **Photos**: tap the ring in a plant's detail view (or add one when creating a plant) to give it a portrait — it shows right inside the watering ring
 - **Streaks & history**: every "Water now" is logged, with a streak counter for consecutive on-time waterings and a short history list
 - **Push notifications**: a daily automated check sends a real phone notification for anything overdue
