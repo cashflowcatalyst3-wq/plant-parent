@@ -78,13 +78,19 @@
       <div class="memory-card ${c.isFlipped || c.isMatched ? 'memory-card-flipped' : ''} ${c.isMatched ? 'memory-card-matched' : ''}" data-id="${c.id}">
         <div class="memory-card-inner">
           <div class="memory-card-back">🌿</div>
-          <div class="memory-card-front">${c.type === 'photo' ? `<img src="${c.value}" class="memory-card-photo">` : c.value}</div>
+          <div class="memory-card-front">${c.type === 'photo' ? `<img src="${c.value}" alt="" class="memory-card-photo">` : c.value}</div>
         </div>
       </div>
     `).join('');
 
     grid.querySelectorAll('.memory-card').forEach(el => {
+      el.setAttribute('role', 'button');
+      el.setAttribute('tabindex', '0');
+      el.setAttribute('aria-label', 'Memory card, tap to flip');
       el.addEventListener('click', () => handleCardClick(parseInt(el.dataset.id, 10)));
+      el.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleCardClick(parseInt(el.dataset.id, 10)); }
+      });
     });
   }
 

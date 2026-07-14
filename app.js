@@ -98,6 +98,7 @@ const state = {
   propagations: [],
   showAddPropModal: false,
   memoryGameCompleted: false,
+  showInviteModal: false,
 };
 
 let nextId = 1;
@@ -301,6 +302,8 @@ function showNextCelebration() {
   const toast = document.createElement('div');
   toast.id = 'celebrationToast';
   toast.className = 'celebration-toast';
+  toast.setAttribute('role', 'status');
+  toast.setAttribute('aria-live', 'polite');
   toast.innerHTML = `
     <div class="celebration-emoji">${badge.emoji}</div>
     <div class="celebration-text">
@@ -319,6 +322,53 @@ function showNextCelebration() {
       showNextCelebration();
     }, 300);
   }, 2400);
+}
+
+// ---------- invite / share app ----------
+
+function renderInviteModal() {
+  const url = window.location.origin + window.location.pathname;
+  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(url)}`;
+  return `
+  <div class="modal-backdrop" id="inviteBackdrop">
+    <div class="modal invite-modal">
+      <h3>Invite a friend</h3>
+      <p class="invite-text">Scan this with a phone camera, or share the link below — anyone can install their own copy of Plant Parent for free.</p>
+      <img src="${qrUrl}" alt="QR code linking to this Plant Parent app" class="invite-qr">
+      <div class="invite-link-row">
+        <input class="invite-link-input" id="inviteLinkInput" value="${url}" readonly>
+        <button class="secondary" id="copyInviteLink">Copy</button>
+      </div>
+      <div class="modal-actions">
+        <button class="secondary" id="closeInvite">Close</button>
+        <button class="primary" id="shareInvite">📤 Share</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+async function shareAppLink() {
+  const url = window.location.origin + window.location.pathname;
+  if (navigator.share) {
+    try {
+      await navigator.share({ title: 'Plant Parent', text: 'Come take care of your plants with me 🌿', url });
+    } catch (err) {
+      // user cancelled — no action needed
+    }
+  } else {
+    copyInviteLink();
+  }
+}
+
+function copyInviteLink() {
+  const input = document.getElementById('inviteLinkInput');
+  if (input) {
+    input.select();
+    navigator.clipboard?.writeText(input.value).then(() => {
+      const btn = document.getElementById('copyInviteLink');
+      if (btn) { const orig = btn.textContent; btn.textContent = 'Copied!'; setTimeout(() => { btn.textContent = orig; }, 1500); }
+    }).catch(() => {});
+  }
 }
 
 // ---------- themes ----------
@@ -613,11 +663,11 @@ function renderAddPropModal() {
       <h3>Start a new cutting</h3>
       <div class="field">
         <label>What is it?</label>
-        <input id="propNameInput" placeholder="e.g. Pothos cutting from kitchen plant">
+        <input id="propNameInput" placeholder="e.g. Pothos cutting from kitchen plant" aria-label="What is it">
       </div>
       <div class="field">
         <label>Notes (optional)</label>
-        <input id="propNotesInput" placeholder="e.g. in water, on the windowsill">
+        <input id="propNotesInput" placeholder="e.g. in water, on the windowsill" aria-label="Notes">
       </div>
       <div class="modal-actions">
         <button class="secondary" id="cancelPropModal">Cancel</button>
@@ -805,7 +855,7 @@ function render() {
         <div class="layout">
           <div class="shelf-column">
             <div class="shelf-controls">
-              <select class="sort-select" id="sortSelect">
+              <select class="sort-select" id="sortSelect" aria-label="Sort plants by">
                 <option value="urgent" ${state.sortBy === 'urgent' ? 'selected' : ''}>Most urgent first</option>
                 <option value="az" ${state.sortBy === 'az' ? 'selected' : ''}>A–Z</option>
                 <option value="room" ${state.sortBy === 'room' ? 'selected' : ''}>By room</option>
@@ -877,6 +927,11 @@ function render() {
             <span>Theme: ${THEMES.find(t => t.id === state.theme)?.name || 'Sage'}</span>
           </button>
           <div class="more-menu-divider"></div>
+          <button class="more-menu-item" id="navInvite">
+            <span class="more-menu-icon">💌</span>
+            <span>Invite a friend</span>
+          </button>
+          <div class="more-menu-divider"></div>
           <button class="more-menu-item" id="navExport">
             <span class="more-menu-icon">⬇️</span>
             <span>Back up my plants</span>
@@ -889,6 +944,7 @@ function render() {
         </div>
       </div>
     ` : ''}
+    ${state.showInviteModal ? renderInviteModal() : ''}
 
     ${state.showAddModal ? renderModal() : ''}
     ${state.showBadgesModal ? renderBadgesModal() : ''}
@@ -953,6 +1009,7 @@ function render() {
     document.getElementById('navJournal').onclick = () => { state.currentView = 'journal'; state.showMoreMenu = false; render(); };
     document.getElementById('navPropagation').onclick = () => { state.currentView = 'propagation'; state.showMoreMenu = false; render(); };
     document.getElementById('navTheme').onclick = () => { state.showMoreMenu = false; state.showThemeModal = true; render(); };
+    document.getElementById('navInvite').onclick = () => { state.showMoreMenu = false; state.showInviteModal = true; render(); };
     document.getElementById('moreMenuBackdrop').addEventListener('click', (e) => {
       if (e.target.id === 'moreMenuBackdrop') { state.showMoreMenu = false; render(); }
     });
@@ -1042,7 +1099,7 @@ function renderGarden() {
       ${state.plants.map(p => {
         const tier = gardenTier(p);
         return `
-          <div class="garden-plant" data-id="${p.id}" title="${p.name} — ${tier.label}">
+          <div class="garden-plant" data-id="${p.id}" title="${p.name} — ${tier.label}" role="button" tabindex="0" aria-label="${p.name}, ${tier.label}">
             <div class="garden-plant-emoji" style="font-size:${tier.size}px;">${tier.emoji}</div>
             <div class="garden-plant-name">${p.name}</div>
           </div>
@@ -1053,11 +1110,15 @@ function renderGarden() {
   `;
 
   div.querySelectorAll('.garden-plant').forEach(el => {
-    el.onclick = () => {
+    const select = () => {
       state.activeId = parseInt(el.dataset.id, 10);
       state.currentView = 'shelf';
       render();
     };
+    el.onclick = select;
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); select(); }
+    });
   });
 
   return div;
@@ -1094,8 +1155,8 @@ function ringPortrait(p, size, strokeWidth) {
   const offset = c * (1 - pct);
   const photoSize = size - strokeWidth * 2.6;
   const inner = p.photo
-    ? `<img src="${p.photo}" class="ring-photo" style="width:${photoSize}px;height:${photoSize}px;">`
-    : `<div class="ring-photo ring-photo-placeholder" style="width:${photoSize}px;height:${photoSize}px;font-size:${photoSize*0.4}px;">🌱</div>`;
+    ? `<img src="${p.photo}" alt="Photo of ${p.name}" class="ring-photo" style="width:${photoSize}px;height:${photoSize}px;">`
+    : `<div class="ring-photo ring-photo-placeholder" style="width:${photoSize}px;height:${photoSize}px;font-size:${photoSize*0.4}px;" role="img" aria-label="No photo yet">🌱</div>`;
   return `
     <div class="ring-wrap" style="width:${size}px;height:${size}px;">
       <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
@@ -1112,6 +1173,9 @@ function ringPortrait(p, size, strokeWidth) {
 function renderCard(p) {
   const div = document.createElement('div');
   div.className = 'plant-card' + (p.id === state.activeId ? ' active' : '');
+  div.setAttribute('role', 'button');
+  div.setAttribute('tabindex', '0');
+  div.setAttribute('aria-label', `${p.name}, ${daysLeft(p) === 0 ? 'water today' : daysLeft(p) + ' days until watering'}`);
   const left = daysLeft(p);
   div.innerHTML = `
     ${ringPortrait(p, 54, 5)}
@@ -1121,7 +1185,11 @@ function renderCard(p) {
     </div>
     <div class="days-badge">${left === 0 ? 'today!' : left + 'd'}</div>
   `;
-  div.onclick = () => { state.activeId = p.id; render(); };
+  const selectCard = () => { state.activeId = p.id; render(); };
+  div.onclick = selectCard;
+  div.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectCard(); }
+  });
   return div;
 }
 
@@ -1166,10 +1234,10 @@ function renderDetail(p) {
       last watered ${daysSince(p.lastWatered)} day${daysSince(p.lastWatered)===1?'':'s'} ago ·
       ${left} day${left===1?'':'s'} left
     </div>
-    <input class="room-input" id="roomInput" placeholder="📍 Add a room (e.g. Kitchen)" value="${p.room || ''}">
+    <input class="room-input" id="roomInput" placeholder="📍 Add a room (e.g. Kitchen)" value="${p.room || ''}" aria-label="Room">
 
     <div class="section-label">notes</div>
-    <textarea class="notes-input" id="notesInput" placeholder="e.g. repot in spring, keep away from cold drafts…">${p.notes || ''}</textarea>
+    <textarea class="notes-input" id="notesInput" aria-label="Notes" placeholder="e.g. repot in spring, keep away from cold drafts…">${p.notes || ''}</textarea>
     ${p.speciesDesc ? `<div class="species-desc">🌿 <strong>${p.species}:</strong> ${p.speciesDesc}</div>` : ''}
 
     <div class="section-label">streak</div>
@@ -1261,7 +1329,7 @@ function formatHistoryDate(iso) {
 
 function renderModal() {
   const preview = state.pendingModalPhoto
-    ? `<img src="${state.pendingModalPhoto}" class="modal-photo-preview">`
+    ? `<img src="${state.pendingModalPhoto}" alt="Selected plant photo preview" class="modal-photo-preview">`
     : '';
   const species = state.pendingSpecies;
   const editingPlant = state.editingPlantId ? state.plants.find(p => p.id === state.editingPlantId) : null;
@@ -1278,7 +1346,7 @@ function renderModal() {
       </div>
       <div class="field">
         <label>Name</label>
-        <input id="modalNameInput" placeholder="e.g. Fig in the corner" value="${isEditing ? editingPlant.name : ''}">
+        <input id="modalNameInput" placeholder="e.g. Fig in the corner" value="${isEditing ? editingPlant.name : ''}" aria-label="Plant name">
       </div>
       <div class="field">
         <label>Species</label>
@@ -1288,11 +1356,11 @@ function renderModal() {
       </div>
       <div class="field">
         <label>Room (optional)</label>
-        <input id="modalRoomInput" placeholder="e.g. Kitchen, Bedroom, Balcony" value="${isEditing ? (editingPlant.room || '') : ''}">
+        <input id="modalRoomInput" placeholder="e.g. Kitchen, Bedroom, Balcony" value="${isEditing ? (editingPlant.room || '') : ''}" aria-label="Room">
       </div>
       <div class="field">
         <label>Water every how many days?</label>
-        <input id="modalFreqInput" type="number" min="1" value="${isEditing ? editingPlant.frequency : (species ? species.freq : 7)}">
+        <input id="modalFreqInput" type="number" min="1" value="${isEditing ? editingPlant.frequency : (species ? species.freq : 7)}" aria-label="Water every how many days">
         <div class="freq-hint">Most houseplants: 5–10 days. Succulents: 14–21.</div>
       </div>
       <div class="modal-actions">
@@ -1377,6 +1445,10 @@ document.addEventListener('click', (e) => {
   if (e.target.id === 'speciesPickerBackdrop') { state.showSpeciesPicker = false; render(); }
   if (e.target.id === 'cancelSpeciesPicker') { state.showSpeciesPicker = false; render(); }
   if (e.target.id === 'themeBackdrop') { state.showThemeModal = false; render(); }
+  if (e.target.id === 'inviteBackdrop') { state.showInviteModal = false; render(); }
+  if (e.target.id === 'closeInvite') { state.showInviteModal = false; render(); }
+  if (e.target.id === 'shareInvite') { shareAppLink(); }
+  if (e.target.id === 'copyInviteLink') { copyInviteLink(); }
   if (e.target.id === 'closeTheme') { state.showThemeModal = false; render(); }
   if (e.target.closest && e.target.closest('.theme-option')) {
     const btn = e.target.closest('.theme-option');
