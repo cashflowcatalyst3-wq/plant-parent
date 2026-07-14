@@ -13,6 +13,19 @@
     --shadow: 0 2px 12px rgba(31,51,36,0.06);
   }
 
+  body[data-theme="terracotta"] {
+    --sage: #C17A4E; --sage-light: #E0A97E; --clay: #5B7A9B; --clay-light: #8FAFC9;
+  }
+  body[data-theme="lavender"] {
+    --sage: #9B87C4; --sage-light: #C7B8E0; --clay: #C46B87; --clay-light: #E0A0B4;
+  }
+  body[data-theme="ocean"] {
+    --sage: #4E8FA6; --sage-light: #8FC1D4; --clay: #D9935E; --clay-light: #EFC08F;
+  }
+  body[data-theme="blush"] {
+    --sage: #C9748A; --sage-light: #E5AEBB; --clay: #7A9B6E; --clay-light: #A8C49C;
+  }
+
   * { box-sizing: border-box; }
 
   body {
@@ -802,3 +815,125 @@
     background: #FBFAF6;
   }
   .room-input:focus { outline: 2px solid var(--sage); border-color: transparent; }
+
+  /* Theme picker */
+  .theme-modal { width: 340px; }
+  .theme-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+  .theme-option {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1.5px solid var(--line);
+    background: #FBFAF6;
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+  }
+  .theme-option-active { border-color: var(--sage); background: #EFF4EA; }
+  .theme-swatch {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+  }
+
+  /* Propagation tracker */
+  .prop-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .prop-card {
+    background: var(--card);
+    border-radius: 14px;
+    padding: 16px;
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+  }
+  .prop-emoji { font-size: 28px; flex-shrink: 0; }
+  .prop-info { flex: 1; min-width: 140px; }
+  .prop-name { font-family: 'Fraunces', serif; font-weight: 600; font-size: 15px; }
+  .prop-days { font-size: 12px; color: var(--soil); margin-top: 2px; }
+  .prop-notes { font-size: 12px; color: var(--ink); margin-top: 4px; font-style: italic; }
+  .prop-actions { display: flex; gap: 8px; }
+  .prop-actions button { font-size: 12px; padding: 8px 12px; }
+  .prop-add-btn { margin-top: 4px; align-self: flex-start; }
+
+  /* Journal */
+  .journal-group { margin-bottom: 24px; }
+  .journal-group-label {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 13px;
+    color: var(--soil);
+    margin-bottom: 10px;
+  }
+  .journal-event {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--card);
+    border-radius: 10px;
+    padding: 10px 14px;
+    margin-bottom: 6px;
+    box-shadow: var(--shadow);
+  }
+  .journal-event-emoji { font-size: 18px; flex-shrink: 0; }
+  .journal-event-text { flex: 1; font-size: 13px; color: var(--ink); }
+  .journal-event-time { font-size: 11px; color: var(--soil); flex-shrink: 0; }
+
+  /* Memory Match */
+  .memory-modal { width: 400px; }
+  .memory-hud {
+    display: flex; justify-content: space-between;
+    font-size: 13px; color: var(--soil);
+    margin-bottom: 10px;
+  }
+  .memory-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .memory-card {
+    aspect-ratio: 1;
+    perspective: 600px;
+    cursor: pointer;
+  }
+  .memory-card-inner {
+    position: relative;
+    width: 100%; height: 100%;
+    transform-style: preserve-3d;
+    transition: transform 0.3s ease;
+  }
+  .memory-card-flipped .memory-card-inner { transform: rotateY(180deg); }
+  .memory-card-back, .memory-card-front {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    backface-visibility: hidden;
+    font-size: 24px;
+  }
+  .memory-card-back { background: var(--sage); }
+  .memory-card-front {
+    background: #FBFAF6;
+    transform: rotateY(180deg);
+    overflow: hidden;
+  }
+  .memory-card-photo { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
+  .memory-card-matched .memory-card-front { background: #E9F1E3; box-shadow: 0 0 0 2px var(--sage) inset; }

@@ -16,7 +16,27 @@ const SPECIES_DICTIONARY = [
   { id: 'cactus', name: 'Cactus', latin: 'assorted species', emoji: '🌵', light: 'Bright, direct', freq: 21, desc: 'Built for drought. Overwatering, not underwatering, is the most common way to lose one.' },
   { id: 'fern', name: 'Boston Fern', latin: 'Nephrolepis exaltata', emoji: '🌿', light: 'Medium, indirect', freq: 4, desc: 'Loves humidity and consistently moist — but never soggy — soil.' },
   { id: 'basil', name: 'Basil', latin: 'Ocimum basilicum', emoji: '🌱', light: 'Bright, direct', freq: 3, desc: 'A thirsty kitchen herb. Keep the soil consistently moist for the best flavor.' },
+  { id: 'bird-of-paradise', name: 'Bird of Paradise', latin: 'Strelitzia reginae', emoji: '🦩', light: 'Bright, direct to indirect', freq: 8, desc: 'A dramatic statement plant with large paddle leaves. Likes generous space and regular feeding.' },
+  { id: 'calathea', name: 'Calathea', latin: 'Calathea spp.', emoji: '🎋', light: 'Medium, indirect', freq: 6, desc: 'Prized for patterned leaves that fold up at night. Fussy about humidity and water quality.' },
+  { id: 'jade-plant', name: 'Jade Plant', latin: 'Crassula ovata', emoji: '🪙', light: 'Bright, direct', freq: 16, desc: 'A classic succulent that can live for decades. Let it dry out fully between waterings.' },
+  { id: 'dracaena', name: 'Dracaena', latin: 'Dracaena spp.', emoji: '🌴', light: 'Low to bright, indirect', freq: 10, desc: 'Tall and architectural, tolerant of a wide range of light. Sensitive to fluoride in tap water.' },
+  { id: 'croton', name: 'Croton', latin: 'Codiaeum variegatum', emoji: '🍁', light: 'Bright, direct', freq: 6, desc: 'Bold, colorful leaves that need strong light to keep their vivid patterns.' },
+  { id: 'anthurium', name: 'Anthurium', latin: 'Anthurium andraeanum', emoji: '❤️', light: 'Bright, indirect', freq: 8, desc: 'Glossy, heart-shaped blooms. Likes humidity and to dry slightly between waterings.' },
+  { id: 'chinese-money-plant', name: 'Chinese Money Plant', latin: 'Pilea peperomioides', emoji: '🪙', light: 'Bright, indirect', freq: 7, desc: 'Round coin-like leaves on a plant that\'s easy to propagate and share with friends.' },
+  { id: 'air-plant', name: 'Air Plant', latin: 'Tillandsia spp.', emoji: '🌬️', light: 'Bright, indirect', freq: 7, desc: 'No soil needed — mist or soak occasionally instead of traditional watering.' },
+  { id: 'christmas-cactus', name: 'Christmas Cactus', latin: 'Schlumbergera', emoji: '🎄', light: 'Bright, indirect', freq: 10, desc: 'Unlike desert cacti, this one prefers slightly moist soil and blooms in winter.' },
+  { id: 'english-ivy', name: 'English Ivy', latin: 'Hedera helix', emoji: '🍇', light: 'Medium, indirect', freq: 6, desc: 'A fast, trailing climber. Keep soil lightly moist and give it room to spread.' },
+  { id: 'prayer-plant', name: 'Prayer Plant', latin: 'Maranta leuconeura', emoji: '🙏', light: 'Medium, indirect', freq: 6, desc: 'Leaves fold up like praying hands at night. Enjoys humidity and consistent moisture.' },
+  { id: 'hoya', name: 'Hoya', latin: 'Hoya carnosa', emoji: '💫', light: 'Bright, indirect', freq: 12, desc: 'Waxy leaves and star-shaped, fragrant blooms. Prefers to dry out well between waterings.' },
   { id: 'other', name: 'Other / not sure', latin: '', emoji: '❓', light: 'Varies', freq: 7, desc: '' },
+];
+
+const THEMES = [
+  { id: 'sage', name: 'Sage', sage: '#8DA377', sageLight: '#C4D97A', clay: '#B5613C', clayLight: '#D99A7D' },
+  { id: 'terracotta', name: 'Terracotta', sage: '#C17A4E', sageLight: '#E0A97E', clay: '#5B7A9B', clayLight: '#8FAFC9' },
+  { id: 'lavender', name: 'Lavender', sage: '#9B87C4', sageLight: '#C7B8E0', clay: '#C46B87', clayLight: '#E0A0B4' },
+  { id: 'ocean', name: 'Ocean', sage: '#4E8FA6', sageLight: '#8FC1D4', clay: '#D9935E', clayLight: '#EFC08F' },
+  { id: 'blush', name: 'Blush', sage: '#C9748A', sageLight: '#E5AEBB', clay: '#7A9B6E', clayLight: '#A8C49C' },
 ];
 
 const ACHIEVEMENTS = [
@@ -30,6 +50,7 @@ const ACHIEVEMENTS = [
   { id: 'stay-alert', emoji: '🔔', name: 'Stay Alert', desc: 'Turn on push reminders' },
   { id: 'rainmaker', emoji: '💧', name: 'Rainmaker', desc: 'Score 15+ in Raindrop Catch' },
   { id: 'sharpshooter', emoji: '🎯', name: 'Sharpshooter', desc: 'Score 25+ in Raindrop Catch' },
+  { id: 'memory-master', emoji: '🧠', name: 'Memory Master', desc: 'Complete a round of Memory Match' },
 ];
 
 const DAILY_TASKS = [
@@ -72,6 +93,11 @@ const state = {
   filterRoom: null, // null = all rooms
   weatherEnabled: false,
   weatherNudge: null, // { text, emoji } once fetched
+  theme: 'sage',
+  showThemeModal: false,
+  propagations: [],
+  showAddPropModal: false,
+  memoryGameCompleted: false,
 };
 
 let nextId = 1;
@@ -150,6 +176,14 @@ function recordGameScore(score) {
     state.gameHighScore = score;
     localStorage.setItem('plant-parent-game-highscore', String(score));
   }
+  localStorage.setItem('plant-parent-last-game-date', todayStr());
+  checkAchievements();
+  render();
+}
+
+function recordMemoryGameCompletion() {
+  state.memoryGameCompleted = true;
+  localStorage.setItem('plant-parent-memory-completed', '1');
   localStorage.setItem('plant-parent-last-game-date', todayStr());
   checkAchievements();
   render();
@@ -247,6 +281,7 @@ function checkAchievements() {
   if (state.notificationsEnabled) unlock('stay-alert');
   if (state.gameHighScore >= 15) unlock('rainmaker');
   if (state.gameHighScore >= 25) unlock('sharpshooter');
+  if (state.memoryGameCompleted) unlock('memory-master');
 
   if (newlyUnlocked.length) {
     state.unlockedAchievements = Array.from(unlocked);
@@ -284,6 +319,332 @@ function showNextCelebration() {
       showNextCelebration();
     }, 300);
   }, 2400);
+}
+
+// ---------- themes ----------
+
+function applyTheme(id) {
+  state.theme = id;
+  document.body.dataset.theme = id;
+  localStorage.setItem('plant-parent-theme', id);
+}
+
+function renderThemeModal() {
+  return `
+  <div class="modal-backdrop" id="themeBackdrop">
+    <div class="modal theme-modal">
+      <h3>Choose a theme</h3>
+      <div class="theme-grid">
+        ${THEMES.map(t => `
+          <button class="theme-option ${state.theme === t.id ? 'theme-option-active' : ''}" data-theme="${t.id}">
+            <span class="theme-swatch" style="background: linear-gradient(135deg, ${t.sage}, ${t.clay});"></span>
+            <span>${t.name}</span>
+          </button>
+        `).join('')}
+      </div>
+      <div class="modal-actions">
+        <button class="secondary" id="closeTheme">Close</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+// ---------- share plant card ----------
+
+function getThemeColors() {
+  const styles = getComputedStyle(document.body);
+  return {
+    sage: styles.getPropertyValue('--sage').trim() || '#8DA377',
+    clay: styles.getPropertyValue('--clay').trim() || '#B5613C',
+    bg: styles.getPropertyValue('--bg').trim() || '#F6F3EC',
+    ink: styles.getPropertyValue('--ink').trim() || '#1F3324',
+  };
+}
+
+async function generateShareCard(plant) {
+  const colors = getThemeColors();
+  const canvas = document.createElement('canvas');
+  const W = 640, H = 800;
+  canvas.width = W;
+  canvas.height = H;
+  const ctx = canvas.getContext('2d');
+
+  const grad = ctx.createLinearGradient(0, 0, W, H);
+  grad.addColorStop(0, colors.sage);
+  grad.addColorStop(1, colors.clay);
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, W, H);
+
+  ctx.fillStyle = 'rgba(255,255,255,0.94)';
+  roundRect(ctx, 32, 32, W - 64, H - 64, 28);
+  ctx.fill();
+
+  const photoSize = 220;
+  const photoX = W / 2;
+  const photoY = 230;
+  ctx.save();
+  ctx.beginPath();
+  ctx.arc(photoX, photoY, photoSize / 2, 0, Math.PI * 2);
+  ctx.closePath();
+  ctx.clip();
+  if (plant.photo) {
+    const img = await loadImage(plant.photo);
+    const scale = Math.max(photoSize / img.width, photoSize / img.height);
+    const w = img.width * scale, h = img.height * scale;
+    ctx.drawImage(img, photoX - w / 2, photoY - h / 2, w, h);
+  } else {
+    ctx.fillStyle = '#EFEBDD';
+    ctx.fillRect(photoX - photoSize/2, photoY - photoSize/2, photoSize, photoSize);
+    ctx.font = '110px serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('🌱', photoX, photoY + 10);
+  }
+  ctx.restore();
+
+  ctx.strokeStyle = colors.sage;
+  ctx.lineWidth = 8;
+  ctx.beginPath();
+  ctx.arc(photoX, photoY, photoSize / 2, 0, Math.PI * 2);
+  ctx.stroke();
+
+  ctx.fillStyle = colors.ink;
+  ctx.textAlign = 'center';
+  ctx.font = '600 40px Georgia, serif';
+  ctx.fillText(plant.name, W / 2, 400);
+
+  if (plant.species) {
+    ctx.font = 'italic 20px Georgia, serif';
+    ctx.fillStyle = '#666';
+    ctx.fillText(plant.species, W / 2, 432);
+  }
+
+  const streak = calcStreak(plant);
+  ctx.font = '600 64px Georgia, serif';
+  ctx.fillStyle = colors.clay;
+  ctx.fillText(String(streak), W / 2, 540);
+  ctx.font = '16px Georgia, serif';
+  ctx.fillStyle = '#666';
+  ctx.fillText(`on-time watering${streak === 1 ? '' : 's'} in a row`, W / 2, 566);
+
+  ctx.font = '600 18px Georgia, serif';
+  ctx.fillStyle = colors.sage;
+  ctx.fillText('🌿 Plant Parent', W / 2, H - 60);
+
+  return canvas;
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r);
+  ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r);
+  ctx.arcTo(x, y, x + w, y, r);
+  ctx.closePath();
+}
+
+function loadImage(src) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = src;
+  });
+}
+
+async function shareCard(plant) {
+  const canvas = await generateShareCard(plant);
+  canvas.toBlob(async (blob) => {
+    const file = new File([blob], `${plant.name.replace(/\s+/g, '-')}-plant-parent.png`, { type: 'image/png' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({ files: [file], title: plant.name, text: `${plant.name} on Plant Parent 🌿` });
+        return;
+      } catch (err) {
+        // user cancelled or share failed — fall through to download
+      }
+    }
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${plant.name.replace(/\s+/g, '-')}-plant-parent.png`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }, 'image/png');
+}
+
+// ---------- journal ----------
+
+function buildJournalEvents() {
+  const events = [];
+  state.plants.forEach(p => {
+    if (p.createdAt) {
+      events.push({ date: p.createdAt, emoji: '🌱', text: `Added <strong>${p.name}</strong> to your shelf` });
+    }
+    (p.waterLog || []).forEach(iso => {
+      events.push({ date: iso, emoji: '💧', text: `Watered <strong>${p.name}</strong>` });
+    });
+    if (p.notesUpdatedAt) {
+      events.push({ date: p.notesUpdatedAt, emoji: '📝', text: `Updated notes on <strong>${p.name}</strong>` });
+    }
+  });
+  return events.sort((a, b) => new Date(b.date) - new Date(a.date));
+}
+
+function formatJournalGroup(iso) {
+  const days = daysSince(iso);
+  if (days === 0) return 'Today';
+  if (days === 1) return 'Yesterday';
+  return new Date(iso).toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
+}
+
+function renderJournal() {
+  const div = document.createElement('div');
+  const events = buildJournalEvents();
+
+  if (events.length === 0) {
+    div.innerHTML = `<div class="garden-empty">No activity yet — water a plant or add a note to start your journal.</div>`;
+    return div;
+  }
+
+  const groups = {};
+  events.forEach(ev => {
+    const key = formatJournalGroup(ev.date);
+    if (!groups[key]) groups[key] = [];
+    groups[key].push(ev);
+  });
+
+  div.innerHTML = Object.entries(groups).map(([label, evs]) => `
+    <div class="journal-group">
+      <div class="journal-group-label">${label}</div>
+      ${evs.map(ev => `
+        <div class="journal-event">
+          <span class="journal-event-emoji">${ev.emoji}</span>
+          <span class="journal-event-text">${ev.text}</span>
+          <span class="journal-event-time">${new Date(ev.date).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}</span>
+        </div>
+      `).join('')}
+    </div>
+  `).join('');
+
+  return div;
+}
+
+// ---------- propagation tracker ----------
+
+function daysRooting(prop) {
+  return daysSince(prop.startDate);
+}
+
+function renderPropagation() {
+  const div = document.createElement('div');
+  div.className = 'prop-list';
+
+  if (state.propagations.length === 0) {
+    div.innerHTML = `<div class="garden-empty">No cuttings being rooted right now. Start one below!</div>`;
+  } else {
+    div.innerHTML = state.propagations.map(prop => `
+      <div class="prop-card" data-id="${prop.id}">
+        <div class="prop-emoji">🌱</div>
+        <div class="prop-info">
+          <div class="prop-name">${prop.name}</div>
+          <div class="prop-days">Rooting for ${daysRooting(prop)} day${daysRooting(prop) === 1 ? '' : 's'}</div>
+          ${prop.notes ? `<div class="prop-notes">${prop.notes}</div>` : ''}
+        </div>
+        <div class="prop-actions">
+          <button class="secondary prop-graduate-btn" data-id="${prop.id}">🌳 Graduate</button>
+          <button class="secondary prop-remove-btn" data-id="${prop.id}">Remove</button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  const addBtn = document.createElement('button');
+  addBtn.className = 'primary prop-add-btn';
+  addBtn.textContent = '+ Start a new cutting';
+  addBtn.onclick = () => { state.showAddPropModal = true; render(); };
+  div.appendChild(addBtn);
+
+  div.querySelectorAll('.prop-graduate-btn').forEach(btn => {
+    btn.onclick = () => {
+      const prop = state.propagations.find(x => x.id === parseInt(btn.dataset.id, 10));
+      if (!prop) return;
+      const freq = 7;
+      const p = {
+        id: nextId++,
+        name: prop.name,
+        species: '', speciesId: null, speciesDesc: '',
+        room: '',
+        frequency: freq,
+        lastWatered: new Date(Date.now() - (freq-1)*24*60*60*1000).toISOString(),
+        waterLog: [],
+        photo: null,
+        notes: prop.notes || '',
+        createdAt: new Date().toISOString(),
+      };
+      state.plants.push(p);
+      state.propagations = state.propagations.filter(x => x.id !== prop.id);
+      state.activeId = p.id;
+      state.currentView = 'shelf';
+      savePropagations();
+      fireConfetti(window.innerWidth / 2, 100);
+      render();
+      savePlants();
+    };
+  });
+  div.querySelectorAll('.prop-remove-btn').forEach(btn => {
+    btn.onclick = () => {
+      state.propagations = state.propagations.filter(x => x.id !== parseInt(btn.dataset.id, 10));
+      savePropagations();
+      render();
+    };
+  });
+
+  return div;
+}
+
+function renderAddPropModal() {
+  return `
+  <div class="modal-backdrop" id="propModalBackdrop">
+    <div class="modal">
+      <h3>Start a new cutting</h3>
+      <div class="field">
+        <label>What is it?</label>
+        <input id="propNameInput" placeholder="e.g. Pothos cutting from kitchen plant">
+      </div>
+      <div class="field">
+        <label>Notes (optional)</label>
+        <input id="propNotesInput" placeholder="e.g. in water, on the windowsill">
+      </div>
+      <div class="modal-actions">
+        <button class="secondary" id="cancelPropModal">Cancel</button>
+        <button class="primary" id="savePropModal">Start tracking</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function savePropagations() {
+  try {
+    localStorage.setItem('plant-parent-propagations', JSON.stringify(state.propagations));
+  } catch (err) {
+    console.error('Could not save propagations', err);
+  }
+}
+
+function loadPropagations() {
+  try {
+    const raw = localStorage.getItem('plant-parent-propagations');
+    if (raw) {
+      const saved = JSON.parse(raw);
+      if (Array.isArray(saved)) state.propagations = saved;
+    }
+  } catch (err) {
+    state.propagations = [];
+  }
 }
 
 // ---------- backup / restore ----------
@@ -438,6 +799,8 @@ function render() {
 
       ${state.currentView === 'garden' ? `<div id="gardenView"></div>` : ''}
       ${state.currentView === 'dictionary' ? `<div id="dictionaryView"></div>` : ''}
+      ${state.currentView === 'journal' ? `<div id="journalView"></div>` : ''}
+      ${state.currentView === 'propagation' ? `<div id="propagationView"></div>` : ''}
       ${state.currentView === 'shelf' ? `
         <div class="layout">
           <div class="shelf-column">
@@ -479,14 +842,28 @@ function render() {
     ${state.showMoreMenu ? `
       <div class="more-menu-backdrop" id="moreMenuBackdrop">
         <div class="more-menu">
+          <button class="more-menu-item" id="navJournal">
+            <span class="more-menu-icon">📓</span>
+            <span>Journal</span>
+          </button>
+          <button class="more-menu-item" id="navPropagation">
+            <span class="more-menu-icon">🌱</span>
+            <span>Cuttings${state.propagations.length ? ` (${state.propagations.length})` : ''}</span>
+          </button>
+          <div class="more-menu-divider"></div>
           <button class="more-menu-item" id="navBadges">
             <span class="more-menu-icon">🏆</span>
             <span>Badges <strong>${state.unlockedAchievements.length}/${ACHIEVEMENTS.length}</strong></span>
           </button>
           <button class="more-menu-item" id="navGame">
             <span class="more-menu-icon">🎮</span>
-            <span>Play${state.gameHighScore ? ` · best ${state.gameHighScore}` : ''}</span>
+            <span>Raindrop Catch${state.gameHighScore ? ` · best ${state.gameHighScore}` : ''}</span>
           </button>
+          <button class="more-menu-item" id="navMemoryGame">
+            <span class="more-menu-icon">🧠</span>
+            <span>Memory Match</span>
+          </button>
+          <div class="more-menu-divider"></div>
           <button class="more-menu-item" id="navNotif">
             <span class="more-menu-icon">${state.notificationsEnabled ? '🔔' : '🔕'}</span>
             <span>${state.notificationsEnabled ? 'Reminders on' : 'Enable reminders'}</span>
@@ -494,6 +871,10 @@ function render() {
           <button class="more-menu-item" id="navWeather">
             <span class="more-menu-icon">${state.weatherEnabled ? '🌦️' : '⛅'}</span>
             <span>${state.weatherEnabled ? 'Weather tips on' : 'Enable weather tips'}</span>
+          </button>
+          <button class="more-menu-item" id="navTheme">
+            <span class="more-menu-icon">🎨</span>
+            <span>Theme: ${THEMES.find(t => t.id === state.theme)?.name || 'Sage'}</span>
           </button>
           <div class="more-menu-divider"></div>
           <button class="more-menu-item" id="navExport">
@@ -512,12 +893,18 @@ function render() {
     ${state.showAddModal ? renderModal() : ''}
     ${state.showBadgesModal ? renderBadgesModal() : ''}
     ${state.showSpeciesPicker ? renderSpeciesPicker() : ''}
+    ${state.showThemeModal ? renderThemeModal() : ''}
+    ${state.showAddPropModal ? renderAddPropModal() : ''}
   `;
 
   if (state.currentView === 'garden') {
     document.getElementById('gardenView').appendChild(renderGarden());
   } else if (state.currentView === 'dictionary') {
     document.getElementById('dictionaryView').appendChild(renderDictionary());
+  } else if (state.currentView === 'journal') {
+    document.getElementById('journalView').appendChild(renderJournal());
+  } else if (state.currentView === 'propagation') {
+    document.getElementById('propagationView').appendChild(renderPropagation());
   } else {
     const shelf = document.getElementById('shelf');
     getVisiblePlants().forEach(p => shelf.appendChild(renderCard(p)));
@@ -562,6 +949,10 @@ function render() {
     };
     document.getElementById('navBadges').onclick = () => { state.showMoreMenu = false; state.showBadgesModal = true; render(); };
     document.getElementById('navGame').onclick = () => { state.showMoreMenu = false; render(); if (window.openMiniGame) window.openMiniGame(); };
+    document.getElementById('navMemoryGame').onclick = () => { state.showMoreMenu = false; render(); if (window.openMemoryGame) window.openMemoryGame(); };
+    document.getElementById('navJournal').onclick = () => { state.currentView = 'journal'; state.showMoreMenu = false; render(); };
+    document.getElementById('navPropagation').onclick = () => { state.currentView = 'propagation'; state.showMoreMenu = false; render(); };
+    document.getElementById('navTheme').onclick = () => { state.showMoreMenu = false; state.showThemeModal = true; render(); };
     document.getElementById('moreMenuBackdrop').addEventListener('click', (e) => {
       if (e.target.id === 'moreMenuBackdrop') { state.showMoreMenu = false; render(); }
     });
@@ -763,6 +1154,7 @@ function renderDetail(p) {
         <div class="row-actions">
           <button class="primary" id="waterBtn">Water now</button>
           <button class="secondary" id="editBtn">✏️ Edit</button>
+          <button class="secondary" id="shareBtn">📤 Share</button>
           <button class="secondary" id="removeBtn">Remove plant</button>
         </div>
       </div>
@@ -811,6 +1203,19 @@ function renderDetail(p) {
     state.pendingSpecies = SPECIES_DICTIONARY.find(s => s.id === p.speciesId) || null;
     state.showAddModal = true;
     render();
+  };
+  div.querySelector('#shareBtn').onclick = async (e) => {
+    const btn = e.target;
+    const originalText = btn.textContent;
+    btn.textContent = 'Preparing…';
+    btn.disabled = true;
+    try {
+      await shareCard(p);
+    } catch (err) {
+      alert("Couldn't create the share image. Try again.");
+    }
+    btn.textContent = originalText;
+    btn.disabled = false;
   };
   div.querySelector('#removeBtn').onclick = () => {
     state.plants = state.plants.filter(x => x.id !== p.id);
@@ -971,6 +1376,29 @@ document.addEventListener('click', (e) => {
   if (e.target.id === 'closeBadges') { state.showBadgesModal = false; render(); }
   if (e.target.id === 'speciesPickerBackdrop') { state.showSpeciesPicker = false; render(); }
   if (e.target.id === 'cancelSpeciesPicker') { state.showSpeciesPicker = false; render(); }
+  if (e.target.id === 'themeBackdrop') { state.showThemeModal = false; render(); }
+  if (e.target.id === 'closeTheme') { state.showThemeModal = false; render(); }
+  if (e.target.closest && e.target.closest('.theme-option')) {
+    const btn = e.target.closest('.theme-option');
+    applyTheme(btn.dataset.theme);
+    render();
+  }
+  if (e.target.id === 'propModalBackdrop') { state.showAddPropModal = false; render(); }
+  if (e.target.id === 'cancelPropModal') { state.showAddPropModal = false; render(); }
+  if (e.target.id === 'savePropModal') {
+    const name = document.getElementById('propNameInput').value.trim();
+    const notes = document.getElementById('propNotesInput').value.trim();
+    if (!name) return;
+    state.propagations.push({
+      id: nextId++,
+      name,
+      notes,
+      startDate: new Date().toISOString(),
+    });
+    state.showAddPropModal = false;
+    savePropagations();
+    render();
+  }
   if (e.target.id === 'saveModal') {
     const name = document.getElementById('modalNameInput').value.trim();
     const freq = parseInt(document.getElementById('modalFreqInput').value, 10) || 7;
@@ -1005,7 +1433,8 @@ document.addEventListener('click', (e) => {
         lastWatered: now,
         waterLog: [],
         photo: state.pendingModalPhoto || null,
-        notes: ''
+        notes: '',
+        createdAt: new Date().toISOString()
       };
       state.plants.push(p);
       state.activeId = p.id;
@@ -1122,8 +1551,8 @@ if (!loaded) {
   const fig = SPECIES_DICTIONARY.find(s => s.id === 'fiddle-leaf-fig');
   const pothos = SPECIES_DICTIONARY.find(s => s.id === 'pothos');
   state.plants.push(
-    { id: nextId++, name: 'Fig in the corner', species: fig.name, speciesId: fig.id, speciesDesc: fig.desc, frequency: 7, lastWatered: new Date(Date.now() - 5*24*60*60*1000).toISOString(), waterLog: [], photo: null },
-    { id: nextId++, name: 'Kitchen pothos', species: pothos.name, speciesId: pothos.id, speciesDesc: pothos.desc, frequency: 6, lastWatered: new Date(Date.now() - 6*24*60*60*1000).toISOString(), waterLog: [], photo: null }
+    { id: nextId++, name: 'Fig in the corner', species: fig.name, speciesId: fig.id, speciesDesc: fig.desc, frequency: 7, lastWatered: new Date(Date.now() - 5*24*60*60*1000).toISOString(), waterLog: [], photo: null, createdAt: new Date(Date.now() - 20*24*60*60*1000).toISOString() },
+    { id: nextId++, name: 'Kitchen pothos', species: pothos.name, speciesId: pothos.id, speciesDesc: pothos.desc, frequency: 6, lastWatered: new Date(Date.now() - 6*24*60*60*1000).toISOString(), waterLog: [], photo: null, createdAt: new Date(Date.now() - 15*24*60*60*1000).toISOString() }
   );
   savePlants();
 }
@@ -1141,6 +1570,10 @@ try {
 } catch (err) {
   state.weatherNudge = null;
 }
+loadPropagations();
+state.theme = localStorage.getItem('plant-parent-theme') || 'sage';
+document.body.dataset.theme = state.theme;
+state.memoryGameCompleted = localStorage.getItem('plant-parent-memory-completed') === '1';
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch((err) => console.error('SW registration failed', err));

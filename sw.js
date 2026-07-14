@@ -1,10 +1,11 @@
-const CACHE_NAME = 'plant-parent-v12';
+const CACHE_NAME = 'plant-parent-v13';
 const ASSETS = [
   '/',
   '/index.html',
   '/styles.css',
   '/app.js',
   '/game.js',
+  '/game2.js',
   '/manifest.json',
   '/icons/icon-192.png',
   '/icons/icon-512.png'
