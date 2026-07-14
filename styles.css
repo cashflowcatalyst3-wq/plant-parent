@@ -469,6 +469,8 @@
     padding: 28px;
     width: 360px;
     max-width: 90vw;
+    max-height: 85vh;
+    overflow-y: auto;
   }
   .modal h3 {
     font-family: 'Fraunces', serif;

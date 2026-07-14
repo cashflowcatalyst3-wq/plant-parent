@@ -302,8 +302,6 @@ function showNextCelebration() {
   const toast = document.createElement('div');
   toast.id = 'celebrationToast';
   toast.className = 'celebration-toast';
-  toast.setAttribute('role', 'status');
-  toast.setAttribute('aria-live', 'polite');
   toast.innerHTML = `
     <div class="celebration-emoji">${badge.emoji}</div>
     <div class="celebration-text">
