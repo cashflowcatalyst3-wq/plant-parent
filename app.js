@@ -86,6 +86,7 @@ const state = {
   pendingModalPhoto: null, // dataURL waiting to be attached on save
   pendingSpecies: null, // selected SPECIES_DICTIONARY entry for the plant being added
   editingPlantId: null, // if set, the Add Plant modal is in edit mode for this plant
+  modalDraft: null, // preserves typed name/room/freq across re-renders (e.g. opening the species picker)
   unlockedAchievements: [],
   gameHighScore: 0,
   celebrationQueue: [],
@@ -1041,7 +1042,7 @@ function render() {
     const addBtn = document.createElement('div');
     addBtn.className = 'add-btn';
     addBtn.textContent = '+ Add a plant';
-    addBtn.onclick = () => { state.pendingModalPhoto = null; state.pendingSpecies = null; state.editingPlantId = null; state.showAddModal = true; render(); };
+    addBtn.onclick = () => { state.pendingModalPhoto = null; state.pendingSpecies = null; state.editingPlantId = null; state.modalDraft = null; state.showAddModal = true; render(); };
     shelf.appendChild(addBtn);
 
     const panel = document.getElementById('panel');
@@ -1094,7 +1095,20 @@ function render() {
     document.getElementById('modalNameInput')?.focus();
     wireModalPhoto();
     const openBtn = document.getElementById('openSpeciesPicker');
-    if (openBtn) openBtn.onclick = () => { state.showSpeciesPicker = true; render(); };
+    if (openBtn) openBtn.onclick = () => {
+      captureModalDraft();
+      state.showSpeciesPicker = true;
+      render();
+    };
+    const freqInput = document.getElementById('modalFreqInput');
+    const twiceDailyField = document.getElementById('twiceDailyField');
+    if (freqInput && twiceDailyField) {
+      freqInput.addEventListener('input', () => {
+        const isDaily = Number(freqInput.value) === 1;
+        twiceDailyField.style.display = isDaily ? '' : 'none';
+        if (!isDaily) document.getElementById('modalTwiceDailyInput').checked = false;
+      });
+    }
   }
   if (state.showSpeciesPicker) {
     document.querySelectorAll('.species-picker-row').forEach(row => {
@@ -1129,6 +1143,7 @@ function renderDictionary() {
       state.pendingSpecies = entry;
       state.pendingModalPhoto = null;
       state.editingPlantId = null;
+      state.modalDraft = null;
       state.showAddModal = true;
       render();
     };
@@ -1361,11 +1376,8 @@ function renderEmpty() {
 
 function wateredSlotToday(plant, slot) {
   const today = todayStr();
-  return (plant.waterLog || []).some(iso => {
-    if (iso.slice(0, 10) !== today) return false;
-    const hour = new Date(iso).getHours();
-    return slot === 'morning' ? hour < 12 : hour >= 12;
-  });
+  if (slot === 'morning') return plant.lastMorningWatered === today;
+  return plant.lastNightWatered === today;
 }
 
 function renderDetail(p) {
@@ -1424,11 +1436,13 @@ function renderDetail(p) {
     ` : `<div style="font-size:13px;color:var(--soil);">No waterings logged yet.</div>`}
   `;
 
-  const doWater = (e) => {
+  const doWater = (e, slot) => {
     p.lastWatered = new Date().toISOString();
     p.waterLog = p.waterLog || [];
     p.waterLog.push(p.lastWatered);
-    if (p.waterLog.length > 30) p.waterLog = p.waterLog.slice(-30);
+    if (p.waterLog.length > 3650) p.waterLog = p.waterLog.slice(-3650);
+    if (slot === 'morning') p.lastMorningWatered = todayStr();
+    if (slot === 'night') p.lastNightWatered = todayStr();
     const rect = e.target.getBoundingClientRect();
     fireConfetti(rect.left + rect.width / 2, rect.top);
     playWaterSound();
@@ -1436,11 +1450,11 @@ function renderDetail(p) {
     savePlants();
   };
   const waterBtn = div.querySelector('#waterBtn');
-  if (waterBtn) waterBtn.onclick = doWater;
+  if (waterBtn) waterBtn.onclick = (e) => doWater(e);
   const waterMorningBtn = div.querySelector('#waterMorningBtn');
-  if (waterMorningBtn) waterMorningBtn.onclick = doWater;
+  if (waterMorningBtn) waterMorningBtn.onclick = (e) => doWater(e, 'morning');
   const waterNightBtn = div.querySelector('#waterNightBtn');
-  if (waterNightBtn) waterNightBtn.onclick = doWater;
+  if (waterNightBtn) waterNightBtn.onclick = (e) => doWater(e, 'night');
   div.querySelector('#backToPlants').onclick = () => {
     state.mobileDetailOpen = false;
     render();
@@ -1449,6 +1463,7 @@ function renderDetail(p) {
     state.editingPlantId = p.id;
     state.pendingModalPhoto = p.photo || null;
     state.pendingSpecies = SPECIES_DICTIONARY.find(s => s.id === p.speciesId) || null;
+    state.modalDraft = null;
     state.showAddModal = true;
     render();
   };
@@ -1508,6 +1523,15 @@ function formatHistoryDate(iso) {
   return `${label} — ${agoText}`;
 }
 
+function captureModalDraft() {
+  state.modalDraft = {
+    name: document.getElementById('modalNameInput')?.value || '',
+    room: document.getElementById('modalRoomInput')?.value || '',
+    freq: document.getElementById('modalFreqInput')?.value || 7,
+    twiceDaily: document.getElementById('modalTwiceDailyInput')?.checked || false,
+  };
+}
+
 function renderModal() {
   const preview = state.pendingModalPhoto
     ? `<img src="${state.pendingModalPhoto}" alt="Selected plant photo preview" class="modal-photo-preview">`
@@ -1515,6 +1539,12 @@ function renderModal() {
   const species = state.pendingSpecies;
   const editingPlant = state.editingPlantId ? state.plants.find(p => p.id === state.editingPlantId) : null;
   const isEditing = !!editingPlant;
+  const draft = state.modalDraft;
+  const nameVal = draft ? draft.name : (isEditing ? editingPlant.name : '');
+  const roomVal = draft ? draft.room : (isEditing ? (editingPlant.room || '') : '');
+  const freqVal = draft ? draft.freq : (isEditing ? editingPlant.frequency : (species ? species.freq : 7));
+  const twiceDailyVal = draft ? draft.twiceDaily : (isEditing && !!editingPlant.twiceDaily);
+  const showTwiceDaily = Number(freqVal) === 1;
   return `
   <div class="modal-backdrop" id="modalBackdrop">
     <div class="modal">
@@ -1527,7 +1557,7 @@ function renderModal() {
       </div>
       <div class="field">
         <label>Name</label>
-        <input id="modalNameInput" placeholder="e.g. Fig in the corner" value="${isEditing ? editingPlant.name : ''}" aria-label="Plant name">
+        <input id="modalNameInput" placeholder="e.g. Fig in the corner" value="${nameVal}" aria-label="Plant name">
       </div>
       <div class="field">
         <label>Species</label>
@@ -1537,16 +1567,16 @@ function renderModal() {
       </div>
       <div class="field">
         <label>Room (optional)</label>
-        <input id="modalRoomInput" placeholder="e.g. Kitchen, Bedroom, Balcony" value="${isEditing ? (editingPlant.room || '') : ''}" aria-label="Room">
+        <input id="modalRoomInput" placeholder="e.g. Kitchen, Bedroom, Balcony" value="${roomVal}" aria-label="Room">
       </div>
       <div class="field">
         <label>Water every how many days?</label>
-        <input id="modalFreqInput" type="number" min="1" value="${isEditing ? editingPlant.frequency : (species ? species.freq : 7)}" aria-label="Water every how many days">
+        <input id="modalFreqInput" type="number" min="1" value="${freqVal}" aria-label="Water every how many days">
         <div class="freq-hint">Most houseplants: 5–10 days. Succulents: 14–21.</div>
       </div>
-      <div class="field checkbox-field">
+      <div class="field checkbox-field" id="twiceDailyField" style="${showTwiceDaily ? '' : 'display:none;'}">
         <label class="checkbox-label">
-          <input type="checkbox" id="modalTwiceDailyInput" ${isEditing && editingPlant.twiceDaily ? 'checked' : ''}>
+          <input type="checkbox" id="modalTwiceDailyInput" ${twiceDailyVal ? 'checked' : ''}>
           Water twice a day (morning &amp; night)
         </label>
       </div>
@@ -1625,8 +1655,8 @@ function resizeImageToDataUrl(file, maxDim) {
 // ---------- add / cancel plant ----------
 
 document.addEventListener('click', (e) => {
-  if (e.target.id === 'modalBackdrop') { state.showAddModal = false; state.editingPlantId = null; render(); }
-  if (e.target.id === 'cancelModal') { state.showAddModal = false; state.editingPlantId = null; render(); }
+  if (e.target.id === 'modalBackdrop') { state.showAddModal = false; state.editingPlantId = null; state.modalDraft = null; render(); }
+  if (e.target.id === 'cancelModal') { state.showAddModal = false; state.editingPlantId = null; state.modalDraft = null; render(); }
   if (e.target.id === 'badgesBackdrop') { state.showBadgesModal = false; render(); }
   if (e.target.id === 'closeBadges') { state.showBadgesModal = false; render(); }
   if (e.target.id === 'speciesPickerBackdrop') { state.showSpeciesPicker = false; render(); }
@@ -1669,7 +1699,7 @@ document.addEventListener('click', (e) => {
     const name = document.getElementById('modalNameInput').value.trim();
     const freq = parseInt(document.getElementById('modalFreqInput').value, 10) || 7;
     const room = document.getElementById('modalRoomInput').value.trim();
-    const twiceDaily = document.getElementById('modalTwiceDailyInput').checked;
+    const twiceDaily = freq === 1 && document.getElementById('modalTwiceDailyInput').checked;
     if (!name) return;
     const species = state.pendingSpecies;
 
@@ -1712,6 +1742,7 @@ document.addEventListener('click', (e) => {
     state.showAddModal = false;
     state.pendingModalPhoto = null;
     state.pendingSpecies = null;
+    state.modalDraft = null;
     render();
     savePlants();
   }
@@ -1816,7 +1847,7 @@ async function enableNotifications() {
 // ---------- startup ----------
 
 loadPlants();
-state.activeId = state.plants[0]?.id ?? null;
+state.activeId = null;
 state.notificationsEnabled = localStorage.getItem('plant-parent-notifications-enabled') === '1';
 try {
   state.unlockedAchievements = JSON.parse(localStorage.getItem('plant-parent-achievements') || '[]');
