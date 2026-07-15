@@ -1270,11 +1270,19 @@ function renderCard(p) {
 function renderEmpty() {
   const div = document.createElement('div');
   div.className = 'empty-panel';
-  div.innerHTML = `
-    <svg class="big-ring" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="none" stroke="var(--sage)" stroke-width="6" stroke-dasharray="8 10"/></svg>
-    <div style="font-family:'Fraunces',serif;font-size:18px;">No plant selected</div>
-    <div style="font-size:13px;">Add one, or tap a plant on the shelf.</div>
-  `;
+  if (state.plants.length === 0) {
+    div.innerHTML = `
+      <svg class="big-ring" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="none" stroke="var(--sage)" stroke-width="6" stroke-dasharray="8 10"/></svg>
+      <div style="font-family:'Fraunces',serif;font-size:18px;">Your shelf is empty</div>
+      <div style="font-size:13px;">Add your first plant to get started 🌱</div>
+    `;
+  } else {
+    div.innerHTML = `
+      <svg class="big-ring" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="none" stroke="var(--sage)" stroke-width="6" stroke-dasharray="8 10"/></svg>
+      <div style="font-family:'Fraunces',serif;font-size:18px;">No plant selected</div>
+      <div style="font-size:13px;">Tap a plant on the shelf to see its details.</div>
+    `;
+  }
   return div;
 }
 
@@ -1734,16 +1742,7 @@ async function enableNotifications() {
 
 // ---------- startup ----------
 
-const loaded = loadPlants();
-if (!loaded) {
-  const fig = SPECIES_DICTIONARY.find(s => s.id === 'fiddle-leaf-fig');
-  const pothos = SPECIES_DICTIONARY.find(s => s.id === 'pothos');
-  state.plants.push(
-    { id: nextId++, name: 'Fig in the corner', species: fig.name, speciesId: fig.id, speciesDesc: fig.desc, frequency: 7, lastWatered: new Date(Date.now() - 5*24*60*60*1000).toISOString(), waterLog: [], photo: null, createdAt: new Date(Date.now() - 20*24*60*60*1000).toISOString() },
-    { id: nextId++, name: 'Kitchen pothos', species: pothos.name, speciesId: pothos.id, speciesDesc: pothos.desc, frequency: 6, lastWatered: new Date(Date.now() - 6*24*60*60*1000).toISOString(), waterLog: [], photo: null, createdAt: new Date(Date.now() - 15*24*60*60*1000).toISOString() }
-  );
-  savePlants();
-}
+loadPlants();
 state.activeId = state.plants[0]?.id ?? null;
 state.notificationsEnabled = localStorage.getItem('plant-parent-notifications-enabled') === '1';
 try {
