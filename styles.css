@@ -227,46 +227,140 @@
 
   /* Garden scene */
   .garden-scene {
-    background: linear-gradient(180deg, #DCEAD4 0%, #F6F3EC 65%);
+    position: relative;
     border-radius: 18px;
-    padding: 28px 24px 0;
     box-shadow: var(--shadow);
     overflow: hidden;
-    min-height: 320px;
+    min-height: 380px;
+    background: linear-gradient(180deg, #BEE0F0 0%, #E8F2E2 55%, #F6F3EC 100%);
   }
-  .garden-summary {
+
+  .garden-sky {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .garden-sun {
+    position: absolute;
+    top: 24px; right: 40px;
+    width: 60px; height: 60px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #FFE9A8, #FFD873 70%);
+    box-shadow: 0 0 40px 12px rgba(255, 216, 115, 0.5);
+  }
+  .garden-cloud {
+    position: absolute;
+    width: 70px; height: 22px;
+    background: #FFFFFF;
+    border-radius: 999px;
+    opacity: 0.85;
+    box-shadow: 18px -8px 0 -2px #FFFFFF, -18px 4px 0 -4px #FFFFFF, 34px 2px 0 -6px #FFFFFF;
+    animation: garden-drift linear infinite;
+  }
+  .garden-cloud-1 { top: 30px; left: -80px; width: 60px; animation-duration: 38s; }
+  .garden-cloud-2 { top: 70px; left: -140px; width: 46px; animation-duration: 52s; animation-delay: -10s; }
+  .garden-cloud-3 { top: 16px; left: -200px; width: 38px; animation-duration: 46s; animation-delay: -25s; }
+  @keyframes garden-drift {
+    from { transform: translateX(0); }
+    to { transform: translateX(calc(100vw + 200px)); }
+  }
+
+  .garden-particles {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .garden-leaf {
+    position: absolute;
+    bottom: -30px;
+    font-size: 16px;
+    opacity: 0;
+    animation: garden-leaf-float ease-in infinite;
+  }
+  @keyframes garden-leaf-float {
+    0% { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0; }
+    10% { opacity: 0.8; }
+    50% { transform: translateY(-160px) translateX(14px) rotate(180deg); }
+    90% { opacity: 0.6; }
+    100% { transform: translateY(-320px) translateX(-10px) rotate(360deg); opacity: 0; }
+  }
+
+  .garden-summary-banner {
+    position: relative;
+    z-index: 2;
     font-family: 'Fraunces', serif;
-    font-size: 18px;
+    font-size: 17px;
     font-weight: 600;
     text-align: center;
-    margin-bottom: 20px;
+    color: var(--ink);
+    background: rgba(255,255,255,0.75);
+    backdrop-filter: blur(2px);
+    padding: 10px 20px;
+    margin: 20px auto 0;
+    border-radius: 999px;
+    width: fit-content;
   }
+
   .garden-empty {
+    position: relative;
+    z-index: 2;
     text-align: center;
-    padding: 80px 20px;
+    padding: 140px 20px 60px;
     color: var(--soil);
     font-family: 'Fraunces', serif;
     font-style: italic;
   }
+
+  .garden-hill {
+    position: absolute;
+    left: -10%;
+    width: 120%;
+    border-radius: 50% 50% 0 0;
+  }
+  .garden-hill-back {
+    bottom: -20px;
+    height: 140px;
+    background: #C9DEB8;
+    z-index: 1;
+  }
+  .garden-hill-front {
+    position: relative;
+    z-index: 2;
+    margin-top: 60px;
+    bottom: -30px;
+    height: auto;
+    min-height: 190px;
+    border-radius: 45% 45% 0 0;
+    background: linear-gradient(180deg, #AFCB98 0%, #9BB984 100%);
+    padding: 40px 24px 0;
+  }
+
   .garden-bed {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
     align-items: flex-end;
-    gap: 24px;
-    padding-bottom: 16px;
+    gap: 20px;
+    max-width: 640px;
+    margin: 0 auto;
   }
   .garden-plant {
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
     cursor: pointer;
     transition: transform 0.15s ease;
+    padding-bottom: 6px;
   }
   .garden-plant:hover { transform: translateY(-4px); }
   .garden-plant-emoji {
     animation: garden-sway 3.2s ease-in-out infinite;
     transform-origin: bottom center;
+    position: relative;
+    z-index: 2;
   }
   .garden-plant:nth-child(even) .garden-plant-emoji { animation-duration: 3.8s; animation-delay: 0.3s; }
   .garden-plant:nth-child(3n) .garden-plant-emoji { animation-duration: 4.4s; animation-delay: 0.6s; }
@@ -274,23 +368,37 @@
     0%, 100% { transform: rotate(-3deg); }
     50% { transform: rotate(3deg); }
   }
+  .garden-plant-shadow {
+    width: 40px; height: 10px;
+    background: rgba(31,51,36,0.18);
+    border-radius: 50%;
+    margin-top: -4px;
+    filter: blur(1px);
+  }
+  .garden-pot {
+    width: 34px; height: 16px;
+    background: linear-gradient(180deg, var(--clay), #8C4A2E);
+    clip-path: polygon(15% 0%, 85% 0%, 100% 100%, 0% 100%);
+    margin-top: -8px;
+  }
   .garden-plant-name {
     font-family: 'Fraunces', serif;
     font-style: italic;
     font-size: 11px;
     color: var(--soil);
-    margin-top: 4px;
-    max-width: 70px;
+    margin-top: 8px;
+    max-width: 76px;
     text-align: center;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    background: rgba(255,255,255,0.6);
+    border-radius: 999px;
+    padding: 2px 8px;
   }
-  .garden-ground {
-    height: 18px;
-    background: linear-gradient(180deg, #B79B6E, #9C8058);
-    border-radius: 0 0 18px 18px;
-    margin: 0 -24px;
+
+  @media (prefers-reduced-motion: reduce) {
+    .garden-cloud, .garden-leaf, .garden-plant-emoji { animation: none !important; }
   }
 
   .layout {

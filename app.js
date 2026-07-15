@@ -1151,7 +1151,16 @@ function renderGarden() {
   div.className = 'garden-scene';
 
   if (state.plants.length === 0) {
-    div.innerHTML = `<div class="garden-empty">Your garden is empty — add a plant to watch it grow here.</div>`;
+    div.innerHTML = `
+      <div class="garden-sky">
+        <div class="garden-sun"></div>
+        <div class="garden-cloud garden-cloud-1"></div>
+        <div class="garden-cloud garden-cloud-2"></div>
+      </div>
+      <div class="garden-hill garden-hill-back"></div>
+      <div class="garden-hill garden-hill-front"></div>
+      <div class="garden-empty">Your garden is empty — add a plant to watch it grow here.</div>
+    `;
     return div;
   }
 
@@ -1166,20 +1175,40 @@ function renderGarden() {
   else if (avgScore >= 0.45) summary = '🌿 Your garden is doing alright.';
   else summary = '💧 A few plants could use some water.';
 
+  const leafCount = Math.min(6, 2 + Math.floor(state.plants.length / 2));
+  const leaves = Array.from({ length: leafCount }, (_, i) => {
+    const left = 8 + Math.random() * 84;
+    const duration = 8 + Math.random() * 6;
+    const delay = Math.random() * 8;
+    const emoji = ['🍃', '🌸', '✨'][i % 3];
+    return `<span class="garden-leaf" style="left:${left}%; animation-duration:${duration}s; animation-delay:-${delay}s;">${emoji}</span>`;
+  }).join('');
+
   div.innerHTML = `
-    <div class="garden-summary">${summary}</div>
-    <div class="garden-bed">
-      ${state.plants.map(p => {
-        const tier = gardenTier(p);
-        return `
-          <div class="garden-plant" data-id="${p.id}" title="${p.name} — ${tier.label}" role="button" tabindex="0" aria-label="${p.name}, ${tier.label}">
-            <div class="garden-plant-emoji" style="font-size:${tier.size}px;">${tier.emoji}</div>
-            <div class="garden-plant-name">${p.name}</div>
-          </div>
-        `;
-      }).join('')}
+    <div class="garden-sky">
+      <div class="garden-sun"></div>
+      <div class="garden-cloud garden-cloud-1"></div>
+      <div class="garden-cloud garden-cloud-2"></div>
+      <div class="garden-cloud garden-cloud-3"></div>
     </div>
-    <div class="garden-ground"></div>
+    <div class="garden-particles">${leaves}</div>
+    <div class="garden-summary-banner">${summary}</div>
+    <div class="garden-hill garden-hill-back"></div>
+    <div class="garden-hill garden-hill-front">
+      <div class="garden-bed">
+        ${state.plants.map(p => {
+          const tier = gardenTier(p);
+          return `
+            <div class="garden-plant" data-id="${p.id}" title="${p.name} — ${tier.label}" role="button" tabindex="0" aria-label="${p.name}, ${tier.label}">
+              <div class="garden-plant-emoji" style="font-size:${tier.size}px;">${tier.emoji}</div>
+              <div class="garden-pot"></div>
+              <div class="garden-plant-shadow"></div>
+              <div class="garden-plant-name">${p.name}</div>
+            </div>
+          `;
+        }).join('')}
+      </div>
+    </div>
   `;
 
   div.querySelectorAll('.garden-plant').forEach(el => {
