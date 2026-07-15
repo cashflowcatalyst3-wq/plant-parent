@@ -94,6 +94,7 @@ const state = {
   filterRoom: null, // null = all rooms
   weatherEnabled: false,
   weatherNudge: null, // { text, emoji } once fetched
+  mobileDetailOpen: false,
   theme: 'sage',
   showThemeModal: false,
   propagations: [],
@@ -101,7 +102,6 @@ const state = {
   memoryGameCompleted: false,
   showInviteModal: false,
   showAboutModal: false,
-  showSupportModal: false,
   showWelcome: false,
   hasInvited: false,
 };
@@ -375,27 +375,6 @@ function renderAboutModal() {
       </div>
       <div class="modal-actions">
         <button class="secondary" id="closeAbout">Close</button>
-      </div>
-    </div>
-  </div>`;
-}
-
-function renderSupportModal() {
-  // Edit this to your own Ko-fi / Buy Me a Coffee username once you create one (both are free to set up).
-  const supportUrl = 'https://ko-fi.com/yourusername';
-  return `
-  <div class="modal-backdrop" id="supportBackdrop">
-    <div class="modal support-modal">
-      <div class="about-hero">💛</div>
-      <h3>Support this app</h3>
-      <p class="about-story">
-        Plant Parent is free and always will be — no ads, no subscriptions, no locked features. If it's
-        helped keep your plants alive and you'd like to say thanks, a small one-time tip goes toward
-        keeping it running and growing. Totally optional, no pressure.
-      </p>
-      <div class="modal-actions">
-        <button class="secondary" id="closeSupport">Maybe later</button>
-        <a class="primary support-link-btn" href="${supportUrl}" target="_blank" rel="noopener">☕ Buy me a coffee</a>
       </div>
     </div>
   </div>`;
@@ -939,7 +918,7 @@ function render() {
       ${state.currentView === 'journal' ? `<div id="journalView"></div>` : ''}
       ${state.currentView === 'propagation' ? `<div id="propagationView"></div>` : ''}
       ${state.currentView === 'shelf' ? `
-        <div class="layout">
+        <div class="layout ${state.mobileDetailOpen ? 'mobile-detail-open' : ''}">
           <div class="shelf-column">
             <div class="shelf-controls">
               <select class="sort-select" id="sortSelect" aria-label="Sort plants by">
@@ -1022,10 +1001,6 @@ function render() {
             <span class="more-menu-icon">🌱</span>
             <span>About Plant Parent</span>
           </button>
-          <button class="more-menu-item" id="navSupport">
-            <span class="more-menu-icon">💛</span>
-            <span>Support this app</span>
-          </button>
           <div class="more-menu-divider"></div>
           <button class="more-menu-item" id="navExport">
             <span class="more-menu-icon">⬇️</span>
@@ -1041,7 +1016,6 @@ function render() {
     ` : ''}
     ${state.showInviteModal ? renderInviteModal() : ''}
     ${state.showAboutModal ? renderAboutModal() : ''}
-    ${state.showSupportModal ? renderSupportModal() : ''}
     ${state.showWelcome ? renderWelcome() : ''}
 
     ${state.showAddModal ? renderModal() : ''}
@@ -1109,7 +1083,6 @@ function render() {
     document.getElementById('navTheme').onclick = () => { state.showMoreMenu = false; state.showThemeModal = true; render(); };
     document.getElementById('navInvite').onclick = () => { state.showMoreMenu = false; state.showInviteModal = true; render(); };
     document.getElementById('navAbout').onclick = () => { state.showMoreMenu = false; state.showAboutModal = true; render(); };
-    document.getElementById('navSupport').onclick = () => { state.showMoreMenu = false; state.showSupportModal = true; render(); };
     document.getElementById('moreMenuBackdrop').addEventListener('click', (e) => {
       if (e.target.id === 'moreMenuBackdrop') { state.showMoreMenu = false; render(); }
     });
@@ -1213,6 +1186,7 @@ function renderGarden() {
     const select = () => {
       state.activeId = parseInt(el.dataset.id, 10);
       state.currentView = 'shelf';
+      state.mobileDetailOpen = true;
       render();
     };
     el.onclick = select;
@@ -1285,7 +1259,7 @@ function renderCard(p) {
     </div>
     <div class="days-badge">${left === 0 ? 'today!' : left + 'd'}</div>
   `;
-  const selectCard = () => { state.activeId = p.id; render(); };
+  const selectCard = () => { state.activeId = p.id; state.mobileDetailOpen = true; render(); };
   div.onclick = selectCard;
   div.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectCard(); }
@@ -1304,6 +1278,15 @@ function renderEmpty() {
   return div;
 }
 
+function wateredSlotToday(plant, slot) {
+  const today = todayStr();
+  return (plant.waterLog || []).some(iso => {
+    if (iso.slice(0, 10) !== today) return false;
+    const hour = new Date(iso).getHours();
+    return slot === 'morning' ? hour < 12 : hour >= 12;
+  });
+}
+
 function renderDetail(p) {
   const div = document.createElement('div');
   const left = daysLeft(p);
@@ -1311,6 +1294,7 @@ function renderDetail(p) {
   const log = (p.waterLog || []).slice(-5).reverse();
 
   div.innerHTML = `
+    <button class="back-to-plants-btn" id="backToPlants">← Back to plants</button>
     <div class="detail-header">
       <div class="detail-ring-click" id="detailRingClick">
         ${ringPortrait(p, 120, 8)}
@@ -1320,7 +1304,12 @@ function renderDetail(p) {
         <h2>${p.name} <span class="mood">${moodEmoji(p)}</span></h2>
         <div class="species">${p.species || 'species unlabeled'}</div>
         <div class="row-actions">
-          <button class="primary" id="waterBtn">Water now</button>
+          ${p.twiceDaily ? `
+            <button class="primary ${wateredSlotToday(p, 'morning') ? 'water-done' : ''}" id="waterMorningBtn">🌅 Morning${wateredSlotToday(p, 'morning') ? ' ✓' : ''}</button>
+            <button class="primary ${wateredSlotToday(p, 'night') ? 'water-done' : ''}" id="waterNightBtn">🌙 Night${wateredSlotToday(p, 'night') ? ' ✓' : ''}</button>
+          ` : `
+            <button class="primary" id="waterBtn">Water now</button>
+          `}
           <button class="secondary" id="editBtn">✏️ Edit</button>
           <button class="secondary" id="shareBtn">📤 Share</button>
           <button class="secondary" id="removeBtn">Remove plant</button>
@@ -1354,7 +1343,7 @@ function renderDetail(p) {
     ` : `<div style="font-size:13px;color:var(--soil);">No waterings logged yet.</div>`}
   `;
 
-  div.querySelector('#waterBtn').onclick = (e) => {
+  const doWater = (e) => {
     p.lastWatered = new Date().toISOString();
     p.waterLog = p.waterLog || [];
     p.waterLog.push(p.lastWatered);
@@ -1364,6 +1353,16 @@ function renderDetail(p) {
     playWaterSound();
     render();
     savePlants();
+  };
+  const waterBtn = div.querySelector('#waterBtn');
+  if (waterBtn) waterBtn.onclick = doWater;
+  const waterMorningBtn = div.querySelector('#waterMorningBtn');
+  if (waterMorningBtn) waterMorningBtn.onclick = doWater;
+  const waterNightBtn = div.querySelector('#waterNightBtn');
+  if (waterNightBtn) waterNightBtn.onclick = doWater;
+  div.querySelector('#backToPlants').onclick = () => {
+    state.mobileDetailOpen = false;
+    render();
   };
   div.querySelector('#editBtn').onclick = () => {
     state.editingPlantId = p.id;
@@ -1388,6 +1387,7 @@ function renderDetail(p) {
   div.querySelector('#removeBtn').onclick = () => {
     state.plants = state.plants.filter(x => x.id !== p.id);
     state.activeId = null;
+    state.mobileDetailOpen = false;
     render();
     savePlants();
   };
@@ -1462,6 +1462,12 @@ function renderModal() {
         <label>Water every how many days?</label>
         <input id="modalFreqInput" type="number" min="1" value="${isEditing ? editingPlant.frequency : (species ? species.freq : 7)}" aria-label="Water every how many days">
         <div class="freq-hint">Most houseplants: 5–10 days. Succulents: 14–21.</div>
+      </div>
+      <div class="field checkbox-field">
+        <label class="checkbox-label">
+          <input type="checkbox" id="modalTwiceDailyInput" ${isEditing && editingPlant.twiceDaily ? 'checked' : ''}>
+          Water twice a day (morning &amp; night)
+        </label>
       </div>
       <div class="modal-actions">
         <button class="secondary" id="cancelModal">Cancel</button>
@@ -1549,8 +1555,6 @@ document.addEventListener('click', (e) => {
   if (e.target.id === 'closeInvite') { state.showInviteModal = false; render(); }
   if (e.target.id === 'aboutBackdrop') { state.showAboutModal = false; render(); }
   if (e.target.id === 'closeAbout') { state.showAboutModal = false; render(); }
-  if (e.target.id === 'supportBackdrop') { state.showSupportModal = false; render(); }
-  if (e.target.id === 'closeSupport') { state.showSupportModal = false; render(); }
   if (e.target.id === 'dismissWelcome') {
     state.showWelcome = false;
     localStorage.setItem('plant-parent-welcome-seen', '1');
@@ -1584,6 +1588,7 @@ document.addEventListener('click', (e) => {
     const name = document.getElementById('modalNameInput').value.trim();
     const freq = parseInt(document.getElementById('modalFreqInput').value, 10) || 7;
     const room = document.getElementById('modalRoomInput').value.trim();
+    const twiceDaily = document.getElementById('modalTwiceDailyInput').checked;
     if (!name) return;
     const species = state.pendingSpecies;
 
@@ -1593,6 +1598,7 @@ document.addEventListener('click', (e) => {
         p.name = name;
         p.frequency = freq;
         p.room = room;
+        p.twiceDaily = twiceDaily;
         p.photo = state.pendingModalPhoto || null;
         if (species) {
           p.species = species.name;
@@ -1611,6 +1617,7 @@ document.addEventListener('click', (e) => {
         speciesDesc: species ? species.desc : '',
         room,
         frequency: freq,
+        twiceDaily,
         lastWatered: now,
         waterLog: [],
         photo: state.pendingModalPhoto || null,

@@ -183,6 +183,13 @@
     background: linear-gradient(120deg, var(--sage), var(--clay));
   }
 
+  @media (max-width: 480px) {
+    header { margin-bottom: 16px; padding-top: 2px; }
+    .header-flourish { font-size: 24px; margin-bottom: 0; }
+    h1 { font-size: 32px; }
+    .tagline { font-size: 12px; margin-top: 2px; padding-bottom: 8px; }
+  }
+
   /* Daily challenge card */
   .daily-card {
     display: flex;
@@ -292,8 +299,26 @@
     gap: 28px;
   }
 
+  .back-to-plants-btn {
+    display: none;
+    background: transparent;
+    border: none;
+    color: var(--sage);
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 8px 0 16px;
+    cursor: pointer;
+  }
+
   @media (max-width: 800px) {
     .layout { grid-template-columns: 1fr; }
+    /* Default: show the plant list, hide the detail panel */
+    .layout .panel { display: none; }
+    /* Once a plant is selected: show only the detail panel, hide the list */
+    .layout.mobile-detail-open .shelf-column { display: none; }
+    .layout.mobile-detail-open .panel { display: block; }
+    .back-to-plants-btn { display: inline-block; }
   }
 
   .shelf {
@@ -501,6 +526,28 @@
   .modal-actions { display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end; }
 
   .freq-hint { font-size: 11px; color: var(--sage); margin-top: 4px; }
+
+  .checkbox-field { display: flex; align-items: center; }
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-family: 'Nunito', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--ink);
+    cursor: pointer;
+  }
+  .checkbox-label input[type="checkbox"] {
+    width: 18px; height: 18px;
+    accent-color: var(--sage);
+    cursor: pointer;
+  }
+
+  .water-done {
+    background: var(--sage) !important;
+    opacity: 0.6;
+  }
 
   .notes-input {
     width: 100%;
@@ -982,7 +1029,7 @@
   }
 
   /* About modal */
-  .about-modal, .support-modal { text-align: center; width: 400px; }
+  .about-modal { text-align: center; width: 400px; }
   .about-hero { font-size: 40px; margin-bottom: 4px; }
   .about-story { font-size: 13px; line-height: 1.6; color: var(--ink); text-align: left; margin: 0 0 18px; }
   .about-stats { display: flex; justify-content: space-around; margin-bottom: 20px; }
@@ -994,11 +1041,6 @@
     background: #FBFAF6; border-radius: 10px; padding: 10px 14px; text-align: left;
   }
   .about-testimonial span { display: block; font-style: normal; font-size: 11px; color: var(--soil); margin-top: 4px; }
-  .support-link-btn {
-    display: inline-block;
-    text-decoration: none;
-    text-align: center;
-  }
 
   /* Welcome screen */
   .welcome-backdrop {
