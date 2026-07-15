@@ -328,13 +328,10 @@
   .garden-hill-front {
     position: relative;
     z-index: 2;
-    margin-top: 60px;
-    bottom: -30px;
-    height: auto;
-    min-height: 190px;
+    margin-top: 30px;
     border-radius: 45% 45% 0 0;
     background: linear-gradient(180deg, #AFCB98 0%, #9BB984 100%);
-    padding: 40px 24px 0;
+    padding: 40px 24px 36px;
   }
 
   .garden-bed {
