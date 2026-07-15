@@ -1,4 +1,4 @@
-const CACHE_NAME = 'plant-parent-v21';
+const CACHE_NAME = 'plant-parent-v22';
 const ASSETS = [
   '/',
   '/index.html',

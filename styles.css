@@ -398,6 +398,51 @@
     .garden-cloud, .garden-leaf, .garden-plant-emoji { animation: none !important; }
   }
 
+  /* Garden stats panel */
+  .garden-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin-top: 16px;
+  }
+  .garden-stat-card {
+    background: var(--card);
+    border-radius: 14px;
+    padding: 16px;
+    box-shadow: var(--shadow);
+    text-align: center;
+  }
+  .garden-stat-num {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 28px;
+    color: var(--sage);
+  }
+  .garden-stat-label {
+    font-size: 11px;
+    color: var(--soil);
+    margin-top: 2px;
+  }
+  .garden-stat-highlight {
+    background: linear-gradient(135deg, #FBFAF6, #F1EEE3);
+  }
+  .garden-stat-icon { font-size: 22px; margin-bottom: 4px; }
+  .garden-stat-title {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 11px;
+    color: var(--soil);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+  .garden-stat-name {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--ink);
+    margin-top: 2px;
+  }
+
   .layout {
     display: grid;
     grid-template-columns: 320px 1fr;

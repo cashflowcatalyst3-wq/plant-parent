@@ -892,25 +892,27 @@ function render() {
 
   app.innerHTML = `
     <div class="main-content">
-      <header>
-        <div class="header-flourish">🌿</div>
-        <h1>Plant Parent</h1>
-        <div class="tagline">a shelf that keeps time for you</div>
-      </header>
+      ${state.currentView !== 'garden' && state.currentView !== 'dictionary' ? `
+        <header>
+          <div class="header-flourish">🌿</div>
+          <h1>Plant Parent</h1>
+          <div class="tagline">a shelf that keeps time for you</div>
+        </header>
 
-      <div class="daily-card ${taskDone ? 'daily-card-done' : ''}">
-        <div class="daily-emoji">${taskDone ? '✅' : task.emoji}</div>
-        <div class="daily-text">
-          <div class="daily-label">Today's little thing</div>
-          <div class="daily-task">${task.label}</div>
+        <div class="daily-card ${taskDone ? 'daily-card-done' : ''}">
+          <div class="daily-emoji">${taskDone ? '✅' : task.emoji}</div>
+          <div class="daily-text">
+            <div class="daily-label">Today's little thing</div>
+            <div class="daily-task">${task.label}</div>
+          </div>
         </div>
-      </div>
 
-      ${state.weatherEnabled && state.weatherNudge ? `
-        <div class="weather-card">
-          <div class="weather-emoji">${state.weatherNudge.emoji}</div>
-          <div class="weather-text">${state.weatherNudge.text}</div>
-        </div>
+        ${state.weatherEnabled && state.weatherNudge ? `
+          <div class="weather-card">
+            <div class="weather-emoji">${state.weatherNudge.emoji}</div>
+            <div class="weather-text">${state.weatherNudge.text}</div>
+          </div>
+        ` : ''}
       ` : ''}
 
       ${state.currentView === 'garden' ? `<div id="gardenView"></div>` : ''}
@@ -1147,11 +1149,12 @@ function gardenTier(plant) {
 }
 
 function renderGarden() {
-  const div = document.createElement('div');
-  div.className = 'garden-scene';
+  const wrapper = document.createElement('div');
+  const scene = document.createElement('div');
+  scene.className = 'garden-scene';
 
   if (state.plants.length === 0) {
-    div.innerHTML = `
+    scene.innerHTML = `
       <div class="garden-sky">
         <div class="garden-sun"></div>
         <div class="garden-cloud garden-cloud-1"></div>
@@ -1161,7 +1164,8 @@ function renderGarden() {
       <div class="garden-hill garden-hill-front"></div>
       <div class="garden-empty">Your garden is empty — add a plant to watch it grow here.</div>
     `;
-    return div;
+    wrapper.appendChild(scene);
+    return wrapper;
   }
 
   const avgScore = state.plants.reduce((sum, p) => {
@@ -1184,7 +1188,7 @@ function renderGarden() {
     return `<span class="garden-leaf" style="left:${left}%; animation-duration:${duration}s; animation-delay:-${delay}s;">${emoji}</span>`;
   }).join('');
 
-  div.innerHTML = `
+  scene.innerHTML = `
     <div class="garden-sky">
       <div class="garden-sun"></div>
       <div class="garden-cloud garden-cloud-1"></div>
@@ -1210,8 +1214,10 @@ function renderGarden() {
       </div>
     </div>
   `;
+  wrapper.appendChild(scene);
+  wrapper.appendChild(renderGardenStats());
 
-  div.querySelectorAll('.garden-plant').forEach(el => {
+  wrapper.querySelectorAll('.garden-plant').forEach(el => {
     const select = () => {
       state.activeId = parseInt(el.dataset.id, 10);
       state.currentView = 'shelf';
@@ -1223,6 +1229,44 @@ function renderGarden() {
       if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); select(); }
     });
   });
+
+  return wrapper;
+}
+
+function renderGardenStats() {
+  const div = document.createElement('div');
+  div.className = 'garden-stats';
+
+  const totalPlants = state.plants.length;
+  const totalStreakDays = state.plants.reduce((sum, p) => sum + calcStreak(p), 0);
+
+  let star = state.plants[0];
+  let needsAttention = state.plants[0];
+  state.plants.forEach(p => {
+    if (calcStreak(p) > calcStreak(star)) star = p;
+    if (daysLeft(p) < daysLeft(needsAttention)) needsAttention = p;
+  });
+
+  div.innerHTML = `
+    <div class="garden-stat-card">
+      <div class="garden-stat-num">${totalPlants}</div>
+      <div class="garden-stat-label">plant${totalPlants === 1 ? '' : 's'} growing</div>
+    </div>
+    <div class="garden-stat-card">
+      <div class="garden-stat-num">${totalStreakDays}</div>
+      <div class="garden-stat-label">combined streak days</div>
+    </div>
+    <div class="garden-stat-card garden-stat-highlight">
+      <div class="garden-stat-icon">🌟</div>
+      <div class="garden-stat-title">Star of the garden</div>
+      <div class="garden-stat-name">${star.name}</div>
+    </div>
+    <div class="garden-stat-card garden-stat-highlight">
+      <div class="garden-stat-icon">💧</div>
+      <div class="garden-stat-title">Needs attention</div>
+      <div class="garden-stat-name">${needsAttention.name}</div>
+    </div>
+  `;
 
   return div;
 }
