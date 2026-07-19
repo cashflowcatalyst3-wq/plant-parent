@@ -96,6 +96,8 @@ const state = {
   weatherEnabled: false,
   weatherNudge: null, // { text, emoji } once fetched
   mobileDetailOpen: false,
+  dictionarySearch: '',
+  dictionaryLightFilter: null,
   theme: 'sage',
   showThemeModal: false,
   propagations: [],
@@ -1122,21 +1124,47 @@ function render() {
   }
 }
 
-function renderDictionary() {
-  const div = document.createElement('div');
-  div.className = 'dictionary-grid';
-  div.innerHTML = SPECIES_DICTIONARY.filter(s => s.id !== 'other').map(s => `
-    <div class="dictionary-card" data-id="${s.id}">
-      <div class="dictionary-emoji">${s.emoji}</div>
-      <div class="dictionary-name">${s.name}</div>
-      ${s.latin ? `<div class="dictionary-latin">${s.latin}</div>` : ''}
-      <div class="dictionary-light">☀️ ${s.light}</div>
-      <div class="dictionary-desc">${s.desc}</div>
-      <button class="secondary dictionary-add-btn" data-id="${s.id}">+ Add one like this</button>
-    </div>
-  `).join('');
+function speciesDifficulty(species) {
+  if (species.freq >= 14) return { label: 'Low maintenance', emoji: '🟢', tier: 'easy' };
+  if (species.freq >= 7) return { label: 'Easy care', emoji: '🟡', tier: 'moderate' };
+  return { label: 'Needs attention', emoji: '🔴', tier: 'demanding' };
+}
 
-  div.querySelectorAll('.dictionary-add-btn').forEach(btn => {
+function lightCategory(lightText) {
+  const t = lightText.toLowerCase();
+  if (t.includes('low')) return 'low';
+  if (t.includes('bright')) return 'bright';
+  if (t.includes('medium')) return 'medium';
+  return 'varies';
+}
+
+function buildDictionaryCardsHtml(list, search) {
+  if (list.length === 0) {
+    return `<div class="guide-no-results">No plants match "${search}" — try a different search or filter.</div>`;
+  }
+  return list.map(s => {
+    const diff = speciesDifficulty(s);
+    return `
+      <div class="dictionary-card dictionary-card-${diff.tier}" data-id="${s.id}">
+        <div class="dictionary-card-top">
+          <div class="dictionary-emoji">${s.emoji}</div>
+          <div class="dictionary-difficulty-badge">${diff.emoji} ${diff.label}</div>
+        </div>
+        <div class="dictionary-name">${s.name}</div>
+        ${s.latin ? `<div class="dictionary-latin">${s.latin}</div>` : ''}
+        <div class="dictionary-meta-row">
+          <span class="dictionary-meta-pill">☀️ ${s.light}</span>
+          <span class="dictionary-meta-pill">💧 every ${s.freq}d</span>
+        </div>
+        <div class="dictionary-desc">${s.desc}</div>
+        <button class="secondary dictionary-add-btn" data-id="${s.id}">+ Add one like this</button>
+      </div>
+    `;
+  }).join('');
+}
+
+function wireDictionaryAddButtons(grid) {
+  grid.querySelectorAll('.dictionary-add-btn').forEach(btn => {
     btn.onclick = (e) => {
       e.stopPropagation();
       const entry = SPECIES_DICTIONARY.find(s => s.id === btn.dataset.id);
@@ -1148,8 +1176,59 @@ function renderDictionary() {
       render();
     };
   });
+}
 
-  return div;
+function filterDictionary(species, search, lightFilter) {
+  return species.filter(s => {
+    const matchesSearch = !search || s.name.toLowerCase().includes(search.toLowerCase()) || (s.latin || '').toLowerCase().includes(search.toLowerCase());
+    const matchesLight = !lightFilter || lightCategory(s.light) === lightFilter;
+    return matchesSearch && matchesLight;
+  });
+}
+
+function renderDictionary() {
+  const wrapper = document.createElement('div');
+  const species = SPECIES_DICTIONARY.filter(s => s.id !== 'other');
+  const search = state.dictionarySearch || '';
+  const lightFilter = state.dictionaryLightFilter || null;
+  const filtered = filterDictionary(species, search, lightFilter);
+
+  wrapper.innerHTML = `
+    <div class="guide-hero">
+      <div class="guide-hero-title">📖 Species Guide</div>
+      <div class="guide-hero-sub">${species.length} plants, with care basics for each</div>
+    </div>
+    <div class="guide-controls">
+      <input type="text" id="guideSearchInput" class="guide-search" placeholder="🔍 Search by name…" value="${search}">
+      <div class="guide-light-chips">
+        <button class="room-chip ${!lightFilter ? 'room-chip-active' : ''}" data-light="">All light</button>
+        <button class="room-chip ${lightFilter === 'low' ? 'room-chip-active' : ''}" data-light="low">Low light</button>
+        <button class="room-chip ${lightFilter === 'medium' ? 'room-chip-active' : ''}" data-light="medium">Medium light</button>
+        <button class="room-chip ${lightFilter === 'bright' ? 'room-chip-active' : ''}" data-light="bright">Bright light</button>
+      </div>
+    </div>
+    <div class="dictionary-grid" id="dictionaryGrid">${buildDictionaryCardsHtml(filtered, search)}</div>
+  `;
+
+  const grid = wrapper.querySelector('#dictionaryGrid');
+  wireDictionaryAddButtons(grid);
+
+  const searchInput = wrapper.querySelector('#guideSearchInput');
+  searchInput.addEventListener('input', () => {
+    state.dictionarySearch = searchInput.value;
+    const refiltered = filterDictionary(species, state.dictionarySearch, state.dictionaryLightFilter);
+    grid.innerHTML = buildDictionaryCardsHtml(refiltered, state.dictionarySearch);
+    wireDictionaryAddButtons(grid);
+  });
+
+  wrapper.querySelectorAll('.guide-light-chips .room-chip').forEach(chip => {
+    chip.onclick = () => {
+      state.dictionaryLightFilter = chip.dataset.light || null;
+      render();
+    };
+  });
+
+  return wrapper;
 }
 
 function gardenTier(plant) {

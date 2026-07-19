@@ -931,31 +931,119 @@
   .species-picker-row-latin { font-family: 'Fraunces', serif; font-style: italic; font-size: 11px; color: var(--soil); }
 
   /* Dictionary / species guide view */
+  .guide-hero {
+    text-align: center;
+    margin-bottom: 20px;
+  }
+  .guide-hero-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 26px;
+    background: linear-gradient(120deg, var(--sage), var(--clay));
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .guide-hero-sub {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 13px;
+    color: var(--soil);
+    margin-top: 2px;
+  }
+
+  .guide-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 22px;
+  }
+  .guide-search {
+    width: 100%;
+    padding: 12px 16px;
+    border-radius: 12px;
+    border: 1.5px solid var(--line);
+    font-family: 'Nunito', sans-serif;
+    font-size: 14px;
+    background: var(--card);
+    color: var(--ink);
+  }
+  .guide-search:focus { outline: 2px solid var(--sage); border-color: transparent; }
+  .guide-light-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .guide-no-results {
+    grid-column: 1 / -1;
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--soil);
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+  }
+
   .dictionary-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
     gap: 16px;
   }
   .dictionary-card {
     background: var(--card);
-    border-radius: 14px;
+    border-radius: 16px;
     padding: 18px;
     box-shadow: var(--shadow);
     display: flex;
     flex-direction: column;
     gap: 6px;
+    border-top: 4px solid var(--line);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .dictionary-card:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(31,51,36,0.12); }
+  .dictionary-card-easy { border-top-color: var(--sage); }
+  .dictionary-card-moderate { border-top-color: #E0B84E; }
+  .dictionary-card-demanding { border-top-color: var(--clay); }
+
+  .dictionary-card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 8px;
   }
   .dictionary-emoji {
-    font-size: 34px;
-    width: 56px; height: 56px;
+    font-size: 32px;
+    width: 54px; height: 54px;
     display: flex; align-items: center; justify-content: center;
     background: #EFEBDD;
     border-radius: 50%;
-    margin-bottom: 4px;
+    flex-shrink: 0;
   }
-  .dictionary-name { font-family: 'Fraunces', serif; font-weight: 600; font-size: 16px; }
+  .dictionary-difficulty-badge {
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--soil);
+    background: #FBFAF6;
+    border-radius: 999px;
+    padding: 4px 9px;
+    white-space: nowrap;
+    align-self: flex-start;
+  }
+  .dictionary-name { font-family: 'Fraunces', serif; font-weight: 600; font-size: 17px; margin-top: 4px; }
   .dictionary-latin { font-family: 'Fraunces', serif; font-style: italic; font-size: 12px; color: var(--soil); margin-top: -4px; }
-  .dictionary-light { font-size: 12px; color: var(--soil); }
+  .dictionary-meta-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 4px 0 2px;
+  }
+  .dictionary-meta-pill {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--soil);
+    background: #F1EEE3;
+    border-radius: 999px;
+    padding: 4px 10px;
+  }
   .dictionary-desc { font-size: 13px; line-height: 1.5; color: var(--ink); margin: 6px 0 10px; flex: 1; }
   .dictionary-add-btn { align-self: flex-start; font-size: 12px; }
 
