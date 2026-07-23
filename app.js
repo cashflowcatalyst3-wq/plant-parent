@@ -1,34 +1,34 @@
 const VAPID_PUBLIC_KEY = 'BN4ieWQBco1u_esfncKASD5n51MKDrjGJoDafo4eJP7FwjzxIRUq-2xsJEGRoMzZ-tyipIrn8zh2Kzy1H5pukrQ';
 
 const SPECIES_DICTIONARY = [
-  { id: 'pothos', name: 'Pothos', latin: 'Epipremnum aureum', emoji: '🍃', light: 'Low to bright, indirect', freq: 7, desc: 'A hardy trailing vine that tolerates neglect and low light well. Let the soil dry out between waterings.' },
-  { id: 'fiddle-leaf-fig', name: 'Fiddle-leaf Fig', latin: 'Ficus lyrata', emoji: '🌳', light: 'Bright, indirect', freq: 7, desc: 'Loves consistent bright light and dislikes being moved around. Sensitive to overwatering and drafts.' },
-  { id: 'snake-plant', name: 'Snake Plant', latin: 'Sansevieria', emoji: '🗡️', light: 'Low to bright', freq: 14, desc: 'Extremely drought-tolerant with striking upright leaves. A forgiving choice for beginners.' },
-  { id: 'monstera', name: 'Monstera', latin: 'Monstera deliciosa', emoji: '🌿', light: 'Bright, indirect', freq: 7, desc: 'Known for its iconic split leaves. Enjoys humidity and steady, moderate watering.' },
-  { id: 'succulent', name: 'Succulent', latin: 'assorted species', emoji: '🌵', light: 'Bright, direct', freq: 18, desc: 'Stores water in thick leaves — thrives on bright sun and being left alone between waterings.' },
-  { id: 'zz-plant', name: 'ZZ Plant', latin: 'Zamioculcas zamiifolia', emoji: '🪴', light: 'Low to medium', freq: 16, desc: 'Nearly indestructible. Tolerates low light and infrequent watering better than almost anything.' },
-  { id: 'peace-lily', name: 'Peace Lily', latin: 'Spathiphyllum', emoji: '🌸', light: 'Low to medium', freq: 7, desc: 'Droops dramatically when thirsty, then perks right back up soon after watering — an easy read.' },
-  { id: 'spider-plant', name: 'Spider Plant', latin: 'Chlorophytum comosum', emoji: '🕷️', light: 'Medium to bright', freq: 7, desc: 'Fast-growing and forgiving. Produces little plantlets you can snip off and propagate.' },
-  { id: 'orchid', name: 'Orchid', latin: 'Phalaenopsis', emoji: '🌺', light: 'Bright, indirect', freq: 10, desc: 'Prefers infrequent, deep watering and good airflow around its roots rather than damp soil.' },
-  { id: 'aloe', name: 'Aloe Vera', latin: 'Aloe vera', emoji: '🪴', light: 'Bright, direct', freq: 21, desc: 'A succulent with soothing gel inside its leaves. Water sparingly and let it dry out fully.' },
-  { id: 'rubber-plant', name: 'Rubber Plant', latin: 'Ficus elastica', emoji: '🍂', light: 'Bright, indirect', freq: 9, desc: 'Glossy, sturdy leaves. Wiping them occasionally helps it photosynthesize better.' },
-  { id: 'philodendron', name: 'Philodendron', latin: 'Philodendron spp.', emoji: '🌿', light: 'Medium, indirect', freq: 7, desc: 'Easygoing trailing or climbing plant, forgiving of inconsistent watering schedules.' },
-  { id: 'cactus', name: 'Cactus', latin: 'assorted species', emoji: '🌵', light: 'Bright, direct', freq: 21, desc: 'Built for drought. Overwatering, not underwatering, is the most common way to lose one.' },
-  { id: 'fern', name: 'Boston Fern', latin: 'Nephrolepis exaltata', emoji: '🌿', light: 'Medium, indirect', freq: 4, desc: 'Loves humidity and consistently moist — but never soggy — soil.' },
-  { id: 'basil', name: 'Basil', latin: 'Ocimum basilicum', emoji: '🌱', light: 'Bright, direct', freq: 3, desc: 'A thirsty kitchen herb. Keep the soil consistently moist for the best flavor.' },
-  { id: 'bird-of-paradise', name: 'Bird of Paradise', latin: 'Strelitzia reginae', emoji: '🦩', light: 'Bright, direct to indirect', freq: 8, desc: 'A dramatic statement plant with large paddle leaves. Likes generous space and regular feeding.' },
-  { id: 'calathea', name: 'Calathea', latin: 'Calathea spp.', emoji: '🎋', light: 'Medium, indirect', freq: 6, desc: 'Prized for patterned leaves that fold up at night. Fussy about humidity and water quality.' },
-  { id: 'jade-plant', name: 'Jade Plant', latin: 'Crassula ovata', emoji: '🪙', light: 'Bright, direct', freq: 16, desc: 'A classic succulent that can live for decades. Let it dry out fully between waterings.' },
-  { id: 'dracaena', name: 'Dracaena', latin: 'Dracaena spp.', emoji: '🌴', light: 'Low to bright, indirect', freq: 10, desc: 'Tall and architectural, tolerant of a wide range of light. Sensitive to fluoride in tap water.' },
-  { id: 'croton', name: 'Croton', latin: 'Codiaeum variegatum', emoji: '🍁', light: 'Bright, direct', freq: 6, desc: 'Bold, colorful leaves that need strong light to keep their vivid patterns.' },
-  { id: 'anthurium', name: 'Anthurium', latin: 'Anthurium andraeanum', emoji: '❤️', light: 'Bright, indirect', freq: 8, desc: 'Glossy, heart-shaped blooms. Likes humidity and to dry slightly between waterings.' },
-  { id: 'chinese-money-plant', name: 'Chinese Money Plant', latin: 'Pilea peperomioides', emoji: '🪙', light: 'Bright, indirect', freq: 7, desc: 'Round coin-like leaves on a plant that\'s easy to propagate and share with friends.' },
-  { id: 'air-plant', name: 'Air Plant', latin: 'Tillandsia spp.', emoji: '🌬️', light: 'Bright, indirect', freq: 7, desc: 'No soil needed — mist or soak occasionally instead of traditional watering.' },
-  { id: 'christmas-cactus', name: 'Christmas Cactus', latin: 'Schlumbergera', emoji: '🎄', light: 'Bright, indirect', freq: 10, desc: 'Unlike desert cacti, this one prefers slightly moist soil and blooms in winter.' },
-  { id: 'english-ivy', name: 'English Ivy', latin: 'Hedera helix', emoji: '🍇', light: 'Medium, indirect', freq: 6, desc: 'A fast, trailing climber. Keep soil lightly moist and give it room to spread.' },
-  { id: 'prayer-plant', name: 'Prayer Plant', latin: 'Maranta leuconeura', emoji: '🙏', light: 'Medium, indirect', freq: 6, desc: 'Leaves fold up like praying hands at night. Enjoys humidity and consistent moisture.' },
-  { id: 'hoya', name: 'Hoya', latin: 'Hoya carnosa', emoji: '💫', light: 'Bright, indirect', freq: 12, desc: 'Waxy leaves and star-shaped, fragrant blooms. Prefers to dry out well between waterings.' },
-  { id: 'other', name: 'Other / not sure', latin: '', emoji: '❓', light: 'Varies', freq: 7, desc: '' },
+  { id: 'pothos', name: 'Pothos', latin: 'Epipremnum aureum', emoji: '🍃', shape: 'trailing', light: 'Low to bright, indirect', freq: 7, desc: 'A hardy trailing vine that tolerates neglect and low light well. Let the soil dry out between waterings.' },
+  { id: 'fiddle-leaf-fig', name: 'Fiddle-leaf Fig', latin: 'Ficus lyrata', emoji: '🌳', shape: 'broad-leaf', light: 'Bright, indirect', freq: 7, desc: 'Loves consistent bright light and dislikes being moved around. Sensitive to overwatering and drafts.' },
+  { id: 'snake-plant', name: 'Snake Plant', latin: 'Sansevieria', emoji: '🗡️', shape: 'spiky', light: 'Low to bright', freq: 14, desc: 'Extremely drought-tolerant with striking upright leaves. A forgiving choice for beginners.' },
+  { id: 'monstera', name: 'Monstera', latin: 'Monstera deliciosa', emoji: '🌿', shape: 'split-leaf', light: 'Bright, indirect', freq: 7, desc: 'Known for its iconic split leaves. Enjoys humidity and steady, moderate watering.' },
+  { id: 'succulent', name: 'Succulent', latin: 'assorted species', emoji: '🌵', shape: 'rosette', light: 'Bright, direct', freq: 18, desc: 'Stores water in thick leaves — thrives on bright sun and being left alone between waterings.' },
+  { id: 'zz-plant', name: 'ZZ Plant', latin: 'Zamioculcas zamiifolia', emoji: '🪴', shape: 'tall-cane', light: 'Low to medium', freq: 16, desc: 'Nearly indestructible. Tolerates low light and infrequent watering better than almost anything.' },
+  { id: 'peace-lily', name: 'Peace Lily', latin: 'Spathiphyllum', emoji: '🌸', shape: 'flower', accent: '#F7F4EA', light: 'Low to medium', freq: 7, desc: 'Droops dramatically when thirsty, then perks right back up soon after watering — an easy read.' },
+  { id: 'spider-plant', name: 'Spider Plant', latin: 'Chlorophytum comosum', emoji: '🕷️', shape: 'spider', light: 'Medium to bright', freq: 7, desc: 'Fast-growing and forgiving. Produces little plantlets you can snip off and propagate.' },
+  { id: 'orchid', name: 'Orchid', latin: 'Phalaenopsis', emoji: '🌺', shape: 'flower', accent: '#D17BA8', light: 'Bright, indirect', freq: 10, desc: 'Prefers infrequent, deep watering and good airflow around its roots rather than damp soil.' },
+  { id: 'aloe', name: 'Aloe Vera', latin: 'Aloe vera', emoji: '🪴', shape: 'spiky', light: 'Bright, direct', freq: 21, desc: 'A succulent with soothing gel inside its leaves. Water sparingly and let it dry out fully.' },
+  { id: 'rubber-plant', name: 'Rubber Plant', latin: 'Ficus elastica', emoji: '🍂', shape: 'broad-leaf', light: 'Bright, indirect', freq: 9, desc: 'Glossy, sturdy leaves. Wiping them occasionally helps it photosynthesize better.' },
+  { id: 'philodendron', name: 'Philodendron', latin: 'Philodendron spp.', emoji: '🌿', shape: 'trailing', light: 'Medium, indirect', freq: 7, desc: 'Easygoing trailing or climbing plant, forgiving of inconsistent watering schedules.' },
+  { id: 'cactus', name: 'Cactus', latin: 'assorted species', emoji: '🌵', shape: 'cactus', light: 'Bright, direct', freq: 21, desc: 'Built for drought. Overwatering, not underwatering, is the most common way to lose one.' },
+  { id: 'fern', name: 'Boston Fern', latin: 'Nephrolepis exaltata', emoji: '🌿', shape: 'fern', light: 'Medium, indirect', freq: 4, desc: 'Loves humidity and consistently moist — but never soggy — soil.' },
+  { id: 'basil', name: 'Basil', latin: 'Ocimum basilicum', emoji: '🌱', shape: 'herb', light: 'Bright, direct', freq: 3, desc: 'A thirsty kitchen herb. Keep the soil consistently moist for the best flavor.' },
+  { id: 'bird-of-paradise', name: 'Bird of Paradise', latin: 'Strelitzia reginae', emoji: '🦩', shape: 'fan', light: 'Bright, direct to indirect', freq: 8, desc: 'A dramatic statement plant with large paddle leaves. Likes generous space and regular feeding.' },
+  { id: 'calathea', name: 'Calathea', latin: 'Calathea spp.', emoji: '🎋', shape: 'broad-leaf', patterned: true, light: 'Medium, indirect', freq: 6, desc: 'Prized for patterned leaves that fold up at night. Fussy about humidity and water quality.' },
+  { id: 'jade-plant', name: 'Jade Plant', latin: 'Crassula ovata', emoji: '🪙', shape: 'branching', light: 'Bright, direct', freq: 16, desc: 'A classic succulent that can live for decades. Let it dry out fully between waterings.' },
+  { id: 'dracaena', name: 'Dracaena', latin: 'Dracaena spp.', emoji: '🌴', shape: 'tall-cane', light: 'Low to bright, indirect', freq: 10, desc: 'Tall and architectural, tolerant of a wide range of light. Sensitive to fluoride in tap water.' },
+  { id: 'croton', name: 'Croton', latin: 'Codiaeum variegatum', emoji: '🍁', shape: 'broad-leaf', accent: '#C9622E', light: 'Bright, direct', freq: 6, desc: 'Bold, colorful leaves that need strong light to keep their vivid patterns.' },
+  { id: 'anthurium', name: 'Anthurium', latin: 'Anthurium andraeanum', emoji: '❤️', shape: 'flower', accent: '#D94F4F', light: 'Bright, indirect', freq: 8, desc: 'Glossy, heart-shaped blooms. Likes humidity and to dry slightly between waterings.' },
+  { id: 'chinese-money-plant', name: 'Chinese Money Plant', latin: 'Pilea peperomioides', emoji: '🪙', shape: 'coin', light: 'Bright, indirect', freq: 7, desc: 'Round coin-like leaves on a plant that\'s easy to propagate and share with friends.' },
+  { id: 'air-plant', name: 'Air Plant', latin: 'Tillandsia spp.', emoji: '🌬️', shape: 'airplant', light: 'Bright, indirect', freq: 7, desc: 'No soil needed — mist or soak occasionally instead of traditional watering.' },
+  { id: 'christmas-cactus', name: 'Christmas Cactus', latin: 'Schlumbergera', emoji: '🎄', shape: 'cactus', accent: '#E07BA0', light: 'Bright, indirect', freq: 10, desc: 'Unlike desert cacti, this one prefers slightly moist soil and blooms in winter.' },
+  { id: 'english-ivy', name: 'English Ivy', latin: 'Hedera helix', emoji: '🍇', shape: 'trailing', light: 'Medium, indirect', freq: 6, desc: 'A fast, trailing climber. Keep soil lightly moist and give it room to spread.' },
+  { id: 'prayer-plant', name: 'Prayer Plant', latin: 'Maranta leuconeura', emoji: '🙏', shape: 'broad-leaf', patterned: true, light: 'Medium, indirect', freq: 6, desc: 'Leaves fold up like praying hands at night. Enjoys humidity and consistent moisture.' },
+  { id: 'hoya', name: 'Hoya', latin: 'Hoya carnosa', emoji: '💫', shape: 'trailing', accent: '#F2C6D9', light: 'Bright, indirect', freq: 12, desc: 'Waxy leaves and star-shaped, fragrant blooms. Prefers to dry out well between waterings.' },
+  { id: 'other', name: 'Other / not sure', latin: '', emoji: '❓', shape: null, light: 'Varies', freq: 7, desc: '' },
 ];
 
 const THEMES = [
@@ -1124,6 +1124,195 @@ function render() {
   }
 }
 
+// ---------- species illustrations ----------
+// Original vector illustrations (no external images/photos) that automatically
+// adopt whichever color theme is active, since they use CSS variables for fills.
+
+function potBase(wide) {
+  const w = wide ? 34 : 26;
+  return `<path d="M ${50-w} 78 L ${50+w} 78 L ${50+w-4} 94 L ${50-w+4} 94 Z" fill="var(--clay)"/>
+          <rect x="${50-w-2}" y="74" width="${(w+2)*2}" height="6" rx="3" fill="var(--clay-light)"/>`;
+}
+
+function leafPair(cx, cy, len, angle, color) {
+  const rad = (angle * Math.PI) / 180;
+  const tipX = cx + Math.cos(rad) * len;
+  const tipY = cy - Math.sin(rad) * len;
+  const ctrlX = cx + Math.cos(rad) * len * 0.5 + Math.sin(rad) * 8;
+  const ctrlY = cy - Math.sin(rad) * len * 0.5 + Math.cos(rad) * 8;
+  return `<path d="M ${cx} ${cy} Q ${ctrlX} ${ctrlY} ${tipX} ${tipY} Q ${ctrlX} ${ctrlY-4} ${cx} ${cy} Z" fill="${color}"/>`;
+}
+
+function speciesIllustrationSVG(species) {
+  const shape = species.shape;
+  const accent = species.accent || null;
+  const stripes = species.patterned ? `<line x1="50" y1="38" x2="50" y2="58" stroke="var(--sage-light)" stroke-width="1.5" opacity="0.6"/>` : '';
+
+  let content = '';
+  switch (shape) {
+    case 'trailing':
+      content = `
+        ${potBase(false)}
+        <path d="M50 76 Q46 50 30 40" stroke="var(--sage)" stroke-width="3" fill="none"/>
+        <path d="M50 76 Q54 48 70 36" stroke="var(--sage)" stroke-width="3" fill="none"/>
+        ${leafPair(30, 40, 14, 150, 'var(--sage)')}
+        ${leafPair(38, 54, 12, 160, 'var(--sage-light)')}
+        ${leafPair(70, 36, 14, 30, 'var(--sage)')}
+        ${leafPair(62, 52, 12, 20, 'var(--sage-light)')}
+        <ellipse cx="50" cy="30" rx="10" ry="12" fill="var(--sage)"/>
+        ${accent ? `<circle cx="50" cy="26" r="3" fill="${accent}"/>` : ''}
+      `;
+      break;
+    case 'broad-leaf':
+      content = `
+        ${potBase(true)}
+        <path d="M50 76 L50 44" stroke="var(--sage)" stroke-width="3"/>
+        <path d="M50 50 Q26 44 24 20 Q46 26 50 50 Z" fill="var(--sage)"/>
+        <path d="M50 50 Q74 44 76 20 Q54 26 50 50 Z" fill="${accent || 'var(--sage-light)'}"/>
+        ${stripes}
+      `;
+      break;
+    case 'split-leaf':
+      content = `
+        ${potBase(true)}
+        <path d="M50 76 L50 46" stroke="var(--sage)" stroke-width="3"/>
+        <path d="M50 50 Q24 42 26 16 Q40 18 44 34 Q40 28 34 30 Q40 34 42 42 Q48 40 50 50 Z" fill="var(--sage)"/>
+        <path d="M50 50 Q76 42 74 16 Q60 18 56 34 Q60 28 66 30 Q60 34 58 42 Q52 40 50 50 Z" fill="var(--sage-light)"/>
+      `;
+      break;
+    case 'spiky':
+      content = `
+        ${potBase(false)}
+        ${[-32,-18,-4,10,24].map((offset, i) => `
+          <path d="M50 78 Q${50+offset*0.3} 50 ${50+offset} 18 Q${50+offset+3} 50 50 78 Z" fill="${i%2===0 ? 'var(--sage)' : 'var(--sage-light)'}"/>
+        `).join('')}
+      `;
+      break;
+    case 'rosette':
+      content = `
+        ${potBase(false)}
+        ${[0,51,102,153,204,255,306].map((deg, i) => {
+          const rad = (deg * Math.PI) / 180;
+          const x = 50 + Math.cos(rad) * 16;
+          const y = 66 + Math.sin(rad) * 10;
+          return `<ellipse cx="${x}" cy="${y}" rx="9" ry="14" transform="rotate(${deg} ${x} ${y})" fill="${i % 2 === 0 ? 'var(--sage)' : 'var(--sage-light)'}"/>`;
+        }).join('')}
+        <circle cx="50" cy="66" r="7" fill="var(--sage)"/>
+      `;
+      break;
+    case 'tall-cane':
+      content = `
+        ${potBase(false)}
+        <path d="M46 78 L44 24" stroke="var(--clay)" stroke-width="4"/>
+        <path d="M56 78 L58 30" stroke="var(--clay)" stroke-width="4"/>
+        ${leafPair(44, 24, 16, 140, 'var(--sage)')}
+        ${leafPair(44, 24, 16, 60, 'var(--sage-light)')}
+        ${leafPair(58, 30, 14, 120, 'var(--sage-light)')}
+        ${leafPair(58, 30, 14, 40, 'var(--sage)')}
+      `;
+      break;
+    case 'flower':
+      content = `
+        ${potBase(false)}
+        <path d="M50 76 Q30 66 28 42" stroke="var(--sage)" stroke-width="3" fill="none"/>
+        <path d="M50 76 Q70 66 72 42" stroke="var(--sage)" stroke-width="3" fill="none"/>
+        ${leafPair(28, 42, 14, 150, 'var(--sage)')}
+        ${leafPair(72, 42, 14, 30, 'var(--sage)')}
+        <path d="M50 60 L50 28" stroke="var(--sage)" stroke-width="3"/>
+        ${[0,72,144,216,288].map(deg => {
+          const rad = (deg * Math.PI) / 180;
+          const x = 50 + Math.cos(rad) * 9;
+          const y = 20 + Math.sin(rad) * 9;
+          return `<ellipse cx="${x}" cy="${y}" rx="6" ry="10" transform="rotate(${deg} ${x} ${y})" fill="${accent || '#F7F4EA'}"/>`;
+        }).join('')}
+        <circle cx="50" cy="20" r="4" fill="#E0B84E"/>
+      `;
+      break;
+    case 'spider':
+      content = `
+        ${potBase(false)}
+        ${[-40,-24,-8,8,24,40].map((offset, i) => `
+          <path d="M50 76 Q${50+offset*0.5} 46 ${50+offset} 22" stroke="${i % 2 === 0 ? 'var(--sage)' : 'var(--sage-light)'}" stroke-width="4" fill="none"/>
+        `).join('')}
+        <circle cx="26" cy="60" r="2.5" fill="var(--sage-light)"/>
+        <circle cx="74" cy="64" r="2.5" fill="var(--sage-light)"/>
+      `;
+      break;
+    case 'cactus':
+      content = `
+        ${potBase(false)}
+        <rect x="40" y="30" width="20" height="48" rx="10" fill="var(--sage)"/>
+        <rect x="22" y="42" width="14" height="26" rx="7" fill="var(--sage-light)"/>
+        <rect x="64" y="36" width="14" height="30" rx="7" fill="var(--sage-light)"/>
+        <line x1="44" y1="36" x2="44" y2="72" stroke="var(--sage-light)" stroke-width="1" opacity="0.5"/>
+        <line x1="56" y1="36" x2="56" y2="72" stroke="var(--sage-light)" stroke-width="1" opacity="0.5"/>
+        ${accent ? `<ellipse cx="50" cy="26" rx="7" ry="8" fill="${accent}"/>` : ''}
+      `;
+      break;
+    case 'fern':
+      content = `
+        ${potBase(false)}
+        ${[-50,-34,-18,0,18,34,50].map((offset, i) => `
+          <path d="M50 76 Q${50+offset*0.4} 50 ${50+offset*0.9} 24" stroke="${i % 2 === 0 ? 'var(--sage)' : 'var(--sage-light)'}" stroke-width="2.5" fill="none"/>
+        `).join('')}
+      `;
+      break;
+    case 'herb':
+      content = `
+        ${potBase(false)}
+        ${[[38,58],[50,50],[62,58],[44,64],[56,64]].map(([x,y], i) => `
+          <ellipse cx="${x}" cy="${y}" rx="9" ry="12" transform="rotate(${(i-2)*15} ${x} ${y})" fill="${i % 2 === 0 ? 'var(--sage)' : 'var(--sage-light)'}"/>
+        `).join('')}
+      `;
+      break;
+    case 'fan':
+      content = `
+        ${potBase(true)}
+        ${[-50,-25,0,25,50].map((angle, i) => {
+          const rad = ((90 - angle) * Math.PI) / 180;
+          const baseX = 50, baseY = 70;
+          const tipX = baseX + Math.cos(rad) * 34;
+          const tipY = baseY - Math.sin(rad) * 44;
+          return `<path d="M${baseX} ${baseY} Q${baseX + (tipX-baseX)*0.3} ${baseY - 20} ${tipX} ${tipY} Q${baseX + (tipX-baseX)*0.6} ${tipY+6} ${baseX} ${baseY} Z" fill="${i % 2 === 0 ? 'var(--sage)' : 'var(--sage-light)'}"/>`;
+        }).join('')}
+      `;
+      break;
+    case 'branching':
+      content = `
+        ${potBase(false)}
+        <path d="M50 78 L50 56 M50 56 L34 38 M50 56 L66 40" stroke="var(--clay)" stroke-width="3" fill="none"/>
+        ${[[34,38],[66,40],[50,56],[26,26],[74,28]].map(([x,y], i) => `
+          <circle cx="${x}" cy="${y}" r="7" fill="${i % 2 === 0 ? 'var(--sage)' : 'var(--sage-light)'}"/>
+        `).join('')}
+      `;
+      break;
+    case 'coin':
+      content = `
+        ${potBase(false)}
+        ${[[36,50],[50,34],[64,52],[44,66],[60,64]].map(([x,y], i) => `
+          <line x1="50" y1="76" x2="${x}" y2="${y+8}" stroke="var(--sage)" stroke-width="2"/>
+          <circle cx="${x}" cy="${y}" r="8" fill="${i % 2 === 0 ? 'var(--sage)' : 'var(--sage-light)'}"/>
+        `).join('')}
+      `;
+      break;
+    case 'airplant':
+      content = `
+        <ellipse cx="50" cy="86" rx="16" ry="4" fill="var(--line)"/>
+        ${[-30,-10,10,30,0].map((angle, i) => {
+          const rad = ((90 - angle) * Math.PI) / 180;
+          const tipX = 50 + Math.cos(rad) * 22;
+          const tipY = 82 - Math.sin(rad) * 46;
+          return `<path d="M50 82 Q${50 + (tipX-50)*0.6} ${82 - (82-tipY)*0.5} ${tipX} ${tipY}" stroke="${i % 2 === 0 ? 'var(--sage)' : 'var(--sage-light)'}" stroke-width="4" fill="none" stroke-linecap="round"/>`;
+        }).join('')}
+      `;
+      break;
+    default:
+      content = `<text x="50" y="62" font-size="40" text-anchor="middle">🌱</text>`;
+  }
+
+  return `<svg viewBox="0 0 100 100" width="100%" height="100%">${content}</svg>`;
+}
+
 function speciesDifficulty(species) {
   if (species.freq >= 14) return { label: 'Low maintenance', emoji: '🟢', tier: 'easy' };
   if (species.freq >= 7) return { label: 'Easy care', emoji: '🟡', tier: 'moderate' };
@@ -1146,8 +1335,8 @@ function buildDictionaryCardsHtml(list, search) {
     const diff = speciesDifficulty(s);
     return `
       <div class="dictionary-card dictionary-card-${diff.tier}" data-id="${s.id}">
+        <div class="dictionary-illustration">${speciesIllustrationSVG(s)}</div>
         <div class="dictionary-card-top">
-          <div class="dictionary-emoji">${s.emoji}</div>
           <div class="dictionary-difficulty-badge">${diff.emoji} ${diff.label}</div>
         </div>
         <div class="dictionary-name">${s.name}</div>
