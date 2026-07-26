@@ -108,6 +108,9 @@ const state = {
   showAboutModal: false,
   showWelcome: false,
   hasInvited: false,
+  confirmDeletePlantId: null,
+  lastDeletedPlant: null,
+  lastDeletedIndex: null,
 };
 
 let nextId = 1;
@@ -385,6 +388,73 @@ function renderAboutModal() {
 }
 
 // ---------- invite / share app ----------
+
+// ---------- delete confirmation ----------
+
+function renderDeleteConfirmModal() {
+  const plant = state.plants.find(p => p.id === state.confirmDeletePlantId);
+  if (!plant) return '';
+  return `
+  <div class="modal-backdrop" id="deleteConfirmBackdrop">
+    <div class="modal delete-confirm-modal">
+      <div class="delete-confirm-emoji">🥀</div>
+      <h3>Remove ${plant.name}?</h3>
+      <p class="delete-confirm-text">This deletes its photo, notes, and full watering history. This can't be undone after a few seconds, but you'll get a brief chance to undo right after.</p>
+      <div class="modal-actions">
+        <button class="secondary" id="cancelDeletePlant">Cancel</button>
+        <button class="primary delete-confirm-btn" id="confirmDeletePlant">Remove plant</button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function performPlantDelete(plantId) {
+  const index = state.plants.findIndex(p => p.id === plantId);
+  if (index === -1) return;
+  state.lastDeletedPlant = state.plants[index];
+  state.lastDeletedIndex = index;
+  state.plants = state.plants.filter(p => p.id !== plantId);
+  state.activeId = null;
+  state.mobileDetailOpen = false;
+  state.confirmDeletePlantId = null;
+  render();
+  savePlants();
+  showUndoToast();
+}
+
+function showUndoToast() {
+  const existing = document.getElementById('undoToast');
+  if (existing) existing.remove();
+
+  const toast = document.createElement('div');
+  toast.id = 'undoToast';
+  toast.className = 'undo-toast';
+  toast.innerHTML = `
+    <span>Plant removed</span>
+    <button id="undoDeleteBtn">Undo</button>
+  `;
+  document.body.appendChild(toast);
+
+  const timeoutId = setTimeout(() => {
+    toast.remove();
+    state.lastDeletedPlant = null;
+    state.lastDeletedIndex = null;
+  }, 5000);
+
+  toast.querySelector('#undoDeleteBtn').onclick = () => {
+    clearTimeout(timeoutId);
+    if (state.lastDeletedPlant) {
+      const restoreAt = Math.min(state.lastDeletedIndex, state.plants.length);
+      state.plants.splice(restoreAt, 0, state.lastDeletedPlant);
+      state.activeId = state.lastDeletedPlant.id;
+      state.lastDeletedPlant = null;
+      state.lastDeletedIndex = null;
+      render();
+      savePlants();
+    }
+    toast.remove();
+  };
+}
 
 function renderInviteModal() {
   const url = window.location.origin + window.location.pathname;
@@ -1022,6 +1092,7 @@ function render() {
     ` : ''}
     ${state.showInviteModal ? renderInviteModal() : ''}
     ${state.showAboutModal ? renderAboutModal() : ''}
+    ${state.confirmDeletePlantId ? renderDeleteConfirmModal() : ''}
     ${state.showWelcome ? renderWelcome() : ''}
 
     ${state.showAddModal ? renderModal() : ''}
@@ -1779,11 +1850,8 @@ function renderDetail(p) {
     btn.disabled = false;
   };
   div.querySelector('#removeBtn').onclick = () => {
-    state.plants = state.plants.filter(x => x.id !== p.id);
-    state.activeId = null;
-    state.mobileDetailOpen = false;
+    state.confirmDeletePlantId = p.id;
     render();
-    savePlants();
   };
 
   const photoInput = div.querySelector('#detailPhotoInput');
@@ -1964,6 +2032,9 @@ document.addEventListener('click', (e) => {
   if (e.target.id === 'closeInvite') { state.showInviteModal = false; render(); }
   if (e.target.id === 'aboutBackdrop') { state.showAboutModal = false; render(); }
   if (e.target.id === 'closeAbout') { state.showAboutModal = false; render(); }
+  if (e.target.id === 'deleteConfirmBackdrop') { state.confirmDeletePlantId = null; render(); }
+  if (e.target.id === 'cancelDeletePlant') { state.confirmDeletePlantId = null; render(); }
+  if (e.target.id === 'confirmDeletePlant') { performPlantDelete(state.confirmDeletePlantId); }
   if (e.target.id === 'dismissWelcome') {
     state.showWelcome = false;
     localStorage.setItem('plant-parent-welcome-seen', '1');
