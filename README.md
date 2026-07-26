@@ -62,6 +62,9 @@ Heads up on a real platform limit: Vercel's free plan only allows cron jobs to r
 That's it — every 5 hours, cron-job.org pings your app, which picks a random plant tip or check-in message and sends it as a real push notification to everyone who's enabled reminders.
 
 ## What's new in this version
+- **Multi-device sync**: More menu → "Sync devices" → create a 6-character code on one device, enter it on another, and both stay linked to the same plant list. No account or password needed. Uses the same free Upstash database already set up for notifications — no new setup required.
+
+## What's new in previous versions
 - **Random check-ins**: a rotating pool of plant tips and gentle nudges, sent every 5 hours via a free external scheduler
 
 ## What's new in previous versions

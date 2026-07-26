@@ -111,6 +111,9 @@ const state = {
   confirmDeletePlantId: null,
   lastDeletedPlant: null,
   lastDeletedIndex: null,
+  syncCode: null,
+  showSyncModal: false,
+  syncStatus: null, // transient status message shown in the sync modal
 };
 
 let nextId = 1;
@@ -1078,6 +1081,10 @@ function render() {
             <span>About Plant Parent</span>
           </button>
           <div class="more-menu-divider"></div>
+          <button class="more-menu-item" id="navSync">
+            <span class="more-menu-icon">🔄</span>
+            <span>${state.syncCode ? `Synced · ${state.syncCode}` : 'Sync devices'}</span>
+          </button>
           <button class="more-menu-item" id="navExport">
             <span class="more-menu-icon">⬇️</span>
             <span>Back up my plants</span>
@@ -1093,6 +1100,7 @@ function render() {
     ${state.showInviteModal ? renderInviteModal() : ''}
     ${state.showAboutModal ? renderAboutModal() : ''}
     ${state.confirmDeletePlantId ? renderDeleteConfirmModal() : ''}
+    ${state.showSyncModal ? renderSyncModal() : ''}
     ${state.showWelcome ? renderWelcome() : ''}
 
     ${state.showAddModal ? renderModal() : ''}
@@ -1159,6 +1167,7 @@ function render() {
     document.getElementById('navPropagation').onclick = () => { state.currentView = 'propagation'; state.showMoreMenu = false; render(); };
     document.getElementById('navTheme').onclick = () => { state.showMoreMenu = false; state.showThemeModal = true; render(); };
     document.getElementById('navInvite').onclick = () => { state.showMoreMenu = false; state.showInviteModal = true; render(); };
+    document.getElementById('navSync').onclick = () => { state.showMoreMenu = false; state.syncStatus = null; state.showSyncModal = true; render(); };
     document.getElementById('navAbout').onclick = () => { state.showMoreMenu = false; state.showAboutModal = true; render(); };
     document.getElementById('moreMenuBackdrop').addEventListener('click', (e) => {
       if (e.target.id === 'moreMenuBackdrop') { state.showMoreMenu = false; render(); }
@@ -2035,6 +2044,23 @@ document.addEventListener('click', (e) => {
   if (e.target.id === 'deleteConfirmBackdrop') { state.confirmDeletePlantId = null; render(); }
   if (e.target.id === 'cancelDeletePlant') { state.confirmDeletePlantId = null; render(); }
   if (e.target.id === 'confirmDeletePlant') { performPlantDelete(state.confirmDeletePlantId); }
+  if (e.target.id === 'syncBackdrop') { state.showSyncModal = false; render(); }
+  if (e.target.id === 'cancelSyncModal') { state.showSyncModal = false; render(); }
+  if (e.target.id === 'closeSyncModal') { state.showSyncModal = false; render(); }
+  if (e.target.id === 'createSyncCode') { createAndPushSyncCode(); }
+  if (e.target.id === 'joinSyncCode') {
+    const input = document.getElementById('syncCodeInput');
+    const code = (input?.value || '').trim().toUpperCase();
+    if (code.length >= 4) joinExistingSyncCode(code);
+  }
+  if (e.target.id === 'pullSyncNow') { pullSyncNow(); }
+  if (e.target.id === 'stopSyncing') { stopSyncing(); }
+  if (e.target.id === 'copySyncCode') {
+    navigator.clipboard?.writeText(state.syncCode).then(() => {
+      const btn = document.getElementById('copySyncCode');
+      if (btn) { const orig = btn.textContent; btn.textContent = 'Copied!'; setTimeout(() => { btn.textContent = orig; }, 1500); }
+    }).catch(() => {});
+  }
   if (e.target.id === 'dismissWelcome') {
     state.showWelcome = false;
     localStorage.setItem('plant-parent-welcome-seen', '1');
@@ -2138,6 +2164,15 @@ function savePlants() {
   syncToServer();
 }
 
+function savePlantsLocalOnly() {
+  try {
+    localStorage.setItem('plant-parent-plants', JSON.stringify(state.plants));
+  } catch (err) {
+    console.error('Could not save plants locally', err);
+  }
+  checkAchievements();
+}
+
 function loadPlants() {
   try {
     const raw = localStorage.getItem('plant-parent-plants');
@@ -2160,11 +2195,136 @@ async function syncToServer() {
     await fetch('/api/sync', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ deviceId: getDeviceId(), plants: state.plants })
+      body: JSON.stringify({ deviceId: getDeviceId(), plants: state.plants, syncCode: state.syncCode || undefined })
     });
   } catch (err) {
     // offline or backend not deployed yet — local storage still has the data
   }
+}
+
+// ---------- multi-device sync ----------
+
+function generateSyncCode() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no ambiguous chars (0/O, 1/I)
+  let code = '';
+  for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
+  return code;
+}
+
+function renderSyncModal() {
+  const status = state.syncStatus;
+  return `
+  <div class="modal-backdrop" id="syncBackdrop">
+    <div class="modal sync-modal">
+      <h3>Sync across devices</h3>
+      ${state.syncCode ? `
+        <p class="about-story">This device is linked with the code below. Enter the same code in Plant Parent on another device to see the same plants there.</p>
+        <div class="sync-code-display">${state.syncCode}</div>
+        <div class="modal-actions">
+          <button class="secondary" id="copySyncCode">Copy code</button>
+          <button class="primary" id="pullSyncNow">🔄 Sync now</button>
+        </div>
+        <button class="sync-stop-btn" id="stopSyncing">Stop syncing this device</button>
+      ` : `
+        <p class="about-story">Link this device with another so you see the same plants on both. No account needed — just a short code.</p>
+        <div class="sync-choice-row">
+          <button class="primary" id="createSyncCode">✨ Create a new sync code</button>
+        </div>
+        <div class="sync-divider">or</div>
+        <div class="field">
+          <label>Enter a code from another device</label>
+          <input id="syncCodeInput" placeholder="e.g. AB12CD" maxlength="6" style="text-transform:uppercase;">
+        </div>
+        <div class="modal-actions">
+          <button class="secondary" id="cancelSyncModal">Cancel</button>
+          <button class="primary" id="joinSyncCode">Link this device</button>
+        </div>
+      `}
+      ${status ? `<div class="sync-status">${status}</div>` : ''}
+      ${state.syncCode ? `<div class="modal-actions"><button class="secondary" id="closeSyncModal">Close</button></div>` : ''}
+    </div>
+  </div>`;
+}
+
+async function createAndPushSyncCode() {
+  state.syncCode = generateSyncCode();
+  localStorage.setItem('plant-parent-sync-code', state.syncCode);
+  state.syncStatus = 'Setting up…';
+  render();
+  await syncToServer();
+  state.syncStatus = 'Ready! Enter this code on your other device.';
+  render();
+}
+
+async function joinExistingSyncCode(code) {
+  state.syncStatus = 'Looking for that code…';
+  render();
+  try {
+    const res = await fetch('/api/sync-pull', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ syncCode: code })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      state.syncStatus = data.error || "Couldn't find that code. Double check it and try again.";
+      render();
+      return;
+    }
+    const confirmed = confirm(`This will replace your current ${state.plants.length} plant(s) with ${data.plants.length} plant(s) from the linked device. Continue?`);
+    if (!confirmed) {
+      state.syncStatus = null;
+      render();
+      return;
+    }
+    state.plants = data.plants;
+    nextId = state.plants.length ? Math.max(...state.plants.map(p => p.id)) + 1 : 1;
+    state.syncCode = code;
+    localStorage.setItem('plant-parent-sync-code', code);
+    state.activeId = null;
+    state.syncStatus = 'Linked and up to date!';
+    render();
+    savePlants();
+  } catch (err) {
+    state.syncStatus = "Couldn't reach the server. Check your connection and try again.";
+    render();
+  }
+}
+
+async function pullSyncNow() {
+  if (!state.syncCode) return;
+  state.syncStatus = 'Checking for updates…';
+  render();
+  try {
+    const res = await fetch('/api/sync-pull', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ syncCode: state.syncCode })
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      state.syncStatus = data.error || 'Nothing to sync yet.';
+      render();
+      return;
+    }
+    state.plants = data.plants;
+    nextId = state.plants.length ? Math.max(...state.plants.map(p => p.id)) + 1 : 1;
+    state.activeId = null;
+    state.syncStatus = 'Up to date!';
+    render();
+    savePlantsLocalOnly();
+  } catch (err) {
+    state.syncStatus = "Couldn't reach the server.";
+    render();
+  }
+}
+
+function stopSyncing() {
+  state.syncCode = null;
+  localStorage.removeItem('plant-parent-sync-code');
+  state.showSyncModal = false;
+  state.syncStatus = null;
+  render();
 }
 
 // ---------- push notifications ----------
@@ -2236,6 +2396,7 @@ document.body.dataset.theme = state.theme;
 state.memoryGameCompleted = localStorage.getItem('plant-parent-memory-completed') === '1';
 state.hasInvited = localStorage.getItem('plant-parent-has-invited') === '1';
 state.showWelcome = localStorage.getItem('plant-parent-welcome-seen') !== '1';
+state.syncCode = localStorage.getItem('plant-parent-sync-code') || null;
 
 if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('sw.js').catch((err) => console.error('SW registration failed', err));
@@ -2243,3 +2404,27 @@ if ('serviceWorker' in navigator) {
 
 render();
 maybeRefreshWeather();
+
+// If this device is linked to a sync code, quietly check for updates from
+// other linked devices right on startup (no confirmation needed here since
+// it's a normal refresh, not a first-time link).
+if (state.syncCode) {
+  (async () => {
+    try {
+      const res = await fetch('/api/sync-pull', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ syncCode: state.syncCode })
+      });
+      const data = await res.json();
+      if (res.ok && Array.isArray(data.plants)) {
+        state.plants = data.plants;
+        nextId = state.plants.length ? Math.max(...state.plants.map(p => p.id)) + 1 : 1;
+        render();
+        savePlantsLocalOnly();
+      }
+    } catch (err) {
+      // offline or nothing to sync yet — local data stays as-is
+    }
+  })();
+}
