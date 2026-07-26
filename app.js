@@ -2247,6 +2247,7 @@ function renderSyncModal() {
 }
 
 async function createAndPushSyncCode() {
+  localStorage.removeItem('plant-parent-pre-sync-backup');
   state.syncCode = generateSyncCode();
   localStorage.setItem('plant-parent-sync-code', state.syncCode);
   state.syncStatus = 'Setting up…';
@@ -2276,6 +2277,12 @@ async function joinExistingSyncCode(code) {
       state.syncStatus = null;
       render();
       return;
+    }
+    // Save what this device had before joining, so "Stop syncing" can restore it later.
+    try {
+      localStorage.setItem('plant-parent-pre-sync-backup', JSON.stringify(state.plants));
+    } catch (err) {
+      // if this fails, stopping sync later will just keep the synced list instead of restoring
     }
     state.plants = data.plants;
     nextId = state.plants.length ? Math.max(...state.plants.map(p => p.id)) + 1 : 1;
@@ -2320,11 +2327,30 @@ async function pullSyncNow() {
 }
 
 function stopSyncing() {
+  let backup = null;
+  try {
+    const raw = localStorage.getItem('plant-parent-pre-sync-backup');
+    if (raw) backup = JSON.parse(raw);
+  } catch (err) {
+    backup = null;
+  }
+
+  if (backup && Array.isArray(backup)) {
+    const restore = confirm(`Restore the ${backup.length} plant(s) this device had before you joined the sync? Choose "Cancel" to keep the currently synced list instead.`);
+    if (restore) {
+      state.plants = backup;
+      nextId = state.plants.length ? Math.max(...state.plants.map(p => p.id)) + 1 : 1;
+      state.activeId = null;
+    }
+  }
+
+  localStorage.removeItem('plant-parent-pre-sync-backup');
   state.syncCode = null;
   localStorage.removeItem('plant-parent-sync-code');
   state.showSyncModal = false;
   state.syncStatus = null;
   render();
+  savePlantsLocalOnly();
 }
 
 // ---------- push notifications ----------
