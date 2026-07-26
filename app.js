@@ -732,6 +732,108 @@ function daysRooting(prop) {
   return daysSince(prop.startDate);
 }
 
+// ---------- settings ----------
+
+function renderSettings() {
+  const div = document.createElement('div');
+  div.className = 'settings-page';
+
+  div.innerHTML = `
+    <div class="guide-hero">
+      <div class="guide-hero-title">⚙️ Settings</div>
+      <div class="guide-hero-sub">Everything about how Plant Parent looks and behaves</div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">Appearance</div>
+      <div class="settings-row">
+        <div class="settings-row-label">
+          <div class="settings-row-name">Theme</div>
+          <div class="settings-row-desc">Current: ${THEMES.find(t => t.id === state.theme)?.name || 'Sage'}</div>
+        </div>
+        <button class="secondary" id="settingsThemeBtn">🎨 Change</button>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">Reminders</div>
+      <div class="settings-row">
+        <div class="settings-row-label">
+          <div class="settings-row-name">Push reminders</div>
+          <div class="settings-row-desc">Real phone notifications for overdue plants</div>
+        </div>
+        <button class="secondary ${state.notificationsEnabled ? 'settings-toggle-on' : ''}" id="settingsNotifBtn">${state.notificationsEnabled ? '🔔 On' : '🔕 Off'}</button>
+      </div>
+      <div class="settings-row">
+        <div class="settings-row-label">
+          <div class="settings-row-name">Weather tips</div>
+          <div class="settings-row-desc">Watering nudges based on local weather</div>
+        </div>
+        <button class="secondary ${state.weatherEnabled ? 'settings-toggle-on' : ''}" id="settingsWeatherBtn">${state.weatherEnabled ? '🌦️ On' : '⛅ Off'}</button>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">Sync &amp; backup</div>
+      <div class="settings-row">
+        <div class="settings-row-label">
+          <div class="settings-row-name">Sync across devices</div>
+          <div class="settings-row-desc">${state.syncCode ? `Linked · code ${state.syncCode}` : 'Not linked to another device'}</div>
+        </div>
+        <button class="secondary" id="settingsSyncBtn">🔄 ${state.syncCode ? 'Manage' : 'Set up'}</button>
+      </div>
+      <div class="settings-row">
+        <div class="settings-row-label">
+          <div class="settings-row-name">Back up my plants</div>
+          <div class="settings-row-desc">Download everything as a file</div>
+        </div>
+        <button class="secondary" id="settingsExportBtn">⬇️ Back up</button>
+      </div>
+      <div class="settings-row">
+        <div class="settings-row-label">
+          <div class="settings-row-name">Restore from backup</div>
+          <div class="settings-row-desc">Replace current plants with a backup file</div>
+        </div>
+        <button class="secondary" id="settingsImportBtn">⬆️ Restore</button>
+        <input type="file" id="settingsImportFileInput" accept="application/json" style="display:none;">
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">Community</div>
+      <div class="settings-row">
+        <div class="settings-row-label">
+          <div class="settings-row-name">Invite a friend</div>
+          <div class="settings-row-desc">Share a QR code or link to the app</div>
+        </div>
+        <button class="secondary" id="settingsInviteBtn">💌 Invite</button>
+      </div>
+      <div class="settings-row">
+        <div class="settings-row-label">
+          <div class="settings-row-name">About Plant Parent</div>
+          <div class="settings-row-desc">The story, stats, and testimonials</div>
+        </div>
+        <button class="secondary" id="settingsAboutBtn">🌱 View</button>
+      </div>
+    </div>
+  `;
+
+  div.querySelector('#settingsThemeBtn').onclick = () => { state.showThemeModal = true; render(); };
+  div.querySelector('#settingsNotifBtn').onclick = () => enableNotifications();
+  div.querySelector('#settingsWeatherBtn').onclick = () => toggleWeather();
+  div.querySelector('#settingsSyncBtn').onclick = () => { state.syncStatus = null; state.showSyncModal = true; render(); };
+  div.querySelector('#settingsExportBtn').onclick = () => exportBackup();
+  div.querySelector('#settingsImportBtn').onclick = () => div.querySelector('#settingsImportFileInput').click();
+  div.querySelector('#settingsImportFileInput').onchange = (e) => {
+    const file = e.target.files[0];
+    if (file) importBackup(file);
+  };
+  div.querySelector('#settingsInviteBtn').onclick = () => { state.showInviteModal = true; render(); };
+  div.querySelector('#settingsAboutBtn').onclick = () => { state.showAboutModal = true; render(); };
+
+  return div;
+}
+
 function renderPropagation() {
   const div = document.createElement('div');
   div.className = 'prop-list';
@@ -969,7 +1071,7 @@ function render() {
 
   app.innerHTML = `
     <div class="main-content">
-      ${state.currentView !== 'garden' && state.currentView !== 'dictionary' ? `
+      ${state.currentView !== 'garden' && state.currentView !== 'dictionary' && state.currentView !== 'settings' ? `
         <header>
           <div class="header-flourish">🌿</div>
           <h1>Plant Parent</h1>
@@ -996,6 +1098,7 @@ function render() {
       ${state.currentView === 'dictionary' ? `<div id="dictionaryView"></div>` : ''}
       ${state.currentView === 'journal' ? `<div id="journalView"></div>` : ''}
       ${state.currentView === 'propagation' ? `<div id="propagationView"></div>` : ''}
+      ${state.currentView === 'settings' ? `<div id="settingsView"></div>` : ''}
       ${state.currentView === 'shelf' ? `
         <div class="layout ${state.mobileDetailOpen ? 'mobile-detail-open' : ''}">
           <div class="shelf-column">
@@ -1029,7 +1132,7 @@ function render() {
       <button class="bottom-nav-btn ${state.currentView === 'dictionary' ? 'bottom-nav-active' : ''}" id="navDictionary">
         <span class="bottom-nav-icon">📖</span><span class="bottom-nav-label">Guide</span>
       </button>
-      <button class="bottom-nav-btn ${state.showMoreMenu ? 'bottom-nav-active' : ''}" id="navMore">
+      <button class="bottom-nav-btn ${state.showMoreMenu || ['settings','journal','propagation'].includes(state.currentView) ? 'bottom-nav-active' : ''}" id="navMore">
         <span class="bottom-nav-icon">⋯</span><span class="bottom-nav-label">More</span>
       </button>
     </nav>
@@ -1059,41 +1162,10 @@ function render() {
             <span>Memory Match</span>
           </button>
           <div class="more-menu-divider"></div>
-          <button class="more-menu-item" id="navNotif">
-            <span class="more-menu-icon">${state.notificationsEnabled ? '🔔' : '🔕'}</span>
-            <span>${state.notificationsEnabled ? 'Reminders on' : 'Enable reminders'}</span>
+          <button class="more-menu-item" id="navSettings">
+            <span class="more-menu-icon">⚙️</span>
+            <span>Settings</span>
           </button>
-          <button class="more-menu-item" id="navWeather">
-            <span class="more-menu-icon">${state.weatherEnabled ? '🌦️' : '⛅'}</span>
-            <span>${state.weatherEnabled ? 'Weather tips on' : 'Enable weather tips'}</span>
-          </button>
-          <button class="more-menu-item" id="navTheme">
-            <span class="more-menu-icon">🎨</span>
-            <span>Theme: ${THEMES.find(t => t.id === state.theme)?.name || 'Sage'}</span>
-          </button>
-          <div class="more-menu-divider"></div>
-          <button class="more-menu-item" id="navInvite">
-            <span class="more-menu-icon">💌</span>
-            <span>Invite a friend</span>
-          </button>
-          <button class="more-menu-item" id="navAbout">
-            <span class="more-menu-icon">🌱</span>
-            <span>About Plant Parent</span>
-          </button>
-          <div class="more-menu-divider"></div>
-          <button class="more-menu-item" id="navSync">
-            <span class="more-menu-icon">🔄</span>
-            <span>${state.syncCode ? `Synced · ${state.syncCode}` : 'Sync devices'}</span>
-          </button>
-          <button class="more-menu-item" id="navExport">
-            <span class="more-menu-icon">⬇️</span>
-            <span>Back up my plants</span>
-          </button>
-          <button class="more-menu-item" id="navImport">
-            <span class="more-menu-icon">⬆️</span>
-            <span>Restore from backup</span>
-          </button>
-          <input type="file" id="importFileInput" accept="application/json" style="display:none;">
         </div>
       </div>
     ` : ''}
@@ -1118,6 +1190,8 @@ function render() {
     document.getElementById('journalView').appendChild(renderJournal());
   } else if (state.currentView === 'propagation') {
     document.getElementById('propagationView').appendChild(renderPropagation());
+  } else if (state.currentView === 'settings') {
+    document.getElementById('settingsView').appendChild(renderSettings());
   } else {
     const shelf = document.getElementById('shelf');
     getVisiblePlants().forEach(p => shelf.appendChild(renderCard(p)));
@@ -1150,25 +1224,12 @@ function render() {
   document.getElementById('navMore').onclick = () => { state.showMoreMenu = !state.showMoreMenu; render(); };
 
   if (state.showMoreMenu) {
-    document.getElementById('navNotif').onclick = () => { state.showMoreMenu = false; enableNotifications(); };
-    document.getElementById('navWeather').onclick = () => { state.showMoreMenu = false; render(); toggleWeather(); };
-    document.getElementById('navExport').onclick = () => { state.showMoreMenu = false; render(); exportBackup(); };
-    document.getElementById('navImport').onclick = () => { document.getElementById('importFileInput').click(); };
-    document.getElementById('importFileInput').onchange = (e) => {
-      const file = e.target.files[0];
-      state.showMoreMenu = false;
-      render();
-      if (file) importBackup(file);
-    };
     document.getElementById('navBadges').onclick = () => { state.showMoreMenu = false; state.showBadgesModal = true; render(); };
     document.getElementById('navGame').onclick = () => { state.showMoreMenu = false; render(); if (window.openMiniGame) window.openMiniGame(); };
     document.getElementById('navMemoryGame').onclick = () => { state.showMoreMenu = false; render(); if (window.openMemoryGame) window.openMemoryGame(); };
     document.getElementById('navJournal').onclick = () => { state.currentView = 'journal'; state.showMoreMenu = false; render(); };
     document.getElementById('navPropagation').onclick = () => { state.currentView = 'propagation'; state.showMoreMenu = false; render(); };
-    document.getElementById('navTheme').onclick = () => { state.showMoreMenu = false; state.showThemeModal = true; render(); };
-    document.getElementById('navInvite').onclick = () => { state.showMoreMenu = false; state.showInviteModal = true; render(); };
-    document.getElementById('navSync').onclick = () => { state.showMoreMenu = false; state.syncStatus = null; state.showSyncModal = true; render(); };
-    document.getElementById('navAbout').onclick = () => { state.showMoreMenu = false; state.showAboutModal = true; render(); };
+    document.getElementById('navSettings').onclick = () => { state.currentView = 'settings'; state.showMoreMenu = false; render(); };
     document.getElementById('moreMenuBackdrop').addEventListener('click', (e) => {
       if (e.target.id === 'moreMenuBackdrop') { state.showMoreMenu = false; render(); }
     });

@@ -1370,6 +1370,50 @@
     font-style: italic;
   }
 
+  /* Settings page */
+  .settings-page { max-width: 640px; margin: 0 auto; }
+  .settings-section {
+    background: var(--card);
+    border-radius: 16px;
+    padding: 8px 20px;
+    box-shadow: var(--shadow);
+    margin-bottom: 20px;
+  }
+  .settings-section-title {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--soil);
+    padding: 14px 0 6px;
+  }
+  .settings-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 0;
+    border-top: 1px solid var(--line);
+  }
+  .settings-row-name {
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--ink);
+  }
+  .settings-row-desc {
+    font-size: 12px;
+    color: var(--soil);
+    margin-top: 2px;
+  }
+  .settings-row button { flex-shrink: 0; white-space: nowrap; }
+  .settings-toggle-on {
+    background: var(--sage) !important;
+    color: #fff !important;
+    border-color: var(--sage) !important;
+  }
+
   /* Accessibility: visible keyboard focus */
   button:focus-visible,
   input:focus-visible,
