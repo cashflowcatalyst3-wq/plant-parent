@@ -98,6 +98,7 @@ const state = {
   mobileDetailOpen: false,
   dictionarySearch: '',
   dictionaryLightFilter: null,
+  dictionaryPage: 1,
   theme: 'sage',
   showThemeModal: false,
   propagations: [],
@@ -1375,12 +1376,17 @@ function filterDictionary(species, search, lightFilter) {
   });
 }
 
+const GUIDE_PAGE_SIZE = 8;
+
 function renderDictionary() {
   const wrapper = document.createElement('div');
   const species = SPECIES_DICTIONARY.filter(s => s.id !== 'other');
   const search = state.dictionarySearch || '';
   const lightFilter = state.dictionaryLightFilter || null;
   const filtered = filterDictionary(species, search, lightFilter);
+  const totalPages = Math.max(1, Math.ceil(filtered.length / GUIDE_PAGE_SIZE));
+  if (!state.dictionaryPage) state.dictionaryPage = 1;
+  if (state.dictionaryPage > totalPages) state.dictionaryPage = totalPages;
 
   wrapper.innerHTML = `
     <div class="guide-hero">
@@ -1396,23 +1402,47 @@ function renderDictionary() {
         <button class="room-chip ${lightFilter === 'bright' ? 'room-chip-active' : ''}" data-light="bright">Bright light</button>
       </div>
     </div>
-    <div class="dictionary-grid" id="dictionaryGrid">${buildDictionaryCardsHtml(filtered, search)}</div>
+    <div class="dictionary-grid" id="dictionaryGrid"></div>
+    <div class="guide-pagination" id="guidePagination"></div>
   `;
 
   const grid = wrapper.querySelector('#dictionaryGrid');
-  wireDictionaryAddButtons(grid);
+  const paginationEl = wrapper.querySelector('#guidePagination');
+
+  function renderPage() {
+    const start = (state.dictionaryPage - 1) * GUIDE_PAGE_SIZE;
+    const pageItems = filtered.slice(start, start + GUIDE_PAGE_SIZE);
+    grid.innerHTML = buildDictionaryCardsHtml(pageItems, search);
+    wireDictionaryAddButtons(grid);
+    grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+    if (filtered.length <= GUIDE_PAGE_SIZE) {
+      paginationEl.innerHTML = '';
+      return;
+    }
+    paginationEl.innerHTML = `
+      <button class="secondary" id="guidePrevPage" ${state.dictionaryPage === 1 ? 'disabled' : ''}>← Prev</button>
+      <span class="guide-page-label">Page ${state.dictionaryPage} of ${totalPages}</span>
+      <button class="secondary" id="guideNextPage" ${state.dictionaryPage === totalPages ? 'disabled' : ''}>Next →</button>
+    `;
+    const prevBtn = paginationEl.querySelector('#guidePrevPage');
+    const nextBtn = paginationEl.querySelector('#guideNextPage');
+    if (prevBtn) prevBtn.onclick = () => { state.dictionaryPage--; renderPage(); };
+    if (nextBtn) nextBtn.onclick = () => { state.dictionaryPage++; renderPage(); };
+  }
+  renderPage();
 
   const searchInput = wrapper.querySelector('#guideSearchInput');
   searchInput.addEventListener('input', () => {
     state.dictionarySearch = searchInput.value;
-    const refiltered = filterDictionary(species, state.dictionarySearch, state.dictionaryLightFilter);
-    grid.innerHTML = buildDictionaryCardsHtml(refiltered, state.dictionarySearch);
-    wireDictionaryAddButtons(grid);
+    state.dictionaryPage = 1;
+    render();
   });
 
   wrapper.querySelectorAll('.guide-light-chips .room-chip').forEach(chip => {
     chip.onclick = () => {
       state.dictionaryLightFilter = chip.dataset.light || null;
+      state.dictionaryPage = 1;
       render();
     };
   });

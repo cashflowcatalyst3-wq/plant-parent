@@ -983,6 +983,29 @@
     font-style: italic;
   }
 
+  .guide-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 24px;
+    padding-bottom: 12px;
+  }
+  .guide-pagination button {
+    font-size: 13px;
+    padding: 9px 18px;
+  }
+  .guide-pagination button:disabled {
+    opacity: 0.4;
+    cursor: default;
+  }
+  .guide-page-label {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 13px;
+    color: var(--soil);
+  }
+
   .dictionary-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
