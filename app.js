@@ -363,6 +363,15 @@ function renderWelcome() {
 
 function renderAboutModal() {
   const speciesCount = SPECIES_DICTIONARY.length - 1; // exclude "Other"
+  const totalWaterings = state.plants.reduce((sum, p) => sum + (p.waterLog || []).length, 0);
+  const longestStreak = state.plants.reduce((max, p) => Math.max(max, calcStreak(p)), 0);
+  const oldestPlant = state.plants.reduce((oldest, p) => {
+    if (!p.createdAt) return oldest;
+    if (!oldest || new Date(p.createdAt) < new Date(oldest.createdAt)) return p;
+    return oldest;
+  }, null);
+  const daysSinceStart = oldestPlant ? daysSince(oldestPlant.createdAt) : 0;
+
   return `
   <div class="modal-backdrop" id="aboutBackdrop">
     <div class="modal about-modal">
@@ -379,10 +388,15 @@ function renderAboutModal() {
         <div class="about-stat"><div class="about-stat-num">${ACHIEVEMENTS.length}</div><div class="about-stat-label">achievements</div></div>
         <div class="about-stat"><div class="about-stat-num">$0</div><div class="about-stat-label">to run, forever</div></div>
       </div>
-      <div class="about-testimonials">
-        <div class="about-testimonial">"I haven't lost a plant since I started using this." <span>— early tester</span></div>
-        <div class="about-testimonial">"The garden view is genuinely satisfying to check every day." <span>— early tester</span></div>
-      </div>
+      ${state.plants.length ? `
+        <div class="about-journey">
+          <div class="about-journey-title">Your journey so far</div>
+          <div class="about-journey-row"><span>🪴</span> ${state.plants.length} plant${state.plants.length === 1 ? '' : 's'} in your care</div>
+          <div class="about-journey-row"><span>💧</span> ${totalWaterings} watering${totalWaterings === 1 ? '' : 's'} logged</div>
+          <div class="about-journey-row"><span>🔥</span> Best streak: ${longestStreak} in a row</div>
+          ${daysSinceStart > 0 ? `<div class="about-journey-row"><span>📅</span> ${daysSinceStart} day${daysSinceStart === 1 ? '' : 's'} since your first plant</div>` : ''}
+        </div>
+      ` : ''}
       <div class="modal-actions">
         <button class="secondary" id="closeAbout">Close</button>
       </div>

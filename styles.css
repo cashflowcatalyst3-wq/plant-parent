@@ -1442,12 +1442,30 @@
   .about-stats { display: flex; justify-content: space-around; margin-bottom: 20px; }
   .about-stat-num { font-family: 'Fraunces', serif; font-weight: 600; font-size: 26px; color: var(--sage); }
   .about-stat-label { font-size: 11px; color: var(--soil); margin-top: 2px; }
-  .about-testimonials { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
-  .about-testimonial {
-    font-size: 12px; font-style: italic; color: var(--ink);
-    background: #FBFAF6; border-radius: 10px; padding: 10px 14px; text-align: left;
+  .about-journey {
+    background: #FBFAF6;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 18px;
+    text-align: left;
   }
-  .about-testimonial span { display: block; font-style: normal; font-size: 11px; color: var(--soil); margin-top: 4px; }
+  .about-journey-title {
+    font-family: 'Fraunces', serif;
+    font-style: italic;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--soil);
+    margin-bottom: 8px;
+  }
+  .about-journey-row {
+    font-size: 13px;
+    color: var(--ink);
+    padding: 4px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
 
   /* Welcome screen */
   .welcome-backdrop {
