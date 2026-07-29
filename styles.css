@@ -11,6 +11,11 @@
     --card: #FFFFFF;
     --line: #E4DFD1;
     --shadow: 0 2px 12px rgba(31,51,36,0.06);
+    --panel2: #FBFAF6;
+    --panel3: #F1EEE3;
+    --panel4: #EFEBDD;
+    --panel5: #EFF4EA;
+    --info-tint: #E4EEF6;
   }
 
   body[data-theme="terracotta"] {
@@ -33,6 +38,11 @@
     --line: #303B32;
     --soil: #B7AF9F;
     --shadow: 0 2px 14px rgba(0,0,0,0.45);
+    --panel2: #202A22;
+    --panel3: #283529;
+    --panel4: #23302A;
+    --panel5: #1E2B22;
+    --info-tint: #1E2A30;
   }
   body[data-mode="dark"] .guide-search,
   body[data-mode="dark"] .notes-input,
@@ -52,6 +62,9 @@
   body[data-mode="dark"] .garden-hill-back { background: #2B3A2E; }
   body[data-mode="dark"] .garden-hill-front { background: linear-gradient(180deg, #24352A 0%, #1F2E24 100%); }
   body[data-mode="dark"] .garden-sun { opacity: 0.7; }
+  body[data-mode="dark"] .garden-summary-banner { background: rgba(20,25,21,0.75); }
+  body[data-mode="dark"] .garden-plant-name { background: rgba(20,25,21,0.6); }
+  body[data-mode="dark"] .game-area { background: linear-gradient(180deg, #1E2B22 0%, var(--bg) 100%); }
 
   * { box-sizing: border-box; }
 
@@ -164,7 +177,7 @@
     cursor: pointer;
     text-align: left;
   }
-  .more-menu-item:hover { background: #F1EEE3; }
+  .more-menu-item:hover { background: var(--panel3); }
   .more-menu-divider {
     height: 1px;
     background: var(--line);
@@ -238,14 +251,14 @@
     display: flex;
     align-items: center;
     gap: 14px;
-    background: linear-gradient(135deg, #EFEBDD, #F6F3EC);
+    background: linear-gradient(135deg, var(--panel4), var(--bg));
     border: 1.5px solid var(--line);
     border-radius: 14px;
     padding: 14px 18px;
     margin-bottom: 24px;
   }
   .daily-card-done {
-    background: linear-gradient(135deg, #E9F1E3, #F6F3EC);
+    background: linear-gradient(135deg, var(--panel5), var(--bg));
     border-color: var(--sage-light);
   }
   .daily-emoji { font-size: 26px; flex-shrink: 0; }
@@ -259,7 +272,7 @@
     display: flex;
     align-items: center;
     gap: 14px;
-    background: linear-gradient(135deg, #E4EEF6, #F6F3EC);
+    background: linear-gradient(135deg, var(--info-tint), var(--bg));
     border: 1.5px solid var(--line);
     border-radius: 14px;
     padding: 14px 18px;
@@ -467,7 +480,7 @@
     margin-top: 2px;
   }
   .garden-stat-highlight {
-    background: linear-gradient(135deg, #FBFAF6, #F1EEE3);
+    background: linear-gradient(135deg, var(--panel2), var(--panel3));
   }
   .garden-stat-icon { font-size: 22px; margin-bottom: 4px; }
   .garden-stat-title {
@@ -562,7 +575,7 @@
   }
   .ring-photo-placeholder {
     position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-    border-radius: 50%; background: #EFEBDD;
+    border-radius: 50%; background: var(--panel4);
     display: flex; align-items: center; justify-content: center;
   }
 
@@ -767,7 +780,7 @@
     font-family: 'Nunito', sans-serif;
     font-size: 14px;
     color: var(--ink);
-    background: #FBFAF6;
+    background: var(--panel2);
     resize: vertical;
   }
   .notes-input:focus { outline: 2px solid var(--sage); border-color: transparent; }
@@ -823,7 +836,7 @@
     font-size: 13px;
     color: var(--ink);
     padding: 8px 12px;
-    background: #FBFAF6;
+    background: var(--panel2);
     border-radius: 8px;
     border-left: 3px solid var(--sage-light);
   }
@@ -923,7 +936,7 @@
     margin-bottom: 8px;
   }
   .badge-item {
-    background: #FBFAF6;
+    background: var(--panel2);
     border-radius: 12px;
     padding: 14px;
     text-align: center;
@@ -982,7 +995,7 @@
   .species-desc {
     margin-top: 10px;
     padding: 12px 14px;
-    background: #EFF4EA;
+    background: var(--panel5);
     border-radius: 10px;
     font-size: 13px;
     line-height: 1.5;
@@ -996,7 +1009,7 @@
     padding: 10px 12px;
     border-radius: 8px;
     border: 1.5px solid var(--line);
-    background: #FBFAF6;
+    background: var(--panel2);
     font-family: 'Nunito', sans-serif;
     font-size: 14px;
     color: var(--ink);
@@ -1023,12 +1036,12 @@
     border-radius: 10px;
     cursor: pointer;
   }
-  .species-picker-row:hover { background: #FBFAF6; }
+  .species-picker-row:hover { background: var(--panel2); }
   .species-picker-row-emoji {
     font-size: 26px;
     width: 40px; height: 40px;
     display: flex; align-items: center; justify-content: center;
-    background: #EFEBDD;
+    background: var(--panel4);
     border-radius: 50%;
     flex-shrink: 0;
   }
@@ -1135,7 +1148,7 @@
   .dictionary-illustration {
     width: 100%;
     aspect-ratio: 1.4;
-    background: linear-gradient(180deg, #EFEBDD, #F6F3EC);
+    background: linear-gradient(180deg, var(--panel4), var(--bg));
     border-radius: 12px;
     margin-bottom: 4px;
     overflow: hidden;
@@ -1150,7 +1163,7 @@
     font-size: 10px;
     font-weight: 700;
     color: var(--soil);
-    background: #FBFAF6;
+    background: var(--panel2);
     border-radius: 999px;
     padding: 4px 9px;
     white-space: nowrap;
@@ -1168,7 +1181,7 @@
     font-size: 11px;
     font-weight: 600;
     color: var(--soil);
-    background: #F1EEE3;
+    background: var(--panel3);
     border-radius: 999px;
     padding: 4px 10px;
   }
@@ -1286,7 +1299,7 @@
     font-family: 'Nunito', sans-serif;
     font-size: 13px;
     color: var(--ink);
-    background: #FBFAF6;
+    background: var(--panel2);
   }
   .room-input:focus { outline: 2px solid var(--sage); border-color: transparent; }
 
@@ -1305,14 +1318,14 @@
     padding: 12px;
     border-radius: 12px;
     border: 1.5px solid var(--line);
-    background: #FBFAF6;
+    background: var(--panel2);
     cursor: pointer;
     font-family: 'Nunito', sans-serif;
     font-size: 13px;
     font-weight: 600;
     color: var(--ink);
   }
-  .theme-option-active { border-color: var(--sage); background: #EFF4EA; }
+  .theme-option-active { border-color: var(--sage); background: var(--panel5); }
   .theme-swatch {
     width: 28px; height: 28px;
     border-radius: 50%;
@@ -1405,12 +1418,12 @@
   }
   .memory-card-back { background: var(--sage); }
   .memory-card-front {
-    background: #FBFAF6;
+    background: var(--panel2);
     transform: rotateY(180deg);
     overflow: hidden;
   }
   .memory-card-photo { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
-  .memory-card-matched .memory-card-front { background: #E9F1E3; box-shadow: 0 0 0 2px var(--sage) inset; }
+  .memory-card-matched .memory-card-front { background: var(--panel5); box-shadow: 0 0 0 2px var(--sage) inset; }
 
   /* Invite modal */
   .invite-modal { text-align: center; }
@@ -1425,7 +1438,7 @@
     font-family: 'Nunito', sans-serif;
     font-size: 12px;
     color: var(--soil);
-    background: #FBFAF6;
+    background: var(--panel2);
   }
 
   /* Sync devices modal */
@@ -1437,7 +1450,7 @@
     letter-spacing: 0.12em;
     text-align: center;
     color: var(--sage);
-    background: #EFF4EA;
+    background: var(--panel5);
     border-radius: 12px;
     padding: 16px;
     margin-bottom: 16px;
@@ -1565,7 +1578,7 @@
   .about-stat-num { font-family: 'Fraunces', serif; font-weight: 600; font-size: 26px; color: var(--sage); }
   .about-stat-label { font-size: 11px; color: var(--soil); margin-top: 2px; }
   .about-journey {
-    background: #FBFAF6;
+    background: var(--panel2);
     border-radius: 12px;
     padding: 14px 16px;
     margin-bottom: 18px;
