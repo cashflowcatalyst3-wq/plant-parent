@@ -100,6 +100,7 @@ const state = {
   dictionaryLightFilter: null,
   dictionaryPage: 1,
   theme: 'sage',
+  darkMode: false,
   showThemeModal: false,
   propagations: [],
   showAddPropModal: false,
@@ -163,6 +164,31 @@ function getRoomList() {
   const rooms = new Set();
   state.plants.forEach(p => { if (p.room && p.room.trim()) rooms.add(p.room.trim()); });
   return Array.from(rooms).sort();
+}
+
+function renderShelfOverviewStrip() {
+  const dueToday = state.plants.filter(p => daysLeft(p) === 0).length;
+  const thriving = state.plants.filter(p => ringPercent(p) < 0.5).length;
+  const bestStreak = state.plants.reduce((max, p) => Math.max(max, calcStreak(p)), 0);
+
+  return `
+    <div class="shelf-overview">
+      <div class="shelf-overview-hero ${dueToday > 0 ? 'shelf-overview-hero-urgent' : ''}">
+        <div class="shelf-overview-hero-num">${dueToday}</div>
+        <div class="shelf-overview-hero-label">${dueToday === 1 ? 'plant needs' : 'plants need'} water today</div>
+      </div>
+      <div class="shelf-overview-side">
+        <div class="shelf-overview-mini">
+          <span class="shelf-overview-mini-num">${thriving}</span>
+          <span class="shelf-overview-mini-label">thriving</span>
+        </div>
+        <div class="shelf-overview-mini">
+          <span class="shelf-overview-mini-num">${bestStreak}</span>
+          <span class="shelf-overview-mini-label">best streak</span>
+        </div>
+      </div>
+    </div>
+  `;
 }
 
 function getVisiblePlants() {
@@ -408,6 +434,36 @@ function renderAboutModal() {
 
 // ---------- delete confirmation ----------
 
+// ---------- custom icon set ----------
+// Consistent line-icon style used in the nav bar, More menu, and Settings —
+// replacing emoji so the app's chrome looks designed rather than default.
+
+const ICONS = {
+  plants: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V11"/><path d="M12 11C12 11 6 11 6 5C12 5 12 11 12 11Z"/><path d="M12 13C12 13 18 13 18 7C12 7 12 13 12 13Z"/><path d="M7 21H17"/></svg>`,
+  garden: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3.2"/><path d="M12 3v3M12 18v3M3 12h3M18 12h3M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M18.4 5.6l-2.1 2.1M7.7 16.3l-2.1 2.1"/></svg>`,
+  guide: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5.5C4 4.7 4.7 4 5.5 4H12V20H5.5C4.7 20 4 19.3 4 18.5V5.5Z"/><path d="M20 5.5C20 4.7 19.3 4 18.5 4H12V20H18.5C19.3 20 20 19.3 20 18.5V5.5Z"/></svg>`,
+  more: `<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="1.8"/><circle cx="12" cy="12" r="1.8"/><circle cx="19" cy="12" r="1.8"/></svg>`,
+  journal: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5h9.5A2.5 2.5 0 0 1 18 6v14l-3-2-3 2-3-2-3 2V6a2.5 2.5 0 0 1 2.5-2.5Z"/><path d="M9 8h6M9 11.5h6"/></svg>`,
+  cuttings: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V9"/><path d="M12 9c0-3.5 2.5-6 6-6-.5 3.5-2.5 6-6 6Z"/><circle cx="7" cy="6" r="2.2"/><circle cx="7" cy="14" r="2.2"/><path d="M8.6 7.6 12 9M8.6 12.4 12 11"/></svg>`,
+  badges: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="5.5"/><path d="m8.5 13.5-1.5 7 5-2.5 5 2.5-1.5-7"/></svg>`,
+  game: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="10" rx="4"/><path d="M8 11v4M6 13h4"/><circle cx="16" cy="12" r="1"/><circle cx="18" cy="14.5" r="1"/></svg>`,
+  brain: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4.5a2.7 2.7 0 0 0-2.7 2.7v.3A2.7 2.7 0 0 0 4.5 10v.6a2.7 2.7 0 0 0 1 5v.4A2.7 2.7 0 0 0 8.2 18.7h.8"/><path d="M15 4.5a2.7 2.7 0 0 1 2.7 2.7v.3A2.7 2.7 0 0 1 19.5 10v.6a2.7 2.7 0 0 1-1 5v.4A2.7 2.7 0 0 1 15.8 18.7h-.8"/><path d="M9 4.5V19M15 4.5V19"/></svg>`,
+  settings: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 13a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V19a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H4a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1.1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H10a1.7 1.7 0 0 0 1-1.6V4a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V10a1.7 1.7 0 0 0 1.6 1H20a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.6 1Z"/></svg>`,
+  bell: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8.5a6 6 0 1 0-12 0c0 4.5-2 6-2 6h16s-2-1.5-2-6Z"/><path d="M10 19a2 2 0 0 0 4 0"/></svg>`,
+  cloud: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18h10a3.5 3.5 0 0 0 0-7 5 5 0 0 0-9.6-1.5A4 4 0 0 0 7 18Z"/></svg>`,
+  palette: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21a9 9 0 1 1 0-18c4.5 0 8 3 8 6.5 0 2-1.5 3.5-3.5 3.5H15a1.5 1.5 0 0 0-1 2.6c.5.5.7 1 .7 1.6 0 1.5-1.2 2.6-2.7 2.8Z"/><circle cx="7.5" cy="10.5" r="1.2" fill="currentColor" stroke="none"/><circle cx="11" cy="7" r="1.2" fill="currentColor" stroke="none"/><circle cx="15.5" cy="8" r="1.2" fill="currentColor" stroke="none"/></svg>`,
+  sync: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 0 1 14-5.3M20 12a8 8 0 0 1-14 5.3"/><path d="M18 3v4h-4M6 21v-4h4"/></svg>`,
+  download: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11m0 0-4-4m4 4 4-4M5 19h14"/></svg>`,
+  upload: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20V9m0 0-4 4m4-4 4 4M5 5h14"/></svg>`,
+  mail: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5.5" width="17" height="13" rx="2"/><path d="m4.5 7 7 5.5L18.5 7"/></svg>`,
+  moon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z"/></svg>`,
+  sun: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M3 12h2M19 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></svg>`,
+};
+
+function icon(name, size) {
+  return `<span class="icon-wrap" style="width:${size || 22}px;height:${size || 22}px;">${ICONS[name] || ''}</span>`;
+}
+
 function renderDeleteConfirmModal() {
   const plant = state.plants.find(p => p.id === state.confirmDeletePlantId);
   if (!plant) return '';
@@ -534,6 +590,13 @@ function applyTheme(id) {
   state.theme = id;
   document.body.dataset.theme = id;
   localStorage.setItem('plant-parent-theme', id);
+}
+
+function toggleDarkMode() {
+  state.darkMode = !state.darkMode;
+  document.body.dataset.mode = state.darkMode ? 'dark' : 'light';
+  localStorage.setItem('plant-parent-dark-mode', state.darkMode ? '1' : '0');
+  render();
 }
 
 function renderThemeModal() {
@@ -765,7 +828,14 @@ function renderSettings() {
           <div class="settings-row-name">Theme</div>
           <div class="settings-row-desc">Current: ${THEMES.find(t => t.id === state.theme)?.name || 'Sage'}</div>
         </div>
-        <button class="secondary" id="settingsThemeBtn">🎨 Change</button>
+        <button class="secondary" id="settingsThemeBtn">${icon('palette', 16)} Change</button>
+      </div>
+      <div class="settings-row">
+        <div class="settings-row-label">
+          <div class="settings-row-name">Dark mode</div>
+          <div class="settings-row-desc">Easier on the eyes at night</div>
+        </div>
+        <button class="secondary ${state.darkMode ? 'settings-toggle-on' : ''}" id="settingsDarkModeBtn">${icon(state.darkMode ? 'moon' : 'sun', 16)} ${state.darkMode ? 'On' : 'Off'}</button>
       </div>
     </div>
 
@@ -776,14 +846,14 @@ function renderSettings() {
           <div class="settings-row-name">Push reminders</div>
           <div class="settings-row-desc">Real phone notifications for overdue plants</div>
         </div>
-        <button class="secondary ${state.notificationsEnabled ? 'settings-toggle-on' : ''}" id="settingsNotifBtn">${state.notificationsEnabled ? '🔔 On' : '🔕 Off'}</button>
+        <button class="secondary ${state.notificationsEnabled ? 'settings-toggle-on' : ''}" id="settingsNotifBtn">${icon('bell', 16)} ${state.notificationsEnabled ? 'On' : 'Off'}</button>
       </div>
       <div class="settings-row">
         <div class="settings-row-label">
           <div class="settings-row-name">Weather tips</div>
           <div class="settings-row-desc">Watering nudges based on local weather</div>
         </div>
-        <button class="secondary ${state.weatherEnabled ? 'settings-toggle-on' : ''}" id="settingsWeatherBtn">${state.weatherEnabled ? '🌦️ On' : '⛅ Off'}</button>
+        <button class="secondary ${state.weatherEnabled ? 'settings-toggle-on' : ''}" id="settingsWeatherBtn">${icon('cloud', 16)} ${state.weatherEnabled ? 'On' : 'Off'}</button>
       </div>
     </div>
 
@@ -794,21 +864,21 @@ function renderSettings() {
           <div class="settings-row-name">Sync across devices</div>
           <div class="settings-row-desc">${state.syncCode ? `Linked · code ${state.syncCode}` : 'Not linked to another device'}</div>
         </div>
-        <button class="secondary" id="settingsSyncBtn">🔄 ${state.syncCode ? 'Manage' : 'Set up'}</button>
+        <button class="secondary" id="settingsSyncBtn">${icon('sync', 16)} ${state.syncCode ? 'Manage' : 'Set up'}</button>
       </div>
       <div class="settings-row">
         <div class="settings-row-label">
           <div class="settings-row-name">Back up my plants</div>
           <div class="settings-row-desc">Download everything as a file</div>
         </div>
-        <button class="secondary" id="settingsExportBtn">⬇️ Back up</button>
+        <button class="secondary" id="settingsExportBtn">${icon('download', 16)} Back up</button>
       </div>
       <div class="settings-row">
         <div class="settings-row-label">
           <div class="settings-row-name">Restore from backup</div>
           <div class="settings-row-desc">Replace current plants with a backup file</div>
         </div>
-        <button class="secondary" id="settingsImportBtn">⬆️ Restore</button>
+        <button class="secondary" id="settingsImportBtn">${icon('upload', 16)} Restore</button>
         <input type="file" id="settingsImportFileInput" accept="application/json" style="display:none;">
       </div>
     </div>
@@ -820,19 +890,20 @@ function renderSettings() {
           <div class="settings-row-name">Invite a friend</div>
           <div class="settings-row-desc">Share a QR code or link to the app</div>
         </div>
-        <button class="secondary" id="settingsInviteBtn">💌 Invite</button>
+        <button class="secondary" id="settingsInviteBtn">${icon('mail', 16)} Invite</button>
       </div>
       <div class="settings-row">
         <div class="settings-row-label">
           <div class="settings-row-name">About Plant Parent</div>
-          <div class="settings-row-desc">The story, stats, and testimonials</div>
+          <div class="settings-row-desc">The story behind the app, and your stats</div>
         </div>
-        <button class="secondary" id="settingsAboutBtn">🌱 View</button>
+        <button class="secondary" id="settingsAboutBtn">${icon('plants', 16)} View</button>
       </div>
     </div>
   `;
 
   div.querySelector('#settingsThemeBtn').onclick = () => { state.showThemeModal = true; render(); };
+  div.querySelector('#settingsDarkModeBtn').onclick = () => toggleDarkMode();
   div.querySelector('#settingsNotifBtn').onclick = () => enableNotifications();
   div.querySelector('#settingsWeatherBtn').onclick = () => toggleWeather();
   div.querySelector('#settingsSyncBtn').onclick = () => { state.syncStatus = null; state.showSyncModal = true; render(); };
@@ -1073,6 +1144,8 @@ function maybeRefreshWeather() {
 
 // ---------- rendering ----------
 
+let __previousView = null;
+
 function render() {
   const app = document.getElementById('app');
   const active = state.plants.find(p => p.id === state.activeId);
@@ -1082,9 +1155,10 @@ function render() {
     localStorage.setItem('plant-parent-daily-celebrated', todayStr());
     setTimeout(() => { fireConfetti(window.innerWidth / 2, 80); playUnlockSound(); }, 100);
   }
+  const viewChanged = state.currentView !== __previousView;
 
   app.innerHTML = `
-    <div class="main-content">
+    <div class="main-content ${viewChanged ? 'view-enter' : ''}">
       ${state.currentView !== 'garden' && state.currentView !== 'dictionary' && state.currentView !== 'settings' ? `
         <header>
           <div class="header-flourish">🌿</div>
@@ -1116,6 +1190,7 @@ function render() {
       ${state.currentView === 'shelf' ? `
         <div class="layout ${state.mobileDetailOpen ? 'mobile-detail-open' : ''}">
           <div class="shelf-column">
+            ${state.plants.length ? renderShelfOverviewStrip() : ''}
             <div class="shelf-controls">
               <select class="sort-select" id="sortSelect" aria-label="Sort plants by">
                 <option value="urgent" ${state.sortBy === 'urgent' ? 'selected' : ''}>Most urgent first</option>
@@ -1138,16 +1213,16 @@ function render() {
 
     <nav class="bottom-nav">
       <button class="bottom-nav-btn ${state.currentView === 'shelf' ? 'bottom-nav-active' : ''}" id="navShelf">
-        <span class="bottom-nav-icon">🪴</span><span class="bottom-nav-label">Plants</span>
+        <span class="bottom-nav-icon">${icon('plants')}</span><span class="bottom-nav-label">Plants</span>
       </button>
       <button class="bottom-nav-btn ${state.currentView === 'garden' ? 'bottom-nav-active' : ''}" id="navGarden">
-        <span class="bottom-nav-icon">🌻</span><span class="bottom-nav-label">Garden</span>
+        <span class="bottom-nav-icon">${icon('garden')}</span><span class="bottom-nav-label">Garden</span>
       </button>
       <button class="bottom-nav-btn ${state.currentView === 'dictionary' ? 'bottom-nav-active' : ''}" id="navDictionary">
-        <span class="bottom-nav-icon">📖</span><span class="bottom-nav-label">Guide</span>
+        <span class="bottom-nav-icon">${icon('guide')}</span><span class="bottom-nav-label">Guide</span>
       </button>
       <button class="bottom-nav-btn ${state.showMoreMenu || ['settings','journal','propagation'].includes(state.currentView) ? 'bottom-nav-active' : ''}" id="navMore">
-        <span class="bottom-nav-icon">⋯</span><span class="bottom-nav-label">More</span>
+        <span class="bottom-nav-icon">${icon('more')}</span><span class="bottom-nav-label">More</span>
       </button>
     </nav>
 
@@ -1155,29 +1230,29 @@ function render() {
       <div class="more-menu-backdrop" id="moreMenuBackdrop">
         <div class="more-menu">
           <button class="more-menu-item" id="navJournal">
-            <span class="more-menu-icon">📓</span>
+            <span class="more-menu-icon">${icon('journal')}</span>
             <span>Journal</span>
           </button>
           <button class="more-menu-item" id="navPropagation">
-            <span class="more-menu-icon">🌱</span>
+            <span class="more-menu-icon">${icon('cuttings')}</span>
             <span>Cuttings${state.propagations.length ? ` (${state.propagations.length})` : ''}</span>
           </button>
           <div class="more-menu-divider"></div>
           <button class="more-menu-item" id="navBadges">
-            <span class="more-menu-icon">🏆</span>
+            <span class="more-menu-icon">${icon('badges')}</span>
             <span>Badges <strong>${state.unlockedAchievements.length}/${ACHIEVEMENTS.length}</strong></span>
           </button>
           <button class="more-menu-item" id="navGame">
-            <span class="more-menu-icon">🎮</span>
+            <span class="more-menu-icon">${icon('game')}</span>
             <span>Raindrop Catch${state.gameHighScore ? ` · best ${state.gameHighScore}` : ''}</span>
           </button>
           <button class="more-menu-item" id="navMemoryGame">
-            <span class="more-menu-icon">🧠</span>
+            <span class="more-menu-icon">${icon('brain')}</span>
             <span>Memory Match</span>
           </button>
           <div class="more-menu-divider"></div>
           <button class="more-menu-item" id="navSettings">
-            <span class="more-menu-icon">⚙️</span>
+            <span class="more-menu-icon">${icon('settings')}</span>
             <span>Settings</span>
           </button>
         </div>
@@ -1278,6 +1353,7 @@ function render() {
       };
     });
   }
+  __previousView = state.currentView;
 }
 
 // ---------- species illustrations ----------
@@ -2494,6 +2570,11 @@ try {
 loadPropagations();
 state.theme = localStorage.getItem('plant-parent-theme') || 'sage';
 document.body.dataset.theme = state.theme;
+const storedDarkMode = localStorage.getItem('plant-parent-dark-mode');
+state.darkMode = storedDarkMode !== null
+  ? storedDarkMode === '1'
+  : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+document.body.dataset.mode = state.darkMode ? 'dark' : 'light';
 state.memoryGameCompleted = localStorage.getItem('plant-parent-memory-completed') === '1';
 state.hasInvited = localStorage.getItem('plant-parent-has-invited') === '1';
 state.showWelcome = localStorage.getItem('plant-parent-welcome-seen') !== '1';
