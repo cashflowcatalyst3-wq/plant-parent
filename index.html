@@ -29,10 +29,41 @@
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+<script>
+  // Apply saved theme/dark-mode before the loading screen paints, so there's
+  // no flash of the wrong colors while app.js finishes loading and running.
+  (function () {
+    try {
+      var theme = localStorage.getItem('plant-parent-theme') || 'sage';
+      document.body.dataset.theme = theme;
+      var storedDark = localStorage.getItem('plant-parent-dark-mode');
+      var dark = storedDark !== null
+        ? storedDark === '1'
+        : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+      document.body.dataset.mode = dark ? 'dark' : 'light';
+    } catch (err) {
+      // localStorage unavailable — defaults will apply once app.js runs
+    }
+  })();
+</script>
+<div id="loadingScreen">
+  <div class="loading-flourish">🌿</div>
+  <div class="loading-title">Plant Parent</div>
+  <div class="loading-spinner"></div>
+</div>
 <div class="app" id="app"></div>
 
 <script src="app.js"></script>
 <script src="game.js"></script>
 <script src="game2.js"></script>
+<script>
+  // Safety net: if something above ever throws before the app calls
+  // hideLoadingScreen() itself, don't leave the person staring at a frozen
+  // loading screen forever.
+  setTimeout(function () {
+    var el = document.getElementById('loadingScreen');
+    if (el) el.remove();
+  }, 6000);
+</script>
 </body>
 </html>

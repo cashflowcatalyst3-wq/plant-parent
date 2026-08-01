@@ -1,3 +1,5 @@
+const APP_LOAD_START = Date.now();
+
 const VAPID_PUBLIC_KEY = 'BN4ieWQBco1u_esfncKASD5n51MKDrjGJoDafo4eJP7FwjzxIRUq-2xsJEGRoMzZ-tyipIrn8zh2Kzy1H5pukrQ';
 
 const SPECIES_DICTIONARY = [
@@ -1145,6 +1147,18 @@ function maybeRefreshWeather() {
 // ---------- rendering ----------
 
 let __previousView = null;
+
+function hideLoadingScreen() {
+  const el = document.getElementById('loadingScreen');
+  if (!el) return;
+  const elapsed = Date.now() - (typeof APP_LOAD_START === 'number' ? APP_LOAD_START : 0);
+  const minDisplay = 450; // keep it visible at least this long so it reads as intentional, not a glitch
+  const wait = Math.max(0, minDisplay - elapsed);
+  setTimeout(() => {
+    el.classList.add('loading-hidden');
+    setTimeout(() => el.remove(), 400); // matches the CSS opacity transition duration
+  }, wait);
+}
 
 function render() {
   const app = document.getElementById('app');
@@ -2586,6 +2600,7 @@ if ('serviceWorker' in navigator) {
 
 render();
 maybeRefreshWeather();
+hideLoadingScreen();
 
 // If this device is linked to a sync code, quietly check for updates from
 // other linked devices right on startup (no confirmation needed here since
