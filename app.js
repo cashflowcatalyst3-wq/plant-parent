@@ -50,8 +50,8 @@ const ACHIEVEMENTS = [
   { id: 'note-taker', emoji: '📝', name: 'Note Taker', desc: 'Write your first plant note' },
   { id: 'snapshot', emoji: '📸', name: 'Snapshot', desc: 'Add a photo to a plant' },
   { id: 'stay-alert', emoji: '🔔', name: 'Stay Alert', desc: 'Turn on push reminders' },
-  { id: 'rainmaker', emoji: '💧', name: 'Rainmaker', desc: 'Score 15+ in Raindrop Catch' },
-  { id: 'sharpshooter', emoji: '🎯', name: 'Sharpshooter', desc: 'Score 25+ in Raindrop Catch' },
+  { id: 'rainmaker', emoji: '💧', name: 'Rainmaker', desc: 'Score 30+ in Raindrop Catch' },
+  { id: 'sharpshooter', emoji: '🎯', name: 'Sharpshooter', desc: 'Score 50+ in Raindrop Catch' },
   { id: 'memory-master', emoji: '🧠', name: 'Memory Master', desc: 'Complete a round of Memory Match' },
   { id: 'community-builder', emoji: '🤝', name: 'Community Builder', desc: 'Invite a friend to Plant Parent' },
 ];
@@ -323,8 +323,8 @@ function checkAchievements() {
   if (state.plants.some(p => p.notes && p.notes.trim())) unlock('note-taker');
   if (state.plants.some(p => p.photo)) unlock('snapshot');
   if (state.notificationsEnabled) unlock('stay-alert');
-  if (state.gameHighScore >= 15) unlock('rainmaker');
-  if (state.gameHighScore >= 25) unlock('sharpshooter');
+  if (state.gameHighScore >= 30) unlock('rainmaker');
+  if (state.gameHighScore >= 50) unlock('sharpshooter');
   if (state.memoryGameCompleted) unlock('memory-master');
   if (state.hasInvited) unlock('community-builder');
 
