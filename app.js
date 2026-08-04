@@ -53,6 +53,7 @@ const ACHIEVEMENTS = [
   { id: 'rainmaker', emoji: '💧', name: 'Rainmaker', desc: 'Score 30+ in Raindrop Catch' },
   { id: 'sharpshooter', emoji: '🎯', name: 'Sharpshooter', desc: 'Score 50+ in Raindrop Catch' },
   { id: 'memory-master', emoji: '🧠', name: 'Memory Master', desc: 'Complete a round of Memory Match' },
+  { id: 'memory-whiz', emoji: '🧩', name: 'Memory Whiz', desc: 'Score 300+ in Memory Match' },
   { id: 'community-builder', emoji: '🤝', name: 'Community Builder', desc: 'Invite a friend to Plant Parent' },
 ];
 
@@ -107,6 +108,7 @@ const state = {
   propagations: [],
   showAddPropModal: false,
   memoryGameCompleted: false,
+  memoryHighScore: 0,
   showInviteModal: false,
   showAboutModal: false,
   showWelcome: false,
@@ -233,6 +235,16 @@ function recordMemoryGameCompletion() {
   render();
 }
 
+function recordMemoryGameScore(score) {
+  if (score > state.memoryHighScore) {
+    state.memoryHighScore = score;
+    localStorage.setItem('plant-parent-memory-highscore', String(score));
+  }
+  localStorage.setItem('plant-parent-last-game-date', todayStr());
+  checkAchievements();
+  render();
+}
+
 // ---------- sound effects ----------
 
 let audioCtx = null;
@@ -326,6 +338,7 @@ function checkAchievements() {
   if (state.gameHighScore >= 30) unlock('rainmaker');
   if (state.gameHighScore >= 50) unlock('sharpshooter');
   if (state.memoryGameCompleted) unlock('memory-master');
+  if (state.memoryHighScore >= 300) unlock('memory-whiz');
   if (state.hasInvited) unlock('community-builder');
 
   if (newlyUnlocked.length) {
@@ -1037,6 +1050,7 @@ function exportBackup() {
     plants: state.plants,
     unlockedAchievements: state.unlockedAchievements,
     gameHighScore: state.gameHighScore,
+    memoryHighScore: state.memoryHighScore,
   };
   const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
@@ -1067,6 +1081,10 @@ function importBackup(file) {
       if (typeof data.gameHighScore === 'number') {
         state.gameHighScore = data.gameHighScore;
         localStorage.setItem('plant-parent-game-highscore', String(state.gameHighScore));
+      }
+      if (typeof data.memoryHighScore === 'number') {
+        state.memoryHighScore = data.memoryHighScore;
+        localStorage.setItem('plant-parent-memory-highscore', String(state.memoryHighScore));
       }
       state.activeId = state.plants[0]?.id ?? null;
       render();
@@ -1262,7 +1280,7 @@ function render() {
           </button>
           <button class="more-menu-item" id="navMemoryGame">
             <span class="more-menu-icon">${icon('brain')}</span>
-            <span>Memory Match</span>
+            <span>Memory Match${state.memoryHighScore ? ` · best ${state.memoryHighScore}` : ''}</span>
           </button>
           <div class="more-menu-divider"></div>
           <button class="more-menu-item" id="navSettings">
@@ -2590,6 +2608,7 @@ state.darkMode = storedDarkMode !== null
   : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
 document.body.dataset.mode = state.darkMode ? 'dark' : 'light';
 state.memoryGameCompleted = localStorage.getItem('plant-parent-memory-completed') === '1';
+state.memoryHighScore = parseInt(localStorage.getItem('plant-parent-memory-highscore') || '0', 10) || 0;
 state.hasInvited = localStorage.getItem('plant-parent-has-invited') === '1';
 state.showWelcome = localStorage.getItem('plant-parent-welcome-seen') !== '1';
 state.syncCode = localStorage.getItem('plant-parent-sync-code') || null;
