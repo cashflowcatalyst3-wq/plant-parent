@@ -1741,6 +1741,7 @@ function renderGarden() {
       <div class="garden-empty">Your garden is empty — add a plant to watch it grow here.</div>
     `;
     wrapper.appendChild(scene);
+    wrapper.appendChild(renderGardenCuttings());
     return wrapper;
   }
 
@@ -1792,6 +1793,7 @@ function renderGarden() {
   `;
   wrapper.appendChild(scene);
   wrapper.appendChild(renderGardenStats());
+  wrapper.appendChild(renderGardenCuttings());
 
   wrapper.querySelectorAll('.garden-plant').forEach(el => {
     const select = () => {
@@ -1843,6 +1845,48 @@ function renderGardenStats() {
       <div class="garden-stat-name">${needsAttention.name}</div>
     </div>
   `;
+
+  return div;
+}
+
+function renderGardenCuttings() {
+  const div = document.createElement('div');
+  div.className = 'garden-cuttings';
+
+  const count = state.propagations.length;
+  div.innerHTML = `
+    <div class="garden-cuttings-header">
+      <span class="garden-cuttings-title">🌱 Cuttings rooting</span>
+      ${count ? `<span class="garden-cuttings-count">${count}</span>` : ''}
+    </div>
+    ${count === 0 ? `
+      <div class="garden-cuttings-empty">No cuttings rooting yet — start one from the Cuttings screen.</div>
+    ` : `
+      <div class="garden-cuttings-row">
+        ${state.propagations.map(prop => `
+          <div class="garden-cutting-chip" data-id="${prop.id}" role="button" tabindex="0" aria-label="${prop.name}, rooting ${daysRooting(prop)} day${daysRooting(prop) === 1 ? '' : 's'}">
+            <span class="garden-cutting-emoji">🌱</span>
+            <span class="garden-cutting-name">${prop.name}</span>
+            <span class="garden-cutting-days">${daysRooting(prop)}d</span>
+          </div>
+        `).join('')}
+      </div>
+    `}
+    <button class="secondary garden-cuttings-btn" id="gardenCuttingsBtn">${count ? 'View all cuttings' : '+ Start a cutting'}</button>
+  `;
+
+  const openCuttings = () => {
+    state.currentView = 'propagation';
+    state.showMoreMenu = false;
+    render();
+  };
+  div.querySelectorAll('.garden-cutting-chip').forEach(el => {
+    el.onclick = openCuttings;
+    el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openCuttings(); }
+    });
+  });
+  div.querySelector('#gardenCuttingsBtn').onclick = openCuttings;
 
   return div;
 }

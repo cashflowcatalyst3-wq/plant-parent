@@ -545,6 +545,61 @@
     margin-top: 2px;
   }
 
+  /* Garden cuttings section */
+  .garden-cuttings {
+    background: var(--card);
+    border-radius: 14px;
+    padding: 14px 16px;
+    box-shadow: var(--shadow);
+    margin-top: 12px;
+  }
+  .garden-cuttings-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .garden-cuttings-title {
+    font-family: 'Fraunces', serif;
+    font-weight: 600;
+    font-size: 14px;
+    color: var(--ink);
+  }
+  .garden-cuttings-count {
+    background: var(--panel5);
+    color: var(--sage);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 1px 7px;
+    border-radius: 20px;
+  }
+  .garden-cuttings-empty {
+    font-size: 12px;
+    color: var(--soil);
+    margin-bottom: 10px;
+  }
+  .garden-cuttings-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 10px;
+  }
+  .garden-cutting-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--panel2);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    padding: 6px 12px;
+    cursor: pointer;
+  }
+  .garden-cutting-chip:hover { background: var(--panel5); }
+  .garden-cutting-emoji { font-size: 14px; }
+  .garden-cutting-name { font-size: 12px; font-weight: 600; color: var(--ink); }
+  .garden-cutting-days { font-size: 11px; color: var(--soil); }
+  .garden-cuttings-btn { font-size: 12px; padding: 8px 12px; }
+
   .layout {
     display: grid;
     grid-template-columns: 320px 1fr;
