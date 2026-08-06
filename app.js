@@ -1193,15 +1193,9 @@ function render() {
   app.innerHTML = `
     <div class="main-content ${viewChanged ? 'view-enter' : ''}">
       ${state.currentView !== 'garden' && state.currentView !== 'dictionary' && state.currentView !== 'settings' ? `
-        <header>
-          <div class="brand-mark">${icon('plants', 38)}</div>
-          <h1><span class="brand-plant">Plant</span> <span class="brand-parent">Parent</span></h1>
-          <div class="tagline">a shelf that keeps time for you</div>
-          <div class="tagline-divider" aria-hidden="true">
-            <span class="tagline-rule"></span>
-            <span class="tagline-leaf">${icon('leaf', 13)}</span>
-            <span class="tagline-rule"></span>
-          </div>
+        <header class="app-topbar">
+          <h1 class="app-topbar-title"><span class="brand-plant">Plant</span> <span class="brand-parent">Parent</span></h1>
+          <span class="app-topbar-mark">${icon('plants', 22)}</span>
         </header>
 
         <div class="daily-card ${taskDone ? 'daily-card-done' : ''}">
