@@ -239,8 +239,8 @@
   .app-topbar {
     display: flex;
     align-items: center;
-    justify-content: flex-end;
-    gap: 8px;
+    justify-content: flex-start;
+    gap: 10px;
     padding: 10px 2px 16px;
   }
 
@@ -248,7 +248,7 @@
     font-family: 'Fraunces', serif;
     font-optical-sizing: auto;
     font-weight: 600;
-    font-size: 19px;
+    font-size: 24px;
     margin: 0;
     letter-spacing: -0.005em;
     line-height: 1;
@@ -263,7 +263,7 @@
 
   @media (max-width: 480px) {
     .app-topbar { padding: 8px 0 12px; }
-    .app-topbar-title { font-size: 17px; }
+    .app-topbar-title { font-size: 20px; }
   }
 
   /* Daily challenge card */
