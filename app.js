@@ -473,6 +473,7 @@ const ICONS = {
   mail: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5.5" width="17" height="13" rx="2"/><path d="m4.5 7 7 5.5L18.5 7"/></svg>`,
   moon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z"/></svg>`,
   sun: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M3 12h2M19 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></svg>`,
+  leaf: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19c0-8 4-13 14-14-1 10-6 14-14 14Z"/><path d="M6 18c3-3 5-6 6-10"/></svg>`,
 };
 
 function icon(name, size) {
@@ -1193,9 +1194,14 @@ function render() {
     <div class="main-content ${viewChanged ? 'view-enter' : ''}">
       ${state.currentView !== 'garden' && state.currentView !== 'dictionary' && state.currentView !== 'settings' ? `
         <header>
-          <div class="header-flourish">🌿</div>
-          <h1>Plant Parent</h1>
+          <div class="brand-mark">${icon('plants', 38)}</div>
+          <h1><span class="brand-plant">Plant</span> <span class="brand-parent">Parent</span></h1>
           <div class="tagline">a shelf that keeps time for you</div>
+          <div class="tagline-divider" aria-hidden="true">
+            <span class="tagline-rule"></span>
+            <span class="tagline-leaf">${icon('leaf', 13)}</span>
+            <span class="tagline-rule"></span>
+          </div>
         </header>
 
         <div class="daily-card ${taskDone ? 'daily-card-done' : ''}">
