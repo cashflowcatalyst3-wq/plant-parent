@@ -4,6 +4,7 @@ An installable plant-watering tracker with plant photos, care streaks/history, a
 
 ## What's here
 - `index.html`, `styles.css`, `app.js` — the app itself
+- `game.js`, `game2.js` — the two mini-games (Raindrop Catch, Memory Match)
 - `manifest.json`, `sw.js`, `icons/` — what makes it installable on a phone (PWA)
 - `api/` — small backend functions for syncing plant data and sending push reminders
 - `vercel.json` — schedules a daily check for overdue plants
@@ -62,12 +63,14 @@ Heads up on a real platform limit: Vercel's free plan only allows cron jobs to r
 That's it — every 5 hours, cron-job.org pings your app, which picks a random plant tip or check-in message and sends it as a real push notification to everyone who's enabled reminders.
 
 ## What's new in this version
+- **Memory Match overhaul**: now a leveled, timed game — the board gets bigger and the memorize-window shrinks each round, mismatches cost you time, and matching streaks build a score multiplier. No plant photos in this game anymore, just species icons. Your best score is saved and shown in the menu.
+- **Cuttings in the Garden view**: propagations you're currently rooting now show up as a small chip list right in the Garden tab, so you don't have to dig through the menu to check on them.
+- **Redesigned top logo/wordmark**: replaced the old placeholder-style header with a compact mark using the app's own icon set.
+- **Next plant button**: in a plant's detail view, jump straight to the next plant on your shelf without going back to the list first. The detail view also fits small phone screens better now.
+
+## What's new in previous versions
 - **Multi-device sync**: More menu → "Sync devices" → create a 6-character code on one device, enter it on another, and both stay linked to the same plant list. No account or password needed. Uses the same free Upstash database already set up for notifications — no new setup required.
-
-## What's new in previous versions
 - **Random check-ins**: a rotating pool of plant tips and gentle nudges, sent every 5 hours via a free external scheduler
-
-## What's new in previous versions
 - **Photos**: tap the ring in a plant's detail view (or add one when creating a plant) to give it a portrait — it shows right inside the watering ring
 - **Streaks & history**: every "Water now" is logged, with a streak counter for consecutive on-time waterings and a short history list
 - **Push notifications**: a daily automated check sends a real phone notification for anything overdue
