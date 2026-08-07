@@ -859,6 +859,32 @@
   .field input:focus { outline: 2px solid var(--sage); border-color: transparent; }
   .modal-actions { display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end; }
 
+  .mood-picker {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .mood-option {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    background: var(--panel2);
+    border: 1.5px solid var(--line);
+    border-radius: 12px;
+    padding: 10px 4px;
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+  }
+  .mood-option-emoji { font-size: 20px; }
+  .mood-option-label { font-size: 11px; color: var(--soil); font-weight: 600; }
+  .mood-option-selected {
+    background: var(--panel5);
+    border-color: var(--sage);
+  }
+  .mood-option-selected .mood-option-label { color: var(--sage); }
+
   .freq-hint { font-size: 11px; color: var(--sage); margin-top: 4px; }
 
   .checkbox-field { display: flex; align-items: center; }

@@ -97,7 +97,10 @@ const state = {
   sortBy: 'urgent', // 'urgent' | 'az' | 'room'
   filterRoom: null, // null = all rooms
   weatherEnabled: false,
+  soundEnabled: true,
   weatherNudge: null, // { text, emoji } once fetched
+  seasonalTipsEnabled: true,
+  latitude: null, // reused from weather geolocation, if granted, to guess hemisphere
   mobileDetailOpen: false,
   dictionarySearch: '',
   dictionaryLightFilter: null,
@@ -107,6 +110,9 @@ const state = {
   showThemeModal: false,
   propagations: [],
   showAddPropModal: false,
+  showCheckinModal: false,
+  checkinPlantId: null,
+  checkinDraftMood: null,
   memoryGameCompleted: false,
   memoryHighScore: 0,
   showInviteModal: false,
@@ -162,6 +168,37 @@ function calcStreak(plant) {
     else break;
   }
   return streak;
+}
+
+function fertilizeDaysLeft(p) {
+  if (!p.lastFertilized) return null;
+  const freq = p.fertilizeFrequency || 21;
+  return freq - daysSince(p.lastFertilized);
+}
+
+function rotateDaysLeft(p) {
+  if (!p.lastRotated) return null;
+  const freq = p.rotateFrequency || 7;
+  return freq - daysSince(p.lastRotated);
+}
+
+const MOOD_LABELS = {
+  thriving: '🌿 Thriving',
+  okay: '😐 Okay',
+  struggling: '😟 Struggling',
+  recovering: '🌱 Recovering',
+};
+function moodLabel(mood) {
+  return MOOD_LABELS[mood] || mood;
+}
+
+function escapeHtml(str) {
+  return String(str || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
 }
 
 function getRoomList() {
@@ -259,6 +296,7 @@ function getAudioCtx() {
 }
 
 function playTone(freq, duration, type, volume) {
+  if (typeof state !== 'undefined' && state.soundEnabled === false) return;
   const ctx = getAudioCtx();
   if (!ctx) return;
   try {
@@ -465,6 +503,7 @@ const ICONS = {
   brain: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4.5a2.7 2.7 0 0 0-2.7 2.7v.3A2.7 2.7 0 0 0 4.5 10v.6a2.7 2.7 0 0 0 1 5v.4A2.7 2.7 0 0 0 8.2 18.7h.8"/><path d="M15 4.5a2.7 2.7 0 0 1 2.7 2.7v.3A2.7 2.7 0 0 1 19.5 10v.6a2.7 2.7 0 0 1-1 5v.4A2.7 2.7 0 0 1 15.8 18.7h-.8"/><path d="M9 4.5V19M15 4.5V19"/></svg>`,
   settings: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 13a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V19a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H4a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1.1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H10a1.7 1.7 0 0 0 1-1.6V4a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V10a1.7 1.7 0 0 0 1.6 1H20a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.6 1Z"/></svg>`,
   bell: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8.5a6 6 0 1 0-12 0c0 4.5-2 6-2 6h16s-2-1.5-2-6Z"/><path d="M10 19a2 2 0 0 0 4 0"/></svg>`,
+  'bell-off': `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8.5a6 6 0 0 0-9.3-5"/><path d="M6.3 6.3C6.1 7 6 7.7 6 8.5c0 4.5-2 6-2 6h13"/><path d="M10 19a2 2 0 0 0 4 0"/><path d="M4 4l16 16"/></svg>`,
   cloud: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 18h10a3.5 3.5 0 0 0 0-7 5 5 0 0 0-9.6-1.5A4 4 0 0 0 7 18Z"/></svg>`,
   palette: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21a9 9 0 1 1 0-18c4.5 0 8 3 8 6.5 0 2-1.5 3.5-3.5 3.5H15a1.5 1.5 0 0 0-1 2.6c.5.5.7 1 .7 1.6 0 1.5-1.2 2.6-2.7 2.8Z"/><circle cx="7.5" cy="10.5" r="1.2" fill="currentColor" stroke="none"/><circle cx="11" cy="7" r="1.2" fill="currentColor" stroke="none"/><circle cx="15.5" cy="8" r="1.2" fill="currentColor" stroke="none"/></svg>`,
   sync: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12a8 8 0 0 1 14-5.3M20 12a8 8 0 0 1-14 5.3"/><path d="M18 3v4h-4M6 21v-4h4"/></svg>`,
@@ -612,6 +651,13 @@ function toggleDarkMode() {
   state.darkMode = !state.darkMode;
   document.body.dataset.mode = state.darkMode ? 'dark' : 'light';
   localStorage.setItem('plant-parent-dark-mode', state.darkMode ? '1' : '0');
+  render();
+}
+
+function toggleSound() {
+  state.soundEnabled = !state.soundEnabled;
+  localStorage.setItem('plant-parent-sound', state.soundEnabled ? '1' : '0');
+  if (state.soundEnabled) playClickSound();
   render();
 }
 
@@ -853,6 +899,13 @@ function renderSettings() {
         </div>
         <button class="secondary ${state.darkMode ? 'settings-toggle-on' : ''}" id="settingsDarkModeBtn">${icon(state.darkMode ? 'moon' : 'sun', 16)} ${state.darkMode ? 'On' : 'Off'}</button>
       </div>
+      <div class="settings-row">
+        <div class="settings-row-label">
+          <div class="settings-row-name">Sound effects</div>
+          <div class="settings-row-desc">Taps, watering chimes, and game sounds</div>
+        </div>
+        <button class="secondary ${state.soundEnabled ? 'settings-toggle-on' : ''}" id="settingsSoundBtn">${icon(state.soundEnabled ? 'bell' : 'bell-off', 16)} ${state.soundEnabled ? 'On' : 'Off'}</button>
+      </div>
     </div>
 
     <div class="settings-section">
@@ -870,6 +923,13 @@ function renderSettings() {
           <div class="settings-row-desc">Watering nudges based on local weather</div>
         </div>
         <button class="secondary ${state.weatherEnabled ? 'settings-toggle-on' : ''}" id="settingsWeatherBtn">${icon('cloud', 16)} ${state.weatherEnabled ? 'On' : 'Off'}</button>
+      </div>
+      <div class="settings-row">
+        <div class="settings-row-label">
+          <div class="settings-row-name">Seasonal tips</div>
+          <div class="settings-row-desc">A care nudge based on the time of year</div>
+        </div>
+        <button class="secondary ${state.seasonalTipsEnabled ? 'settings-toggle-on' : ''}" id="settingsSeasonalBtn">${icon('sun', 16)} ${state.seasonalTipsEnabled ? 'On' : 'Off'}</button>
       </div>
     </div>
 
@@ -920,8 +980,10 @@ function renderSettings() {
 
   div.querySelector('#settingsThemeBtn').onclick = () => { state.showThemeModal = true; render(); };
   div.querySelector('#settingsDarkModeBtn').onclick = () => toggleDarkMode();
+  div.querySelector('#settingsSoundBtn').onclick = () => toggleSound();
   div.querySelector('#settingsNotifBtn').onclick = () => enableNotifications();
   div.querySelector('#settingsWeatherBtn').onclick = () => toggleWeather();
+  div.querySelector('#settingsSeasonalBtn').onclick = () => toggleSeasonalTips();
   div.querySelector('#settingsSyncBtn').onclick = () => { state.syncStatus = null; state.showSyncModal = true; render(); };
   div.querySelector('#settingsExportBtn').onclick = () => exportBackup();
   div.querySelector('#settingsImportBtn').onclick = () => div.querySelector('#settingsImportFileInput').click();
@@ -1000,6 +1062,39 @@ function renderPropagation() {
   });
 
   return div;
+}
+
+function renderCheckinModal() {
+  const p = state.plants.find(x => x.id === state.checkinPlantId);
+  if (!p) return '';
+  const moods = [
+    { id: 'thriving', emoji: '🌿', label: 'Thriving' },
+    { id: 'okay', emoji: '😐', label: 'Okay' },
+    { id: 'struggling', emoji: '😟', label: 'Struggling' },
+    { id: 'recovering', emoji: '🌱', label: 'Recovering' },
+  ];
+  return `
+  <div class="modal-backdrop" id="checkinBackdrop">
+    <div class="modal">
+      <h3>How's ${p.name} doing?</h3>
+      <div class="mood-picker">
+        ${moods.map(m => `
+          <button class="mood-option ${state.checkinDraftMood === m.id ? 'mood-option-selected' : ''}" data-mood="${m.id}">
+            <span class="mood-option-emoji">${m.emoji}</span>
+            <span class="mood-option-label">${m.label}</span>
+          </button>
+        `).join('')}
+      </div>
+      <div class="field">
+        <label>Note (optional)</label>
+        <input id="checkinNoteInput" placeholder="e.g. new leaf unfurling, moved to a brighter spot" aria-label="Note">
+      </div>
+      <div class="modal-actions">
+        <button class="secondary" id="cancelCheckinModal">Cancel</button>
+        <button class="primary" id="saveCheckinModal">Save check-in</button>
+      </div>
+    </div>
+  </div>`;
 }
 
 function renderAddPropModal() {
@@ -1116,6 +1211,41 @@ function getWeatherNudge(precipMm, tempC, humidity) {
   return { emoji: '🌤️', text: `Weather's been steady nearby — no changes needed to your usual watering routine.` };
 }
 
+const SEASON_TIPS = {
+  winter: { emoji: '❄️', text: "It's winter — growth slows down for most houseplants, so they typically need less water and no fertilizer until spring." },
+  spring: { emoji: '🌱', text: "It's spring — prime growing season. A good time to repot, propagate, and start feeding again if you paused over winter." },
+  summer: { emoji: '☀️', text: "It's summer — longer days and warmth mean plants often dry out faster. Worth checking soil a little more often." },
+  fall: { emoji: '🍂', text: "It's fall — as days shorten, growth slows. A good time to ease off fertilizing and watch for less frequent watering needs." },
+};
+
+function getHemisphere() {
+  if (typeof state !== 'undefined' && typeof state.latitude === 'number') {
+    return state.latitude < 0 ? 'south' : 'north';
+  }
+  return 'north'; // default assumption when location isn't known
+}
+
+function getSeason() {
+  const month = new Date().getMonth(); // 0 = Jan
+  const northSeasonByMonth = ['winter','winter','spring','spring','spring','summer','summer','summer','fall','fall','fall','winter'];
+  let season = northSeasonByMonth[month];
+  if (getHemisphere() === 'south') {
+    const flip = { winter: 'summer', summer: 'winter', spring: 'fall', fall: 'spring' };
+    season = flip[season];
+  }
+  return season;
+}
+
+function getSeasonalTip() {
+  return SEASON_TIPS[getSeason()];
+}
+
+function toggleSeasonalTips() {
+  state.seasonalTipsEnabled = !state.seasonalTipsEnabled;
+  localStorage.setItem('plant-parent-seasonal-tips', state.seasonalTipsEnabled ? '1' : '0');
+  render();
+}
+
 async function fetchWeather() {
   if (!('geolocation' in navigator)) {
     alert("This browser doesn't support location, so weather tips aren't available.");
@@ -1133,6 +1263,8 @@ async function fetchWeather() {
       const nudge = getWeatherNudge(precipMm, tempC, humidity);
       state.weatherNudge = nudge;
       state.weatherEnabled = true;
+      state.latitude = latitude;
+      localStorage.setItem('plant-parent-latitude', String(latitude));
       localStorage.setItem('plant-parent-weather-enabled', '1');
       localStorage.setItem('plant-parent-weather-date', todayStr());
       localStorage.setItem('plant-parent-weather-nudge', JSON.stringify(nudge));
@@ -1212,6 +1344,13 @@ function render() {
             <div class="weather-text">${state.weatherNudge.text}</div>
           </div>
         ` : ''}
+
+        ${state.seasonalTipsEnabled ? (() => { const tip = getSeasonalTip(); return `
+          <div class="weather-card">
+            <div class="weather-emoji">${tip.emoji}</div>
+            <div class="weather-text">${tip.text}</div>
+          </div>
+        `; })() : ''}
       ` : ''}
 
       ${state.currentView === 'garden' ? `<div id="gardenView"></div>` : ''}
@@ -1301,6 +1440,7 @@ function render() {
     ${state.showSpeciesPicker ? renderSpeciesPicker() : ''}
     ${state.showThemeModal ? renderThemeModal() : ''}
     ${state.showAddPropModal ? renderAddPropModal() : ''}
+    ${state.showCheckinModal ? renderCheckinModal() : ''}
   `;
 
   if (state.currentView === 'garden') {
@@ -1990,6 +2130,7 @@ function renderDetail(p) {
   const left = daysLeft(p);
   const streak = calcStreak(p);
   const log = (p.waterLog || []).slice(-5).reverse();
+  const healthLog = (p.healthLog || []).slice(-6).reverse();
   const w = window.innerWidth;
   const ringSize = w <= 480 ? 84 : w <= 800 ? 100 : 120;
   const ringStroke = w <= 480 ? 6 : w <= 800 ? 7 : 8;
@@ -2029,6 +2170,25 @@ function renderDetail(p) {
     </div>
     <input class="room-input" id="roomInput" placeholder="📍 Add a room (e.g. Kitchen)" value="${p.room || ''}" aria-label="Room">
 
+    <div class="settings-row">
+      <div class="settings-row-label">
+        <div class="settings-row-name">🌾 Feeding</div>
+        <div class="settings-row-desc">${p.lastFertilized
+          ? `Every ${p.fertilizeFrequency || 21} days · fed ${daysSince(p.lastFertilized)} day${daysSince(p.lastFertilized) === 1 ? '' : 's'} ago · ${(() => { const d = fertilizeDaysLeft(p); return d <= 0 ? 'due now' : `${d} day${d === 1 ? '' : 's'} left`; })()}`
+          : 'Not tracked yet'}</div>
+      </div>
+      <button class="secondary" id="feedBtn">Feed now</button>
+    </div>
+    <div class="settings-row">
+      <div class="settings-row-label">
+        <div class="settings-row-name">☀️ Rotation</div>
+        <div class="settings-row-desc">${p.lastRotated
+          ? `Every ${p.rotateFrequency || 7} days · rotated ${daysSince(p.lastRotated)} day${daysSince(p.lastRotated) === 1 ? '' : 's'} ago · ${(() => { const d = rotateDaysLeft(p); return d <= 0 ? 'due now' : `${d} day${d === 1 ? '' : 's'} left`; })()}`
+          : 'Not tracked yet'}</div>
+      </div>
+      <button class="secondary" id="rotateBtn">Rotate now</button>
+    </div>
+
     <div class="section-label">notes</div>
     <textarea class="notes-input" id="notesInput" aria-label="Notes" placeholder="e.g. repot in spring, keep away from cold drafts…">${p.notes || ''}</textarea>
     ${p.speciesDesc ? `<div class="species-desc">🌿 <strong>${p.species}:</strong> ${p.speciesDesc}</div>` : ''}
@@ -2045,6 +2205,19 @@ function renderDetail(p) {
         ${log.map(iso => `<li>${formatHistoryDate(iso)}</li>`).join('')}
       </ul>
     ` : `<div style="font-size:13px;color:var(--soil);">No waterings logged yet.</div>`}
+
+    <div class="settings-row">
+      <div class="settings-row-label">
+        <div class="settings-row-name">📝 Health check-ins</div>
+        <div class="settings-row-desc">Log how ${p.name} is doing over time</div>
+      </div>
+      <button class="secondary" id="checkinBtn">Check in</button>
+    </div>
+    ${healthLog.length ? `
+      <ul class="history-list">
+        ${healthLog.map(h => `<li>${moodLabel(h.mood)} · ${formatHistoryDate(h.date)}${h.note ? ` — ${escapeHtml(h.note)}` : ''}</li>`).join('')}
+      </ul>
+    ` : `<div style="font-size:13px;color:var(--soil);">No check-ins yet.</div>`}
   `;
 
   const doWater = (e, slot) => {
@@ -2066,6 +2239,37 @@ function renderDetail(p) {
   if (waterMorningBtn) waterMorningBtn.onclick = (e) => doWater(e, 'morning');
   const waterNightBtn = div.querySelector('#waterNightBtn');
   if (waterNightBtn) waterNightBtn.onclick = (e) => doWater(e, 'night');
+
+  const feedBtn = div.querySelector('#feedBtn');
+  if (feedBtn) feedBtn.onclick = (e) => {
+    p.lastFertilized = new Date().toISOString();
+    p.fertilizeLog = p.fertilizeLog || [];
+    p.fertilizeLog.push(p.lastFertilized);
+    if (p.fertilizeLog.length > 3650) p.fertilizeLog = p.fertilizeLog.slice(-3650);
+    const rect = e.target.getBoundingClientRect();
+    fireConfetti(rect.left + rect.width / 2, rect.top);
+    playWaterSound();
+    render();
+    savePlants();
+  };
+
+  const rotateBtn = div.querySelector('#rotateBtn');
+  if (rotateBtn) rotateBtn.onclick = (e) => {
+    p.lastRotated = new Date().toISOString();
+    const rect = e.target.getBoundingClientRect();
+    fireConfetti(rect.left + rect.width / 2, rect.top);
+    playClickSound();
+    render();
+    savePlants();
+  };
+
+  const checkinBtn = div.querySelector('#checkinBtn');
+  if (checkinBtn) checkinBtn.onclick = () => {
+    state.checkinPlantId = p.id;
+    state.checkinDraftMood = null;
+    state.showCheckinModal = true;
+    render();
+  };
   div.querySelector('#backToPlants').onclick = () => {
     state.mobileDetailOpen = false;
     render();
@@ -2319,6 +2523,30 @@ document.addEventListener('click', (e) => {
   }
   if (e.target.id === 'propModalBackdrop') { state.showAddPropModal = false; render(); }
   if (e.target.id === 'cancelPropModal') { state.showAddPropModal = false; render(); }
+  if (e.target.id === 'checkinBackdrop') { state.showCheckinModal = false; state.checkinDraftMood = null; render(); }
+  if (e.target.id === 'cancelCheckinModal') { state.showCheckinModal = false; state.checkinDraftMood = null; render(); }
+  if (e.target.closest && e.target.closest('.mood-option')) {
+    const btn = e.target.closest('.mood-option');
+    state.checkinDraftMood = btn.dataset.mood;
+    // Update selection styling directly instead of a full render() —
+    // a full re-render would wipe out any note text already typed below.
+    document.querySelectorAll('.mood-option').forEach(el => el.classList.remove('mood-option-selected'));
+    btn.classList.add('mood-option-selected');
+  }
+  if (e.target.id === 'saveCheckinModal') {
+    const p = state.plants.find(x => x.id === state.checkinPlantId);
+    if (p) {
+      const noteInput = document.getElementById('checkinNoteInput');
+      const note = noteInput ? noteInput.value.trim() : '';
+      p.healthLog = p.healthLog || [];
+      p.healthLog.push({ date: new Date().toISOString(), mood: state.checkinDraftMood || 'okay', note });
+      if (p.healthLog.length > 500) p.healthLog = p.healthLog.slice(-500);
+      savePlants();
+    }
+    state.showCheckinModal = false;
+    state.checkinDraftMood = null;
+    render();
+  }
   if (e.target.id === 'savePropModal') {
     const name = document.getElementById('propNameInput').value.trim();
     const notes = document.getElementById('propNotesInput').value.trim();
@@ -2659,6 +2887,9 @@ try {
 } catch (err) {
   state.weatherNudge = null;
 }
+state.seasonalTipsEnabled = localStorage.getItem('plant-parent-seasonal-tips') !== '0';
+const storedLatitude = localStorage.getItem('plant-parent-latitude');
+state.latitude = storedLatitude !== null ? parseFloat(storedLatitude) : null;
 loadPropagations();
 state.theme = localStorage.getItem('plant-parent-theme') || 'sage';
 document.body.dataset.theme = state.theme;
@@ -2667,6 +2898,7 @@ state.darkMode = storedDarkMode !== null
   ? storedDarkMode === '1'
   : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
 document.body.dataset.mode = state.darkMode ? 'dark' : 'light';
+state.soundEnabled = localStorage.getItem('plant-parent-sound') !== '0';
 state.memoryGameCompleted = localStorage.getItem('plant-parent-memory-completed') === '1';
 state.memoryHighScore = parseInt(localStorage.getItem('plant-parent-memory-highscore') || '0', 10) || 0;
 state.hasInvited = localStorage.getItem('plant-parent-has-invited') === '1';
