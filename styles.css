@@ -580,6 +580,14 @@
     gap: 28px;
   }
 
+  .detail-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-bottom: 4px;
+  }
+
   .back-to-plants-btn {
     display: none;
     background: transparent;
@@ -592,6 +600,20 @@
     cursor: pointer;
   }
 
+  .next-plant-btn {
+    background: var(--panel2);
+    border: 1px solid var(--line);
+    color: var(--sage);
+    font-family: 'Nunito', sans-serif;
+    font-weight: 700;
+    font-size: 12px;
+    padding: 7px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .next-plant-btn:hover { background: var(--panel5); }
+
   @media (max-width: 800px) {
     .layout { grid-template-columns: 1fr; }
     /* Default: show the plant list, hide the detail panel */
@@ -599,6 +621,7 @@
     /* Once a plant is selected: show only the detail panel, hide the list */
     .layout.mobile-detail-open .shelf-column { display: none; }
     .layout.mobile-detail-open .panel { display: block; }
+    .detail-topbar { justify-content: space-between; }
     .back-to-plants-btn { display: inline-block; }
   }
 
@@ -743,6 +766,20 @@
   .detail-title .species { font-style: italic; color: var(--soil); font-size: 14px; }
 
   .row-actions { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+
+  @media (max-width: 800px) {
+    .panel { padding: 20px; min-height: 0; border-radius: 14px; }
+    .detail-header::before { top: -20px; left: -20px; right: -20px; height: 110px; }
+    .detail-header { gap: 16px; margin-bottom: 20px; }
+    .detail-title h2 { font-size: 26px; }
+    .row-actions button { flex: 1 1 auto; font-size: 12px; padding: 9px 10px; }
+  }
+
+  @media (max-width: 480px) {
+    .panel { padding: 16px; }
+    .detail-title h2 { font-size: 22px; }
+    .next-plant-btn { font-size: 11px; padding: 6px 10px; }
+  }
 
   button.primary, button.secondary {
     font-family: 'Nunito', sans-serif;

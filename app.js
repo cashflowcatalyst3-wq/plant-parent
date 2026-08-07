@@ -1990,12 +1990,18 @@ function renderDetail(p) {
   const left = daysLeft(p);
   const streak = calcStreak(p);
   const log = (p.waterLog || []).slice(-5).reverse();
+  const w = window.innerWidth;
+  const ringSize = w <= 480 ? 84 : w <= 800 ? 100 : 120;
+  const ringStroke = w <= 480 ? 6 : w <= 800 ? 7 : 8;
 
   div.innerHTML = `
-    <button class="back-to-plants-btn" id="backToPlants">← Back to plants</button>
+    <div class="detail-topbar">
+      <button class="back-to-plants-btn" id="backToPlants">← Back to plants</button>
+      ${state.plants.length > 1 ? `<button class="next-plant-btn" id="nextPlantBtn">Next plant →</button>` : ''}
+    </div>
     <div class="detail-header">
       <div class="detail-ring-click" id="detailRingClick">
-        ${ringPortrait(p, 120, 8)}
+        ${ringPortrait(p, ringSize, ringStroke)}
       </div>
       <input type="file" id="detailPhotoInput" accept="image/*" capture="environment" style="display:none;">
       <div class="detail-title">
@@ -2064,6 +2070,16 @@ function renderDetail(p) {
     state.mobileDetailOpen = false;
     render();
   };
+  const nextPlantBtn = div.querySelector('#nextPlantBtn');
+  if (nextPlantBtn) {
+    nextPlantBtn.onclick = () => {
+      const idx = state.plants.findIndex(x => x.id === p.id);
+      const next = state.plants[(idx + 1) % state.plants.length];
+      state.activeId = next.id;
+      state.mobileDetailOpen = true;
+      render();
+    };
+  }
   div.querySelector('#editBtn').onclick = () => {
     state.editingPlantId = p.id;
     state.pendingModalPhoto = p.photo || null;
