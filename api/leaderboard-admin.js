@@ -15,6 +15,20 @@ function isAuthorized(req) {
   return !!process.env.ADMIN_SECRET && secret === process.env.ADMIN_SECRET;
 }
 
+// Snapshot the entry's real values the first time an admin overrides it, so
+// "Clear override" has something to actually restore. If it's already
+// overridden, don't touch the snapshot — that would lose the true original.
+function captureOriginalIfNeeded(entry) {
+  if (!entry.adminOverride) {
+    entry.preOverride = {
+      nickname: entry.nickname,
+      normalized: entry.normalized,
+      bestStreak: entry.bestStreak || 0,
+      plantCount: entry.plantCount || 0,
+    };
+  }
+}
+
 export default async function handler(req, res) {
   if (!process.env.ADMIN_SECRET) {
     return res.status(500).json({ error: 'ADMIN_SECRET is not set. Add it in Vercel → Settings → Environment Variables, then redeploy.' });
@@ -69,7 +83,25 @@ export default async function handler(req, res) {
       }
 
       if (action === 'clearOverride') {
+        if (entry.preOverride) {
+          const restore = entry.preOverride;
+          // Restore nickname too, but only if nobody else has since claimed
+          // it — if they have, keep the current nickname and just restore stats.
+          if (restore.normalized && restore.normalized !== entry.normalized) {
+            const owner = await redis.hget(NICKNAME_INDEX_KEY, restore.normalized);
+            if (!owner || owner === deviceId) {
+              await redis.hdel(NICKNAME_INDEX_KEY, entry.normalized);
+              await redis.hset(NICKNAME_INDEX_KEY, { [restore.normalized]: deviceId });
+              entry.nickname = restore.nickname;
+              entry.normalized = restore.normalized;
+            }
+          }
+          entry.bestStreak = restore.bestStreak;
+          entry.plantCount = restore.plantCount;
+          delete entry.preOverride;
+        }
         entry.adminOverride = false;
+        entry.updatedAt = new Date().toISOString();
         await redis.set(`leaderboard-entry:${deviceId}`, entry);
         return res.status(200).json({ ok: true, entry });
       }
@@ -90,6 +122,7 @@ export default async function handler(req, res) {
         if (entry.normalized && entry.normalized !== normalized) {
           await redis.hdel(NICKNAME_INDEX_KEY, entry.normalized);
         }
+        captureOriginalIfNeeded(entry);
         entry.nickname = cleanNickname;
         entry.normalized = normalized;
         entry.adminOverride = true; // lock it so their device doesn't quietly revert it
@@ -110,6 +143,7 @@ export default async function handler(req, res) {
 
       const current = entry[field] || 0;
       const next = mode === 'add' ? current + amount : amount;
+      captureOriginalIfNeeded(entry);
       entry[field] = Math.max(0, next);
       entry.adminOverride = true;
       entry.updatedAt = new Date().toISOString();
