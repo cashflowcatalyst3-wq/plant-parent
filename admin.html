@@ -194,14 +194,22 @@ document.getElementById('loginBtn').onclick = async () => {
   const input = document.getElementById('secretInput');
   secret = input.value.trim();
   if (!secret) return;
+  const errorEl = document.getElementById('loginError');
+  errorEl.textContent = 'Checking…';
   // verify before committing to the panel
-  const res = await fetch('/api/leaderboard-admin', { headers: authHeaders() });
-  if (res.status === 401) {
-    document.getElementById('loginError').textContent = 'Incorrect secret.';
-    return;
+  try {
+    const res = await fetch('/api/leaderboard-admin', { headers: authHeaders() });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      errorEl.textContent = data.error || 'Incorrect secret.';
+      return;
+    }
+    errorEl.textContent = '';
+    sessionStorage.setItem('pp-admin-secret', secret);
+    showPanel();
+  } catch (err) {
+    errorEl.textContent = "Couldn't reach the server — try again in a moment.";
   }
-  sessionStorage.setItem('pp-admin-secret', secret);
-  showPanel();
 };
 document.getElementById('secretInput').addEventListener('keydown', (e) => {
   if (e.key === 'Enter') document.getElementById('loginBtn').click();
