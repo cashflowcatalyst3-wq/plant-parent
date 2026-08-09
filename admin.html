@@ -27,6 +27,16 @@
   h2 { font-size: 15px; margin: 28px 0 10px; }
   .rename-row { display: flex; gap: 6px; align-items: center; }
   .rename-row input { width: 110px; }
+  .announce-box { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; background: #fff; padding: 14px; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); margin-bottom: 6px; }
+  .announce-box input[type="text"], .announce-box input[type="password"] { padding: 8px 10px; border: 1.5px solid #ddd; border-radius: 8px; font-size: 13px; }
+  #announceTitle { width: 180px; }
+  #announceBody { flex: 1; min-width: 180px; }
+  #cronSecretInput { width: 180px; }
+  .device-id { font-family: monospace; font-size: 11px; color: #999; }
+  .message-row { display: flex; gap: 6px; align-items: center; }
+  .message-row input { width: 130px; }
+  .push-yes { color: #6E8F58; font-weight: 700; }
+  .push-no { color: #B7AF9D; }
 </style>
 </head>
 <body>
@@ -40,7 +50,40 @@
 </div>
 
 <div id="adminPanel" style="display:none;max-width:960px;margin:0 auto;">
-  <h1>🏆 Leaderboard admin</h1>
+  <h1>🛠️ Plant Parent Admin</h1>
+  <p class="hint">Full control over the app — every device's data, push notifications, and manual test triggers, plus the leaderboard tools below.</p>
+  <div id="globalError"></div>
+
+  <h2>📋 All devices</h2>
+  <p class="hint">Every device that's ever synced or subscribed to notifications. "Nickname" only shows if that device also joined the public leaderboard.</p>
+  <div id="deviceStatus"></div>
+  <table>
+    <thead>
+      <tr><th>Device</th><th>Plants</th><th>Overdue</th><th>Push</th><th>Actions</th></tr>
+    </thead>
+    <tbody id="devicesBody"></tbody>
+  </table>
+
+  <h2>📣 Send an announcement</h2>
+  <p class="hint">Sends a real push notification. Only reaches devices that have notifications enabled.</p>
+  <div class="announce-box">
+    <input type="text" id="announceTitle" placeholder="Title, e.g. 🌱 Heads up">
+    <input type="text" id="announceBody" placeholder="Message">
+    <button class="primary" id="announceAllBtn">Send to everyone</button>
+    <span id="announceStatus" class="hint" style="margin:0;"></span>
+  </div>
+
+  <h2>🧪 Testing tools</h2>
+  <p class="hint">Manually run the same jobs your daily cron and 5-hour scheduler trigger automatically — useful for testing without waiting. Needs your CRON_SECRET (different from your admin secret), remembered only for this browser tab.</p>
+  <div class="announce-box">
+    <input type="password" id="cronSecretInput" placeholder="CRON_SECRET">
+    <button class="secondary" id="runOverdueBtn">Run daily check (overdue + Sunday digest)</button>
+    <button class="secondary" id="runTipBtn">Send a random check-in tip</button>
+  </div>
+  <p class="hint" style="margin-top:6px;">The weekly digest only actually sends on Sundays regardless — this runs the same job your cron runs daily either way.</p>
+  <div id="testStatus" class="hint"></div>
+
+  <h2>🏆 Leaderboard admin</h2>
   <p class="hint">Adjust anyone's streak, plant count, or nickname. Manual changes stick — the person's own device won't silently overwrite them. "Clear override" restores their real values from before your first change and lets their device resume syncing normally. Banning removes someone and blocks them from rejoining until you unban.</p>
   <div id="status"></div>
   <div id="error"></div>
@@ -64,6 +107,7 @@
 <script>
 let secret = sessionStorage.getItem('pp-admin-secret') || '';
 let allEntries = [];
+let allDevices = [];
 
 function authHeaders() {
   return { 'Content-Type': 'application/json', 'X-Admin-Secret': secret };
@@ -293,6 +337,144 @@ async function deleteEntry(deviceId) {
   }
 }
 
+async function loadDevices() {
+  const statusEl = document.getElementById('deviceStatus');
+  const errorEl = document.getElementById('globalError');
+  statusEl.textContent = 'Loading…';
+  try {
+    const res = await fetch('/api/admin', { headers: authHeaders() });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to load devices');
+    allDevices = data.devices || [];
+    renderDevices(allDevices);
+    statusEl.textContent = `${allDevices.length} device${allDevices.length === 1 ? '' : 's'}`;
+  } catch (err) {
+    statusEl.textContent = '';
+    errorEl.textContent = err.message;
+  }
+}
+
+function renderDevices(devices) {
+  const body = document.getElementById('devicesBody');
+  if (!devices.length) {
+    body.innerHTML = `<tr><td colspan="5" style="color:#7A7566;">No devices yet.</td></tr>`;
+    return;
+  }
+  body.innerHTML = devices.map(d => `
+    <tr data-device="${d.deviceId}">
+      <td>
+        ${d.nickname ? escapeHtml(d.nickname) + '<br>' : ''}
+        <span class="device-id">${escapeHtml(d.deviceId)}</span>
+      </td>
+      <td>${d.plantCount}</td>
+      <td>${d.overdueCount > 0 ? `<span style="color:#C97B5C;font-weight:700;">${d.overdueCount}</span>` : '0'}</td>
+      <td>${d.pushEnabled ? '<span class="push-yes">On</span>' : '<span class="push-no">Off</span>'}</td>
+      <td>
+        <div class="row-actions">
+          <div class="message-row">
+            <input type="text" data-field="msg-title" placeholder="Title">
+            <input type="text" data-field="msg-body" placeholder="Message">
+            <button class="secondary" data-act="message">Send</button>
+          </div>
+          <button class="danger" data-act="wipe">Wipe device</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+
+  body.querySelectorAll('button[data-act="message"]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const row = btn.closest('tr');
+      const deviceId = row.dataset.device;
+      const title = row.querySelector('[data-field="msg-title"]').value.trim();
+      const msgBody = row.querySelector('[data-field="msg-body"]').value.trim();
+      if (!title || !msgBody) return;
+      sendPush(deviceId, title, msgBody, `msgStatus-${deviceId}`);
+    });
+  });
+  body.querySelectorAll('button[data-act="wipe"]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const deviceId = btn.closest('tr').dataset.device;
+      const typed = prompt('This permanently deletes this device\'s plants, notifications, and leaderboard entry. Type WIPE to confirm.');
+      if (typed === 'WIPE') wipeDevice(deviceId);
+    });
+  });
+}
+
+async function sendPush(deviceId, title, msgBody) {
+  const errorEl = document.getElementById('globalError');
+  errorEl.textContent = '';
+  try {
+    const res = await fetch('/api/admin', {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ action: 'sendPush', deviceId, title, body: msgBody })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to send');
+    return data;
+  } catch (err) {
+    errorEl.textContent = err.message;
+    return null;
+  }
+}
+
+async function wipeDevice(deviceId) {
+  const errorEl = document.getElementById('globalError');
+  errorEl.textContent = '';
+  try {
+    const res = await fetch('/api/admin', {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ action: 'wipeDevice', deviceId })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to wipe device');
+    loadDevices();
+  } catch (err) {
+    errorEl.textContent = err.message;
+  }
+}
+
+document.getElementById('announceAllBtn').addEventListener('click', async () => {
+  const title = document.getElementById('announceTitle').value.trim();
+  const msgBody = document.getElementById('announceBody').value.trim();
+  const statusEl = document.getElementById('announceStatus');
+  if (!title || !msgBody) {
+    statusEl.textContent = 'Enter a title and message first.';
+    return;
+  }
+  statusEl.textContent = 'Sending…';
+  const data = await sendPush('all', title, msgBody);
+  statusEl.textContent = data ? `Sent to ${data.sent} of ${data.checked} devices.` : '';
+});
+
+document.getElementById('cronSecretInput').value = sessionStorage.getItem('pp-cron-secret') || '';
+document.getElementById('cronSecretInput').addEventListener('input', (e) => {
+  sessionStorage.setItem('pp-cron-secret', e.target.value);
+});
+
+async function runTestEndpoint(path, label) {
+  const statusEl = document.getElementById('testStatus');
+  const cronSecret = document.getElementById('cronSecretInput').value.trim();
+  if (!cronSecret) {
+    statusEl.textContent = 'Enter your CRON_SECRET first.';
+    return;
+  }
+  statusEl.textContent = `Running ${label}…`;
+  try {
+    const res = await fetch(`${path}?secret=${encodeURIComponent(cronSecret)}`);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Request failed');
+    statusEl.textContent = `${label}: ${JSON.stringify(data)}`;
+  } catch (err) {
+    statusEl.textContent = `${label} failed: ${err.message}`;
+  }
+}
+
+document.getElementById('runOverdueBtn').addEventListener('click', () => runTestEndpoint('/api/cron-check', 'Daily check'));
+document.getElementById('runTipBtn').addEventListener('click', () => runTestEndpoint('/api/random-notification', 'Random tip'));
+
 function escapeHtml(str) {
   return String(str || '')
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -302,6 +484,7 @@ function escapeHtml(str) {
 function showPanel() {
   document.getElementById('loginBox').style.display = 'none';
   document.getElementById('adminPanel').style.display = 'block';
+  loadDevices();
   loadEntries();
 }
 
