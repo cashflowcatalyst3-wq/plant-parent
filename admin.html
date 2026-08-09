@@ -23,6 +23,10 @@
   .override-badge { font-size: 10px; background: #F4E3D3; color: #A0623F; padding: 2px 6px; border-radius: 10px; margin-left: 6px; }
   #status { font-size: 13px; color: #7A7566; margin: 10px 0; }
   #error { color: #C0392B; font-size: 13px; margin: 10px 0; }
+  #searchInput { width: 100%; box-sizing: border-box; padding: 9px 10px; border: 1.5px solid #ddd; border-radius: 8px; font-size: 13px; margin-bottom: 14px; }
+  h2 { font-size: 15px; margin: 28px 0 10px; }
+  .rename-row { display: flex; gap: 6px; align-items: center; }
+  .rename-row input { width: 110px; }
 </style>
 </head>
 <body>
@@ -35,21 +39,31 @@
   <div id="loginError" style="color:#C0392B;font-size:13px;margin-top:8px;"></div>
 </div>
 
-<div id="adminPanel" style="display:none;max-width:900px;margin:0 auto;">
+<div id="adminPanel" style="display:none;max-width:960px;margin:0 auto;">
   <h1>🏆 Leaderboard admin</h1>
-  <p class="hint">Adjust anyone's streak or plant count. Manual changes stick — the person's own device won't silently overwrite them until you tap "Clear override".</p>
+  <p class="hint">Adjust anyone's streak, plant count, or nickname. Manual changes stick — the person's own device won't silently overwrite them until you tap "Clear override". Banning removes someone and blocks them from rejoining until you unban.</p>
   <div id="status"></div>
   <div id="error"></div>
+  <input type="text" id="searchInput" placeholder="Search by nickname…">
   <table>
     <thead>
       <tr><th>Nickname</th><th>Streak</th><th>Plants</th><th>Updated</th><th>Actions</th></tr>
     </thead>
     <tbody id="entriesBody"></tbody>
   </table>
+
+  <h2>🚫 Banned devices</h2>
+  <table>
+    <thead>
+      <tr><th>Nickname (at time of ban)</th><th>Device ID</th><th>Actions</th></tr>
+    </thead>
+    <tbody id="bannedBody"></tbody>
+  </table>
 </div>
 
 <script>
 let secret = sessionStorage.getItem('pp-admin-secret') || '';
+let allEntries = [];
 
 function authHeaders() {
   return { 'Content-Type': 'application/json', 'X-Admin-Secret': secret };
@@ -64,13 +78,25 @@ async function loadEntries() {
     const res = await fetch('/api/leaderboard-admin', { headers: authHeaders() });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Failed to load');
-    renderEntries(data.entries || []);
-    statusEl.textContent = `${data.entries.length} entr${data.entries.length === 1 ? 'y' : 'ies'}`;
+    allEntries = data.entries || [];
+    renderEntries(filterEntries(document.getElementById('searchInput').value));
+    renderBanned(data.banned || []);
+    statusEl.textContent = `${allEntries.length} entr${allEntries.length === 1 ? 'y' : 'ies'}`;
   } catch (err) {
     statusEl.textContent = '';
     errorEl.textContent = err.message;
   }
 }
+
+function filterEntries(query) {
+  const q = query.trim().toLowerCase();
+  if (!q) return allEntries;
+  return allEntries.filter(e => e.nickname.toLowerCase().includes(q));
+}
+
+document.getElementById('searchInput').addEventListener('input', (e) => {
+  renderEntries(filterEntries(e.target.value));
+});
 
 function renderEntries(entries) {
   const body = document.getElementById('entriesBody');
@@ -87,8 +113,13 @@ function renderEntries(entries) {
           <button class="secondary" data-act="streak-add20">Streak +20</button>
           <input type="number" data-field="streak-custom" placeholder="set streak">
           <input type="number" data-field="plants-custom" placeholder="set plants">
+          <div class="rename-row">
+            <input type="text" data-field="rename-custom" placeholder="new nickname" maxlength="20">
+            <button class="secondary" data-act="rename">Rename</button>
+          </div>
           <button class="secondary" data-act="clear">Clear override</button>
           <button class="danger" data-act="delete">Remove</button>
+          <button class="danger" data-act="ban">Ban</button>
         </div>
       </td>
     </tr>
@@ -111,6 +142,31 @@ function renderEntries(entries) {
       }
     });
   });
+  body.querySelectorAll('input[data-field="rename-custom"]').forEach(input => {
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && input.value.trim() !== '') {
+        renameEntry(input.closest('tr').dataset.device, input.value.trim());
+      }
+    });
+  });
+}
+
+function renderBanned(banned) {
+  const body = document.getElementById('bannedBody');
+  if (!banned.length) {
+    body.innerHTML = `<tr><td colspan="3" style="color:#7A7566;">No one's banned.</td></tr>`;
+    return;
+  }
+  body.innerHTML = banned.map(b => `
+    <tr data-device="${b.deviceId}">
+      <td>${escapeHtml(b.nickname)}</td>
+      <td style="font-family:monospace;font-size:11px;color:#999;">${escapeHtml(b.deviceId)}</td>
+      <td><button class="secondary" data-act="unban">Unban</button></td>
+    </tr>
+  `).join('');
+  body.querySelectorAll('button[data-act="unban"]').forEach(btn => {
+    btn.addEventListener('click', () => unbanDevice(btn.closest('tr').dataset.device));
+  });
 }
 
 async function handleAction(btn) {
@@ -123,7 +179,66 @@ async function handleAction(btn) {
   if (act === 'streak-add20') return adjustEntry(deviceId, 'bestStreak', 'add', 20);
   if (act === 'clear') return clearOverride(deviceId);
   if (act === 'delete') {
-    if (confirm('Remove this person from the leaderboard entirely?')) return deleteEntry(deviceId);
+    if (confirm('Remove this person from the leaderboard entirely? They can rejoin later if they want.')) return deleteEntry(deviceId);
+  }
+  if (act === 'ban') {
+    if (confirm('Ban this device? They will be removed and blocked from rejoining until you unban them.')) return banDevice(deviceId);
+  }
+  if (act === 'rename') {
+    const input = row.querySelector('input[data-field="rename-custom"]');
+    const value = input ? input.value.trim() : '';
+    if (value) return renameEntry(deviceId, value);
+  }
+}
+
+async function renameEntry(deviceId, nickname) {
+  const errorEl = document.getElementById('error');
+  errorEl.textContent = '';
+  try {
+    const res = await fetch('/api/leaderboard-admin', {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ deviceId, action: 'rename', nickname })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to rename');
+    loadEntries();
+  } catch (err) {
+    errorEl.textContent = err.message;
+  }
+}
+
+async function banDevice(deviceId) {
+  const errorEl = document.getElementById('error');
+  errorEl.textContent = '';
+  try {
+    const res = await fetch('/api/leaderboard-admin', {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ deviceId, action: 'ban' })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to ban');
+    loadEntries();
+  } catch (err) {
+    errorEl.textContent = err.message;
+  }
+}
+
+async function unbanDevice(deviceId) {
+  const errorEl = document.getElementById('error');
+  errorEl.textContent = '';
+  try {
+    const res = await fetch('/api/leaderboard-admin', {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ deviceId, action: 'unban' })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to unban');
+    loadEntries();
+  } catch (err) {
+    errorEl.textContent = err.message;
   }
 }
 

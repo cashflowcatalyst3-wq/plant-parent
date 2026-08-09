@@ -1,33 +1,14 @@
 import { Redis } from '@upstash/redis';
+import {
+  sanitizeNickname,
+  normalizeNickname,
+  containsBlockedWord,
+  MEMBERS_KEY,
+  NICKNAME_INDEX_KEY,
+  BANNED_KEY,
+} from '../lib/nickname.js';
 
 const redis = Redis.fromEnv();
-const MEMBERS_KEY = 'leaderboard-members';
-const NICKNAME_INDEX_KEY = 'leaderboard-nickname-index'; // normalized nickname -> deviceId
-const MAX_NICKNAME_LENGTH = 20;
-
-// Not exhaustive — just enough to block the obvious cases. Checked against
-// the nickname with spaces/punctuation stripped, so simple spacing tricks
-// ("f u c k") don't slip through.
-const BLOCKED_WORDS = [
-  'fuck', 'shit', 'bitch', 'asshole', 'bastard', 'dick', 'pussy', 'cunt', 'cock',
-  'nigger', 'nigga', 'fag', 'faggot', 'retard', 'whore', 'slut', 'rape',
-  'nazi', 'hitler', 'kike', 'chink', 'spic', 'tranny',
-];
-
-function sanitizeNickname(raw) {
-  const trimmed = String(raw || '').trim().slice(0, MAX_NICKNAME_LENGTH);
-  // strip anything that isn't a letter, number, space, or a few safe punctuation marks
-  return trimmed.replace(/[^\p{L}\p{N} _\-'!?]/gu, '').trim();
-}
-
-function normalizeNickname(nickname) {
-  return nickname.toLowerCase().replace(/\s+/g, ' ').trim();
-}
-
-function containsBlockedWord(nickname) {
-  const stripped = nickname.toLowerCase().replace(/[^a-z0-9]/g, '');
-  return BLOCKED_WORDS.some((word) => stripped.includes(word));
-}
 
 export default async function handler(req, res) {
   try {
@@ -61,25 +42,40 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Missing deviceId or nickname' });
       }
 
-      const cleanNickname = sanitizeNickname(nickname);
-      if (!cleanNickname) {
-        return res.status(400).json({ error: 'Nickname must contain at least one letter or number.' });
-      }
-      if (containsBlockedWord(cleanNickname)) {
-        return res.status(400).json({ error: "That nickname isn't allowed — please choose something else." });
+      const isBanned = await redis.hexists(BANNED_KEY, deviceId);
+      if (isBanned) {
+        return res.status(403).json({ error: 'This device has been removed from the leaderboard and cannot rejoin.' });
       }
 
-      const normalized = normalizeNickname(cleanNickname);
-
-      const existingOwner = await redis.hget(NICKNAME_INDEX_KEY, normalized);
-      if (existingOwner && existingOwner !== deviceId) {
-        return res.status(409).json({ error: 'That nickname is already taken — try another one.' });
-      }
-
-      // free up this device's previous nickname reservation, if it's changing
       const priorEntry = await redis.get(`leaderboard-entry:${deviceId}`);
-      if (priorEntry && priorEntry.normalized && priorEntry.normalized !== normalized) {
-        await redis.hdel(NICKNAME_INDEX_KEY, priorEntry.normalized);
+
+      let cleanNickname, normalized;
+      if (priorEntry?.adminOverride) {
+        // An admin has locked this entry — keep the nickname (and stats)
+        // exactly as they set it, rather than letting this device's own
+        // periodic self-refresh silently revert the change.
+        cleanNickname = priorEntry.nickname;
+        normalized = priorEntry.normalized;
+      } else {
+        cleanNickname = sanitizeNickname(nickname);
+        if (!cleanNickname) {
+          return res.status(400).json({ error: 'Nickname must contain at least one letter or number.' });
+        }
+        if (containsBlockedWord(cleanNickname)) {
+          return res.status(400).json({ error: "That nickname isn't allowed — please choose something else." });
+        }
+
+        normalized = normalizeNickname(cleanNickname);
+
+        const existingOwner = await redis.hget(NICKNAME_INDEX_KEY, normalized);
+        if (existingOwner && existingOwner !== deviceId) {
+          return res.status(409).json({ error: 'That nickname is already taken — try another one.' });
+        }
+
+        // free up this device's previous nickname reservation, if it's changing
+        if (priorEntry?.normalized && priorEntry.normalized !== normalized) {
+          await redis.hdel(NICKNAME_INDEX_KEY, priorEntry.normalized);
+        }
       }
 
       const entry = {
@@ -93,7 +89,9 @@ export default async function handler(req, res) {
       };
       await redis.set(`leaderboard-entry:${deviceId}`, entry);
       await redis.sadd(MEMBERS_KEY, deviceId);
-      await redis.hset(NICKNAME_INDEX_KEY, { [normalized]: deviceId });
+      if (!priorEntry?.adminOverride) {
+        await redis.hset(NICKNAME_INDEX_KEY, { [normalized]: deviceId });
+      }
       return res.status(200).json({ ok: true, nickname: cleanNickname });
     }
 
