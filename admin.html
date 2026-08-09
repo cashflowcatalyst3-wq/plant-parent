@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Plant Parent — Admin</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #F6F3EC; color: #2B2B26; margin: 0; padding: 24px; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  p.hint { color: #7A7566; font-size: 13px; margin: 0 0 20px; }
+  #loginBox { max-width: 360px; margin: 60px auto; background: #fff; padding: 24px; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); }
+  #loginBox input { width: 100%; box-sizing: border-box; padding: 10px; border: 1.5px solid #ddd; border-radius: 8px; font-size: 14px; margin-bottom: 10px; }
+  button { cursor: pointer; border: none; border-radius: 8px; padding: 8px 12px; font-size: 13px; font-weight: 600; }
+  .primary { background: #8DA377; color: #fff; }
+  .secondary { background: #eee; color: #333; }
+  .danger { background: #C97B5C; color: #fff; }
+  table { width: 100%; border-collapse: collapse; background: #fff; border-radius: 12px; overflow: hidden; box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+  th, td { text-align: left; padding: 10px 12px; font-size: 13px; border-bottom: 1px solid #eee; }
+  th { background: #F0EDE3; font-weight: 700; }
+  tr:last-child td { border-bottom: none; }
+  .row-actions { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  .row-actions input { width: 56px; padding: 5px; border: 1.5px solid #ddd; border-radius: 6px; font-size: 12px; }
+  .override-badge { font-size: 10px; background: #F4E3D3; color: #A0623F; padding: 2px 6px; border-radius: 10px; margin-left: 6px; }
+  #status { font-size: 13px; color: #7A7566; margin: 10px 0; }
+  #error { color: #C0392B; font-size: 13px; margin: 10px 0; }
+</style>
+</head>
+<body>
+
+<div id="loginBox">
+  <h1>Admin login</h1>
+  <p class="hint">Enter your ADMIN_SECRET (set in Vercel env vars).</p>
+  <input type="password" id="secretInput" placeholder="Admin secret">
+  <button class="primary" id="loginBtn" style="width:100%;">Enter</button>
+  <div id="loginError" style="color:#C0392B;font-size:13px;margin-top:8px;"></div>
+</div>
+
+<div id="adminPanel" style="display:none;max-width:900px;margin:0 auto;">
+  <h1>🏆 Leaderboard admin</h1>
+  <p class="hint">Adjust anyone's streak or plant count. Manual changes stick — the person's own device won't silently overwrite them until you tap "Clear override".</p>
+  <div id="status"></div>
+  <div id="error"></div>
+  <table>
+    <thead>
+      <tr><th>Nickname</th><th>Streak</th><th>Plants</th><th>Updated</th><th>Actions</th></tr>
+    </thead>
+    <tbody id="entriesBody"></tbody>
+  </table>
+</div>
+
+<script>
+let secret = sessionStorage.getItem('pp-admin-secret') || '';
+
+function authHeaders() {
+  return { 'Content-Type': 'application/json', 'X-Admin-Secret': secret };
+}
+
+async function loadEntries() {
+  const statusEl = document.getElementById('status');
+  const errorEl = document.getElementById('error');
+  statusEl.textContent = 'Loading…';
+  errorEl.textContent = '';
+  try {
+    const res = await fetch('/api/leaderboard-admin', { headers: authHeaders() });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to load');
+    renderEntries(data.entries || []);
+    statusEl.textContent = `${data.entries.length} entr${data.entries.length === 1 ? 'y' : 'ies'}`;
+  } catch (err) {
+    statusEl.textContent = '';
+    errorEl.textContent = err.message;
+  }
+}
+
+function renderEntries(entries) {
+  const body = document.getElementById('entriesBody');
+  body.innerHTML = entries.map(e => `
+    <tr data-device="${e.deviceId}">
+      <td>${escapeHtml(e.nickname)}${e.adminOverride ? '<span class="override-badge">admin set</span>' : ''}</td>
+      <td>${e.bestStreak || 0}</td>
+      <td>${e.plantCount || 0}</td>
+      <td>${e.updatedAt ? new Date(e.updatedAt).toLocaleDateString() : ''}</td>
+      <td>
+        <div class="row-actions">
+          <button class="secondary" data-act="streak-zero">Streak → 0</button>
+          <button class="secondary" data-act="streak-add10">Streak +10</button>
+          <button class="secondary" data-act="streak-add20">Streak +20</button>
+          <input type="number" data-field="streak-custom" placeholder="set streak">
+          <input type="number" data-field="plants-custom" placeholder="set plants">
+          <button class="secondary" data-act="clear">Clear override</button>
+          <button class="danger" data-act="delete">Remove</button>
+        </div>
+      </td>
+    </tr>
+  `).join('');
+
+  body.querySelectorAll('button').forEach(btn => {
+    btn.addEventListener('click', () => handleAction(btn));
+  });
+  body.querySelectorAll('input[data-field="streak-custom"]').forEach(input => {
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && input.value !== '') {
+        adjustEntry(input.closest('tr').dataset.device, 'bestStreak', 'set', parseInt(input.value, 10));
+      }
+    });
+  });
+  body.querySelectorAll('input[data-field="plants-custom"]').forEach(input => {
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && input.value !== '') {
+        adjustEntry(input.closest('tr').dataset.device, 'plantCount', 'set', parseInt(input.value, 10));
+      }
+    });
+  });
+}
+
+async function handleAction(btn) {
+  const row = btn.closest('tr');
+  const deviceId = row.dataset.device;
+  const act = btn.dataset.act;
+
+  if (act === 'streak-zero') return adjustEntry(deviceId, 'bestStreak', 'set', 0);
+  if (act === 'streak-add10') return adjustEntry(deviceId, 'bestStreak', 'add', 10);
+  if (act === 'streak-add20') return adjustEntry(deviceId, 'bestStreak', 'add', 20);
+  if (act === 'clear') return clearOverride(deviceId);
+  if (act === 'delete') {
+    if (confirm('Remove this person from the leaderboard entirely?')) return deleteEntry(deviceId);
+  }
+}
+
+async function adjustEntry(deviceId, field, mode, value) {
+  const errorEl = document.getElementById('error');
+  errorEl.textContent = '';
+  try {
+    const res = await fetch('/api/leaderboard-admin', {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ deviceId, field, mode, value })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to update');
+    loadEntries();
+  } catch (err) {
+    errorEl.textContent = err.message;
+  }
+}
+
+async function clearOverride(deviceId) {
+  const errorEl = document.getElementById('error');
+  errorEl.textContent = '';
+  try {
+    const res = await fetch('/api/leaderboard-admin', {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ deviceId, action: 'clearOverride' })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to clear override');
+    loadEntries();
+  } catch (err) {
+    errorEl.textContent = err.message;
+  }
+}
+
+async function deleteEntry(deviceId) {
+  const errorEl = document.getElementById('error');
+  errorEl.textContent = '';
+  try {
+    const res = await fetch('/api/leaderboard-admin', {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ deviceId, action: 'delete' })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to remove');
+    loadEntries();
+  } catch (err) {
+    errorEl.textContent = err.message;
+  }
+}
+
+function escapeHtml(str) {
+  return String(str || '')
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+function showPanel() {
+  document.getElementById('loginBox').style.display = 'none';
+  document.getElementById('adminPanel').style.display = 'block';
+  loadEntries();
+}
+
+document.getElementById('loginBtn').onclick = async () => {
+  const input = document.getElementById('secretInput');
+  secret = input.value.trim();
+  if (!secret) return;
+  // verify before committing to the panel
+  const res = await fetch('/api/leaderboard-admin', { headers: authHeaders() });
+  if (res.status === 401) {
+    document.getElementById('loginError').textContent = 'Incorrect secret.';
+    return;
+  }
+  sessionStorage.setItem('pp-admin-secret', secret);
+  showPanel();
+};
+document.getElementById('secretInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') document.getElementById('loginBtn').click();
+});
+
+if (secret) showPanel();
+</script>
+
+</body>
+</html>

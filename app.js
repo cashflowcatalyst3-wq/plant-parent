@@ -113,6 +113,13 @@ const state = {
   showCheckinModal: false,
   checkinPlantId: null,
   checkinDraftMood: null,
+  showLeaderboardModal: false,
+  leaderboardTab: 'streak', // 'streak' | 'plants'
+  leaderboardJoined: false,
+  leaderboardNickname: '',
+  leaderboardData: { streaks: [], plants: [] },
+  leaderboardLoading: false,
+  leaderboardError: null,
   memoryGameCompleted: false,
   memoryHighScore: 0,
   showInviteModal: false,
@@ -499,6 +506,7 @@ const ICONS = {
   journal: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3.5h9.5A2.5 2.5 0 0 1 18 6v14l-3-2-3 2-3-2-3 2V6a2.5 2.5 0 0 1 2.5-2.5Z"/><path d="M9 8h6M9 11.5h6"/></svg>`,
   cuttings: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V9"/><path d="M12 9c0-3.5 2.5-6 6-6-.5 3.5-2.5 6-6 6Z"/><circle cx="7" cy="6" r="2.2"/><circle cx="7" cy="14" r="2.2"/><path d="M8.6 7.6 12 9M8.6 12.4 12 11"/></svg>`,
   badges: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="9" r="5.5"/><path d="m8.5 13.5-1.5 7 5-2.5 5 2.5-1.5-7"/></svg>`,
+  trophy: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v5a4 4 0 0 1-8 0V4Z"/><path d="M8 5H5a3 3 0 0 0 3 5"/><path d="M16 5h3a3 3 0 0 1-3 5"/><path d="M12 13v3"/><path d="M9 20h6"/><path d="M10 16h4v4h-4z"/></svg>`,
   game: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="8" width="18" height="10" rx="4"/><path d="M8 11v4M6 13h4"/><circle cx="16" cy="12" r="1"/><circle cx="18" cy="14.5" r="1"/></svg>`,
   brain: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 4.5a2.7 2.7 0 0 0-2.7 2.7v.3A2.7 2.7 0 0 0 4.5 10v.6a2.7 2.7 0 0 0 1 5v.4A2.7 2.7 0 0 0 8.2 18.7h.8"/><path d="M15 4.5a2.7 2.7 0 0 1 2.7 2.7v.3A2.7 2.7 0 0 1 19.5 10v.6a2.7 2.7 0 0 1-1 5v.4A2.7 2.7 0 0 1 15.8 18.7h-.8"/><path d="M9 4.5V19M15 4.5V19"/></svg>`,
   settings: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 13a1.7 1.7 0 0 0 .3 1.9l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6V19a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.9 1.7 1.7 0 0 0-1.6-1H4a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.6-1.1 1.7 1.7 0 0 0-.3-1.9l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.9.3H10a1.7 1.7 0 0 0 1-1.6V4a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.9V10a1.7 1.7 0 0 0 1.6 1H20a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.6 1Z"/></svg>`,
@@ -1421,6 +1429,10 @@ function render() {
             <span class="more-menu-icon">${icon('brain')}</span>
             <span>Memory Match${state.memoryHighScore ? ` · best ${state.memoryHighScore}` : ''}</span>
           </button>
+          <button class="more-menu-item" id="navLeaderboard">
+            <span class="more-menu-icon">${icon('trophy')}</span>
+            <span>Leaderboard</span>
+          </button>
           <div class="more-menu-divider"></div>
           <button class="more-menu-item" id="navSettings">
             <span class="more-menu-icon">${icon('settings')}</span>
@@ -1441,6 +1453,7 @@ function render() {
     ${state.showThemeModal ? renderThemeModal() : ''}
     ${state.showAddPropModal ? renderAddPropModal() : ''}
     ${state.showCheckinModal ? renderCheckinModal() : ''}
+    ${state.showLeaderboardModal ? renderLeaderboardModal() : ''}
   `;
 
   if (state.currentView === 'garden') {
@@ -1488,6 +1501,14 @@ function render() {
     document.getElementById('navBadges').onclick = () => { state.showMoreMenu = false; state.showBadgesModal = true; render(); };
     document.getElementById('navGame').onclick = () => { state.showMoreMenu = false; render(); if (window.openMiniGame) window.openMiniGame(); };
     document.getElementById('navMemoryGame').onclick = () => { state.showMoreMenu = false; render(); if (window.openMemoryGame) window.openMemoryGame(); };
+    document.getElementById('navLeaderboard').onclick = () => {
+      state.showMoreMenu = false;
+      state.showLeaderboardModal = true;
+      state.leaderboardError = null;
+      render();
+      if (state.leaderboardJoined) refreshMyLeaderboardStats();
+      fetchLeaderboard();
+    };
     document.getElementById('navJournal').onclick = () => { state.currentView = 'journal'; state.showMoreMenu = false; render(); };
     document.getElementById('navPropagation').onclick = () => { state.currentView = 'propagation'; state.showMoreMenu = false; render(); };
     document.getElementById('navSettings').onclick = () => { state.currentView = 'settings'; state.showMoreMenu = false; render(); };
@@ -2508,6 +2529,26 @@ document.addEventListener('click', (e) => {
       if (btn) { const orig = btn.textContent; btn.textContent = 'Copied!'; setTimeout(() => { btn.textContent = orig; }, 1500); }
     }).catch(() => {});
   }
+  if (e.target.id === 'leaderboardBackdrop') { state.showLeaderboardModal = false; render(); }
+  if (e.target.id === 'cancelLeaderboardModal') { state.showLeaderboardModal = false; render(); }
+  if (e.target.id === 'closeLeaderboardModal') { state.showLeaderboardModal = false; render(); }
+  if (e.target.id === 'leaderboardTabStreak') { state.leaderboardTab = 'streak'; render(); }
+  if (e.target.id === 'leaderboardTabPlants') { state.leaderboardTab = 'plants'; render(); }
+  if (e.target.id === 'joinLeaderboardBtn') {
+    const input = document.getElementById('leaderboardNicknameInput');
+    const nickname = input ? input.value.trim() : '';
+    if (!nickname) {
+      state.leaderboardError = 'Enter a nickname first.';
+      render();
+    } else {
+      joinLeaderboard(nickname);
+    }
+  }
+  if (e.target.id === 'leaveLeaderboardBtn') {
+    if (confirm('Remove your nickname and scores from the public leaderboard?')) {
+      leaveLeaderboard();
+    }
+  }
   if (e.target.id === 'dismissWelcome') {
     state.showWelcome = false;
     localStorage.setItem('plant-parent-welcome-seen', '1');
@@ -2717,6 +2758,148 @@ function renderSyncModal() {
   </div>`;
 }
 
+// ---------- community leaderboard ----------
+
+function getBestStreak() {
+  let best = 0;
+  for (const p of state.plants) {
+    const s = calcStreak(p);
+    if (s > best) best = s;
+  }
+  return best;
+}
+
+async function fetchLeaderboard() {
+  state.leaderboardLoading = true;
+  state.leaderboardError = null;
+  render();
+  try {
+    const res = await fetch('/api/leaderboard');
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Could not load leaderboard');
+    state.leaderboardData = { streaks: data.streaks || [], plants: data.plants || [] };
+  } catch (err) {
+    state.leaderboardError = "Couldn't load the leaderboard right now — try again in a bit.";
+  }
+  state.leaderboardLoading = false;
+  render();
+}
+
+async function joinLeaderboard(nickname) {
+  state.leaderboardError = null;
+  state.leaderboardLoading = true;
+  render();
+  try {
+    const res = await fetch('/api/leaderboard', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        deviceId: getDeviceId(),
+        nickname,
+        bestStreak: getBestStreak(),
+        plantCount: state.plants.length,
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Could not join the leaderboard');
+    state.leaderboardJoined = true;
+    state.leaderboardNickname = data.nickname;
+    localStorage.setItem('plant-parent-leaderboard-joined', '1');
+    localStorage.setItem('plant-parent-leaderboard-nickname', data.nickname);
+    await fetchLeaderboard();
+  } catch (err) {
+    state.leaderboardError = err.message || "Couldn't join the leaderboard right now.";
+    state.leaderboardLoading = false;
+    render();
+  }
+}
+
+async function refreshMyLeaderboardStats() {
+  if (!state.leaderboardJoined) return;
+  try {
+    await fetch('/api/leaderboard', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        deviceId: getDeviceId(),
+        nickname: state.leaderboardNickname,
+        bestStreak: getBestStreak(),
+        plantCount: state.plants.length,
+      }),
+    });
+  } catch (err) {
+    // best-effort — the leaderboard will just show slightly stale numbers
+  }
+}
+
+async function leaveLeaderboard() {
+  state.leaderboardLoading = true;
+  render();
+  try {
+    await fetch('/api/leaderboard', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ deviceId: getDeviceId() }),
+    });
+  } catch (err) {
+    // best-effort — proceed to clear locally regardless
+  }
+  state.leaderboardJoined = false;
+  state.leaderboardNickname = '';
+  localStorage.setItem('plant-parent-leaderboard-joined', '0');
+  localStorage.removeItem('plant-parent-leaderboard-nickname');
+  state.leaderboardLoading = false;
+  render();
+}
+
+function renderLeaderboardModal() {
+  const myId = getDeviceId();
+  const list = state.leaderboardTab === 'plants' ? state.leaderboardData.plants : state.leaderboardData.streaks;
+  const unit = state.leaderboardTab === 'plants' ? 'plant' : 'day streak';
+
+  return `
+  <div class="modal-backdrop" id="leaderboardBackdrop">
+    <div class="modal leaderboard-modal">
+      <h3>🏆 Leaderboard</h3>
+      ${!state.leaderboardJoined ? `
+        <p class="about-story">See how your garden compares with everyone else using Plant Parent. Your nickname, current watering streak, and plant count are visible to anyone who opens this leaderboard — no other info about you or your plants is shared.</p>
+        <div class="field">
+          <label>Choose a nickname</label>
+          <input id="leaderboardNicknameInput" placeholder="e.g. Fern Whisperer" maxlength="20">
+        </div>
+        ${state.leaderboardError ? `<div class="sync-status">${state.leaderboardError}</div>` : ''}
+        <div class="modal-actions">
+          <button class="secondary" id="cancelLeaderboardModal">Not now</button>
+          <button class="primary" id="joinLeaderboardBtn" ${state.leaderboardLoading ? 'disabled' : ''}>${state.leaderboardLoading ? 'Joining…' : 'Join leaderboard'}</button>
+        </div>
+      ` : `
+        <div class="leaderboard-tabs">
+          <button class="leaderboard-tab ${state.leaderboardTab === 'streak' ? 'leaderboard-tab-active' : ''}" id="leaderboardTabStreak">🔥 Streaks</button>
+          <button class="leaderboard-tab ${state.leaderboardTab === 'plants' ? 'leaderboard-tab-active' : ''}" id="leaderboardTabPlants">🪴 Plants</button>
+        </div>
+        ${state.leaderboardLoading ? `<div class="sync-status">Loading…</div>` : ''}
+        ${state.leaderboardError ? `<div class="sync-status">${state.leaderboardError}</div>` : ''}
+        ${!state.leaderboardLoading && list.length === 0 ? `<div class="sync-status">No one's on the board yet — be the first!</div>` : ''}
+        ${list.length ? `
+          <ol class="leaderboard-list">
+            ${list.map((entry, i) => `
+              <li class="leaderboard-row ${entry.deviceId === myId ? 'leaderboard-row-me' : ''}">
+                <span class="leaderboard-rank">${i + 1}</span>
+                <span class="leaderboard-name">${escapeHtml(entry.nickname)}${entry.deviceId === myId ? ' (you)' : ''}</span>
+                <span class="leaderboard-value">${entry.value} ${unit}${entry.value === 1 ? '' : 's'}</span>
+              </li>
+            `).join('')}
+          </ol>
+        ` : ''}
+        <div class="modal-actions">
+          <button class="secondary" id="leaveLeaderboardBtn">Leave leaderboard</button>
+          <button class="primary" id="closeLeaderboardModal">Close</button>
+        </div>
+      `}
+    </div>
+  </div>`;
+}
+
 async function createAndPushSyncCode() {
   localStorage.removeItem('plant-parent-pre-sync-backup');
   state.syncCode = generateSyncCode();
@@ -2888,6 +3071,8 @@ try {
   state.weatherNudge = null;
 }
 state.seasonalTipsEnabled = localStorage.getItem('plant-parent-seasonal-tips') !== '0';
+state.leaderboardJoined = localStorage.getItem('plant-parent-leaderboard-joined') === '1';
+state.leaderboardNickname = localStorage.getItem('plant-parent-leaderboard-nickname') || '';
 const storedLatitude = localStorage.getItem('plant-parent-latitude');
 state.latitude = storedLatitude !== null ? parseFloat(storedLatitude) : null;
 loadPropagations();

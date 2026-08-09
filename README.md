@@ -62,7 +62,29 @@ Heads up on a real platform limit: Vercel's free plan only allows cron jobs to r
 
 That's it — every 5 hours, cron-job.org pings your app, which picks a random plant tip or check-in message and sends it as a real push notification to everyone who's enabled reminders.
 
+## Community leaderboard (optional)
+
+Anyone using the app can opt in to a public leaderboard (nicknames only — no other plant data is shared) ranking longest watering streak and total plants. To also get admin controls for it (adjust or zero out someone's streak, remove entries):
+
+**1. Add one more environment variable**
+- In Vercel: **Settings → Environment Variables**
+- Add: Name: `ADMIN_SECRET` → Value: pick your own private password (don't reuse the `CRON_SECRET` above)
+- Redeploy so it takes effect
+
+**2. Open the admin page**
+- Go to `https://YOUR-APP-NAME.vercel.app/admin.html`
+- Enter the secret you just set
+- From there you can zero out or add to anyone's streak, set an exact plant count, clear an admin override so their own device's real numbers resume syncing, or remove someone from the board entirely
+
+This page isn't linked from anywhere in the app itself — only people with the direct URL and your secret can reach it.
+
 ## What's new in this version
+- **Community leaderboard**: opt-in public rankings for longest streak and total plants, with unique appropriate nicknames, plus an admin page to manage entries (see above).
+- **Fertilizing & rotation trackers**: each plant's detail view now has its own "Feed now" and "Rotate now" buttons with day-based reminders, separate from watering.
+- **Health check-ins**: log how a plant is doing (thriving/okay/struggling/recovering) with an optional note, and see the history for that plant.
+- **Weekly digest notification**: every Sunday, alongside the usual overdue check, you get one extra push summarizing the week — waterings logged, best streak, and anything overdue.
+- **Seasonal care tips**: a quiet banner on your shelf with a nudge based on the time of year (Settings → Reminders → Seasonal tips to turn off).
+- **Sound toggle**: Settings → Appearance → Sound effects, to mute taps/chimes/game sounds.
 - **Memory Match overhaul**: now a leveled, timed game — the board gets bigger and the memorize-window shrinks each round, mismatches cost you time, and matching streaks build a score multiplier. No plant photos in this game anymore, just species icons. Your best score is saved and shown in the menu.
 - **Cuttings in the Garden view**: propagations you're currently rooting now show up as a small chip list right in the Garden tab, so you don't have to dig through the menu to check on them.
 - **Redesigned top logo/wordmark**: replaced the old placeholder-style header with a compact mark using the app's own icon set.
