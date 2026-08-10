@@ -38,6 +38,7 @@ export default async function handler(req, res) {
         return {
           deviceId: id,
           plantCount: plantList.length,
+          plantNames: plantList.map((p) => p.name).filter(Boolean),
           overdueCount,
           pushEnabled: !!sub,
           nickname: leaderboardEntry ? leaderboardEntry.nickname : null,
