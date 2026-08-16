@@ -1338,27 +1338,29 @@ function render() {
           <h1 class="app-topbar-title"><span class="brand-plant">Plant</span> <span class="brand-parent">Parent</span></h1>
         </header>
 
-        <div class="daily-card ${taskDone ? 'daily-card-done' : ''}">
-          <div class="daily-emoji">${taskDone ? '✅' : task.emoji}</div>
-          <div class="daily-text">
-            <div class="daily-label">Today's little thing</div>
-            <div class="daily-task">${task.label}</div>
+        ${!state.mobileDetailOpen ? `
+          <div class="daily-card ${taskDone ? 'daily-card-done' : ''}">
+            <div class="daily-emoji">${taskDone ? '✅' : task.emoji}</div>
+            <div class="daily-text">
+              <div class="daily-label">Today's little thing</div>
+              <div class="daily-task">${task.label}</div>
+            </div>
           </div>
-        </div>
 
-        ${state.weatherEnabled && state.weatherNudge ? `
-          <div class="weather-card">
-            <div class="weather-emoji">${state.weatherNudge.emoji}</div>
-            <div class="weather-text">${state.weatherNudge.text}</div>
-          </div>
+          ${state.weatherEnabled && state.weatherNudge ? `
+            <div class="weather-card">
+              <div class="weather-emoji">${state.weatherNudge.emoji}</div>
+              <div class="weather-text">${state.weatherNudge.text}</div>
+            </div>
+          ` : ''}
+
+          ${state.seasonalTipsEnabled ? (() => { const tip = getSeasonalTip(); return `
+            <div class="weather-card">
+              <div class="weather-emoji">${tip.emoji}</div>
+              <div class="weather-text">${tip.text}</div>
+            </div>
+          `; })() : ''}
         ` : ''}
-
-        ${state.seasonalTipsEnabled ? (() => { const tip = getSeasonalTip(); return `
-          <div class="weather-card">
-            <div class="weather-emoji">${tip.emoji}</div>
-            <div class="weather-text">${tip.text}</div>
-          </div>
-        `; })() : ''}
       ` : ''}
 
       ${state.currentView === 'garden' ? `<div id="gardenView"></div>` : ''}
