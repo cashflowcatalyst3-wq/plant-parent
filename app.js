@@ -117,7 +117,7 @@ const state = {
   leaderboardTab: 'streak', // 'streak' | 'plants'
   leaderboardJoined: false,
   leaderboardNickname: '',
-  leaderboardData: { streaks: [], plants: [] },
+  leaderboardData: { streaks: [], plants: [], raindrop: [], memory: [] },
   leaderboardLoading: false,
   leaderboardError: null,
   memoryGameCompleted: false,
@@ -265,6 +265,7 @@ function recordGameScore(score) {
   if (score > state.gameHighScore) {
     state.gameHighScore = score;
     localStorage.setItem('plant-parent-game-highscore', String(score));
+    if (state.leaderboardJoined && typeof refreshMyLeaderboardStats === 'function') refreshMyLeaderboardStats();
   }
   localStorage.setItem('plant-parent-last-game-date', todayStr());
   checkAchievements();
@@ -283,6 +284,7 @@ function recordMemoryGameScore(score) {
   if (score > state.memoryHighScore) {
     state.memoryHighScore = score;
     localStorage.setItem('plant-parent-memory-highscore', String(score));
+    if (state.leaderboardJoined && typeof refreshMyLeaderboardStats === 'function') refreshMyLeaderboardStats();
   }
   localStorage.setItem('plant-parent-last-game-date', todayStr());
   checkAchievements();
@@ -2536,6 +2538,8 @@ document.addEventListener('click', (e) => {
   if (e.target.id === 'closeLeaderboardModal') { state.showLeaderboardModal = false; render(); }
   if (e.target.id === 'leaderboardTabStreak') { state.leaderboardTab = 'streak'; render(); }
   if (e.target.id === 'leaderboardTabPlants') { state.leaderboardTab = 'plants'; render(); }
+  if (e.target.id === 'leaderboardTabRaindrop') { state.leaderboardTab = 'raindrop'; render(); }
+  if (e.target.id === 'leaderboardTabMemory') { state.leaderboardTab = 'memory'; render(); }
   if (e.target.id === 'joinLeaderboardBtn') {
     const input = document.getElementById('leaderboardNicknameInput');
     const nickname = input ? input.value.trim() : '';
@@ -2779,7 +2783,7 @@ async function fetchLeaderboard() {
     const res = await fetch('/api/leaderboard');
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Could not load leaderboard');
-    state.leaderboardData = { streaks: data.streaks || [], plants: data.plants || [] };
+    state.leaderboardData = { streaks: data.streaks || [], plants: data.plants || [], raindrop: data.raindrop || [], memory: data.memory || [] };
   } catch (err) {
     state.leaderboardError = "Couldn't load the leaderboard right now — try again in a bit.";
   }
@@ -2800,6 +2804,8 @@ async function joinLeaderboard(nickname) {
         nickname,
         bestStreak: getBestStreak(),
         plantCount: state.plants.length,
+        gameHighScore: state.gameHighScore || 0,
+        memoryHighScore: state.memoryHighScore || 0,
       }),
     });
     const data = await res.json();
@@ -2827,6 +2833,8 @@ async function refreshMyLeaderboardStats() {
         nickname: state.leaderboardNickname,
         bestStreak: getBestStreak(),
         plantCount: state.plants.length,
+        gameHighScore: state.gameHighScore || 0,
+        memoryHighScore: state.memoryHighScore || 0,
       }),
     });
   } catch (err) {
@@ -2856,15 +2864,20 @@ async function leaveLeaderboard() {
 
 function renderLeaderboardModal() {
   const myId = getDeviceId();
-  const list = state.leaderboardTab === 'plants' ? state.leaderboardData.plants : state.leaderboardData.streaks;
-  const unit = state.leaderboardTab === 'plants' ? 'plant' : 'day streak';
+  const TAB_CONFIG = {
+    streak: { data: state.leaderboardData.streaks, unit: 'day streak' },
+    plants: { data: state.leaderboardData.plants, unit: 'plant' },
+    raindrop: { data: state.leaderboardData.raindrop, unit: 'point' },
+    memory: { data: state.leaderboardData.memory, unit: 'point' },
+  };
+  const { data: list, unit } = TAB_CONFIG[state.leaderboardTab] || TAB_CONFIG.streak;
 
   return `
   <div class="modal-backdrop" id="leaderboardBackdrop">
     <div class="modal leaderboard-modal">
       <h3>🏆 Leaderboard</h3>
       ${!state.leaderboardJoined ? `
-        <p class="about-story">See how your garden compares with everyone else using Plant Parent. Your nickname, current watering streak, and plant count are visible to anyone who opens this leaderboard — no other info about you or your plants is shared.</p>
+        <p class="about-story">See how your garden compares with everyone else using Plant Parent. Your nickname, watering streak, plant count, and mini-game high scores are visible to anyone who opens this leaderboard — no other info about you or your plants is shared.</p>
         <div class="field">
           <label>Choose a nickname</label>
           <input id="leaderboardNicknameInput" placeholder="e.g. Fern Whisperer" maxlength="20">
@@ -2876,8 +2889,10 @@ function renderLeaderboardModal() {
         </div>
       ` : `
         <div class="leaderboard-tabs">
-          <button class="leaderboard-tab ${state.leaderboardTab === 'streak' ? 'leaderboard-tab-active' : ''}" id="leaderboardTabStreak">🔥 Streaks</button>
+          <button class="leaderboard-tab ${state.leaderboardTab === 'streak' ? 'leaderboard-tab-active' : ''}" id="leaderboardTabStreak">🔥 Streak</button>
           <button class="leaderboard-tab ${state.leaderboardTab === 'plants' ? 'leaderboard-tab-active' : ''}" id="leaderboardTabPlants">🪴 Plants</button>
+          <button class="leaderboard-tab ${state.leaderboardTab === 'raindrop' ? 'leaderboard-tab-active' : ''}" id="leaderboardTabRaindrop">💧 Raindrop</button>
+          <button class="leaderboard-tab ${state.leaderboardTab === 'memory' ? 'leaderboard-tab-active' : ''}" id="leaderboardTabMemory">🧠 Memory</button>
         </div>
         ${state.leaderboardLoading ? `<div class="sync-status">Loading…</div>` : ''}
         ${state.leaderboardError ? `<div class="sync-status">${state.leaderboardError}</div>` : ''}

@@ -15,7 +15,7 @@ export default async function handler(req, res) {
     if (req.method === 'GET') {
       const memberIds = await redis.smembers(MEMBERS_KEY);
       if (!memberIds || memberIds.length === 0) {
-        return res.status(200).json({ ok: true, streaks: [], plants: [] });
+        return res.status(200).json({ ok: true, streaks: [], plants: [], raindrop: [], memory: [] });
       }
 
       const entries = await Promise.all(
@@ -23,21 +23,22 @@ export default async function handler(req, res) {
       );
       const valid = entries.filter(Boolean);
 
-      const streaks = [...valid]
-        .sort((a, b) => (b.bestStreak || 0) - (a.bestStreak || 0))
+      const rank = (field) => [...valid]
+        .sort((a, b) => (b[field] || 0) - (a[field] || 0))
         .slice(0, 50)
-        .map((e) => ({ nickname: e.nickname, deviceId: e.deviceId, value: e.bestStreak || 0 }));
+        .map((e) => ({ nickname: e.nickname, deviceId: e.deviceId, value: e[field] || 0 }));
 
-      const plants = [...valid]
-        .sort((a, b) => (b.plantCount || 0) - (a.plantCount || 0))
-        .slice(0, 50)
-        .map((e) => ({ nickname: e.nickname, deviceId: e.deviceId, value: e.plantCount || 0 }));
-
-      return res.status(200).json({ ok: true, streaks, plants });
+      return res.status(200).json({
+        ok: true,
+        streaks: rank('bestStreak'),
+        plants: rank('plantCount'),
+        raindrop: rank('gameHighScore'),
+        memory: rank('memoryHighScore'),
+      });
     }
 
     if (req.method === 'POST') {
-      const { deviceId, nickname, bestStreak, plantCount } = req.body || {};
+      const { deviceId, nickname, bestStreak, plantCount, gameHighScore, memoryHighScore } = req.body || {};
       if (!deviceId || !nickname) {
         return res.status(400).json({ error: 'Missing deviceId or nickname' });
       }
@@ -78,13 +79,16 @@ export default async function handler(req, res) {
         }
       }
 
+      const locked = !!priorEntry?.adminOverride;
       const entry = {
         deviceId,
         nickname: cleanNickname,
         normalized,
-        bestStreak: priorEntry?.adminOverride ? (priorEntry.bestStreak || 0) : Math.max(0, parseInt(bestStreak, 10) || 0),
-        plantCount: priorEntry?.adminOverride ? (priorEntry.plantCount || 0) : Math.max(0, parseInt(plantCount, 10) || 0),
-        adminOverride: !!priorEntry?.adminOverride,
+        bestStreak: locked ? (priorEntry.bestStreak || 0) : Math.max(0, parseInt(bestStreak, 10) || 0),
+        plantCount: locked ? (priorEntry.plantCount || 0) : Math.max(0, parseInt(plantCount, 10) || 0),
+        gameHighScore: locked ? (priorEntry.gameHighScore || 0) : Math.max(0, parseInt(gameHighScore, 10) || 0),
+        memoryHighScore: locked ? (priorEntry.memoryHighScore || 0) : Math.max(0, parseInt(memoryHighScore, 10) || 0),
+        adminOverride: locked,
         updatedAt: new Date().toISOString(),
       };
       await redis.set(`leaderboard-entry:${deviceId}`, entry);

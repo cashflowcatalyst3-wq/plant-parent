@@ -1665,11 +1665,12 @@
   .leaderboard-modal { width: 400px; }
   .leaderboard-tabs {
     display: flex;
+    flex-wrap: wrap;
     gap: 8px;
     margin-bottom: 14px;
   }
   .leaderboard-tab {
-    flex: 1;
+    flex: 1 1 calc(50% - 4px);
     background: var(--panel2);
     border: 1.5px solid var(--line);
     border-radius: 10px;

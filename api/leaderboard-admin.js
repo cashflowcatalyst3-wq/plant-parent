@@ -25,6 +25,8 @@ function captureOriginalIfNeeded(entry) {
       normalized: entry.normalized,
       bestStreak: entry.bestStreak || 0,
       plantCount: entry.plantCount || 0,
+      gameHighScore: entry.gameHighScore || 0,
+      memoryHighScore: entry.memoryHighScore || 0,
     };
   }
 }
@@ -96,8 +98,10 @@ export default async function handler(req, res) {
               entry.normalized = restore.normalized;
             }
           }
-          entry.bestStreak = restore.bestStreak;
-          entry.plantCount = restore.plantCount;
+          entry.bestStreak = restore.bestStreak || 0;
+          entry.plantCount = restore.plantCount || 0;
+          entry.gameHighScore = restore.gameHighScore || 0;
+          entry.memoryHighScore = restore.memoryHighScore || 0;
           delete entry.preOverride;
         }
         entry.adminOverride = false;
@@ -132,8 +136,9 @@ export default async function handler(req, res) {
         return res.status(200).json({ ok: true, entry });
       }
 
-      // Adjust a stat: field is 'bestStreak' or 'plantCount', mode is 'set' or 'add'
-      if (field !== 'bestStreak' && field !== 'plantCount') {
+      // Adjust a stat: field is 'bestStreak', 'plantCount', 'gameHighScore', or 'memoryHighScore'; mode is 'set' or 'add'
+      const ADJUSTABLE_FIELDS = ['bestStreak', 'plantCount', 'gameHighScore', 'memoryHighScore'];
+      if (!ADJUSTABLE_FIELDS.includes(field)) {
         return res.status(400).json({ error: "Unrecognized action or field." });
       }
       const amount = parseInt(value, 10);

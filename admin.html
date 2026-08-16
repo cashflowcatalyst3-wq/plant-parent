@@ -91,7 +91,7 @@
   <input type="text" id="searchInput" placeholder="Search by nickname…">
   <table>
     <thead>
-      <tr><th>Nickname</th><th>Streak</th><th>Plants</th><th>Updated</th><th>Actions</th></tr>
+      <tr><th>Nickname</th><th>Streak</th><th>Plants</th><th>Raindrop</th><th>Memory</th><th>Updated</th><th>Actions</th></tr>
     </thead>
     <tbody id="entriesBody"></tbody>
   </table>
@@ -150,6 +150,8 @@ function renderEntries(entries) {
       <td>${escapeHtml(e.nickname)}${e.adminOverride ? '<span class="override-badge">admin set</span>' : ''}</td>
       <td>${e.bestStreak || 0}</td>
       <td>${e.plantCount || 0}</td>
+      <td>${e.gameHighScore || 0}</td>
+      <td>${e.memoryHighScore || 0}</td>
       <td>${e.updatedAt ? new Date(e.updatedAt).toLocaleDateString() : ''}</td>
       <td>
         <div class="row-actions">
@@ -158,6 +160,8 @@ function renderEntries(entries) {
           <button class="secondary" data-act="streak-add20">Streak +20</button>
           <input type="number" data-field="streak-custom" placeholder="set streak">
           <input type="number" data-field="plants-custom" placeholder="set plants">
+          <input type="number" data-field="raindrop-custom" placeholder="set raindrop score">
+          <input type="number" data-field="memory-custom" placeholder="set memory score">
           <div class="rename-row">
             <input type="text" data-field="rename-custom" placeholder="new nickname" maxlength="20">
             <button class="secondary" data-act="rename">Rename</button>
@@ -184,6 +188,20 @@ function renderEntries(entries) {
     input.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && input.value !== '') {
         adjustEntry(input.closest('tr').dataset.device, 'plantCount', 'set', parseInt(input.value, 10));
+      }
+    });
+  });
+  body.querySelectorAll('input[data-field="raindrop-custom"]').forEach(input => {
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && input.value !== '') {
+        adjustEntry(input.closest('tr').dataset.device, 'gameHighScore', 'set', parseInt(input.value, 10));
+      }
+    });
+  });
+  body.querySelectorAll('input[data-field="memory-custom"]').forEach(input => {
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && input.value !== '') {
+        adjustEntry(input.closest('tr').dataset.device, 'memoryHighScore', 'set', parseInt(input.value, 10));
       }
     });
   });
