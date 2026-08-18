@@ -560,6 +560,19 @@ function performPlantDelete(plantId) {
   showUndoToast();
 }
 
+function showMessageToast(text) {
+  const existing = document.getElementById('messageToast');
+  if (existing) existing.remove();
+
+  const toast = document.createElement('div');
+  toast.id = 'messageToast';
+  toast.className = 'undo-toast';
+  toast.innerHTML = `<span>${text}</span>`;
+  document.body.appendChild(toast);
+
+  setTimeout(() => toast.remove(), 2500);
+}
+
 function showUndoToast() {
   const existing = document.getElementById('undoToast');
   if (existing) existing.remove();
@@ -1375,6 +1388,7 @@ function render() {
           <div class="shelf-column">
             ${state.plants.length ? renderShelfOverviewStrip() : ''}
             <div class="shelf-controls">
+              ${state.plants.length ? `<button class="primary water-all-btn" id="waterAllBtn">💧 Water all plants</button>` : ''}
               <select class="sort-select" id="sortSelect" aria-label="Sort plants by">
                 <option value="urgent" ${state.sortBy === 'urgent' ? 'selected' : ''}>Most urgent first</option>
                 <option value="az" ${state.sortBy === 'az' ? 'selected' : ''}>A–Z</option>
@@ -1487,6 +1501,20 @@ function render() {
     document.querySelectorAll('.room-chip').forEach(chip => {
       chip.onclick = () => { state.filterRoom = chip.dataset.room || null; render(); };
     });
+    const waterAllBtn = document.getElementById('waterAllBtn');
+    if (waterAllBtn) waterAllBtn.onclick = (e) => {
+      const count = waterAllPlants();
+      const rect = e.target.getBoundingClientRect();
+      if (count > 0) {
+        fireConfetti(rect.left + rect.width / 2, rect.top);
+        playWaterSound();
+        showMessageToast(`💧 Watered ${count} plant${count === 1 ? '' : 's'}!`);
+        savePlants();
+      } else {
+        showMessageToast(`Everything's already watered today 🌿`);
+      }
+      render();
+    };
   }
 
 
@@ -2148,6 +2176,33 @@ function wateredSlotToday(plant, slot) {
   const today = todayStr();
   if (slot === 'morning') return plant.lastMorningWatered === today;
   return plant.lastNightWatered === today;
+}
+
+function waterAllPlants() {
+  const now = new Date().toISOString();
+  const today = todayStr();
+  let wateredCount = 0;
+
+  for (const p of state.plants) {
+    let didSomething = false;
+
+    if (p.twiceDaily) {
+      if (p.lastMorningWatered !== today) { p.lastMorningWatered = today; didSomething = true; }
+      if (p.lastNightWatered !== today) { p.lastNightWatered = today; didSomething = true; }
+    } else if (!p.lastWatered || daysSince(p.lastWatered) > 0) {
+      didSomething = true;
+    }
+
+    if (didSomething) {
+      p.lastWatered = now;
+      p.waterLog = p.waterLog || [];
+      p.waterLog.push(now);
+      if (p.waterLog.length > 3650) p.waterLog = p.waterLog.slice(-3650);
+      wateredCount++;
+    }
+  }
+
+  return wateredCount;
 }
 
 function renderDetail(p) {

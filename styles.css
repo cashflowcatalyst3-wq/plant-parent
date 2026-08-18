@@ -1420,6 +1420,11 @@
     color: var(--ink);
     cursor: pointer;
   }
+  .water-all-btn {
+    align-self: flex-start;
+    font-size: 13px;
+    padding: 9px 14px;
+  }
   .room-chips {
     display: flex;
     flex-wrap: wrap;
