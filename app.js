@@ -88,6 +88,9 @@ const state = {
   notificationsEnabled: false,
   pendingModalPhoto: null, // dataURL waiting to be attached on save
   pendingSpecies: null, // selected SPECIES_DICTIONARY entry for the plant being added
+  identifyLoading: false,
+  identifyResults: null,
+  identifyError: null,
   editingPlantId: null, // if set, the Add Plant modal is in edit mode for this plant
   modalDraft: null, // preserves typed name/room/freq across re-renders (e.g. opening the species picker)
   unlockedAchievements: [],
@@ -1490,7 +1493,7 @@ function render() {
     const addBtn = document.createElement('div');
     addBtn.className = 'add-btn';
     addBtn.textContent = '+ Add a plant';
-    addBtn.onclick = () => { state.pendingModalPhoto = null; state.pendingSpecies = null; state.editingPlantId = null; state.modalDraft = null; state.showAddModal = true; render(); };
+    addBtn.onclick = () => { state.pendingModalPhoto = null; state.pendingSpecies = null; state.editingPlantId = null; state.modalDraft = null; state.identifyResults = null; state.identifyError = null; state.showAddModal = true; render(); };
     shelf.appendChild(addBtn);
 
     const panel = document.getElementById('panel');
@@ -1552,6 +1555,7 @@ function render() {
   if (state.showAddModal) {
     document.getElementById('modalNameInput')?.focus();
     wireModalPhoto();
+    wireIdentify();
     const openBtn = document.getElementById('openSpeciesPicker');
     if (openBtn) openBtn.onclick = () => {
       captureModalDraft();
@@ -2369,6 +2373,8 @@ function renderDetail(p) {
     state.pendingModalPhoto = p.photo || null;
     state.pendingSpecies = SPECIES_DICTIONARY.find(s => s.id === p.speciesId) || null;
     state.modalDraft = null;
+    state.identifyResults = null;
+    state.identifyError = null;
     state.showAddModal = true;
     render();
   };
@@ -2466,6 +2472,21 @@ function renderModal() {
         <button class="species-picker-btn" id="openSpeciesPicker" type="button">
           ${species ? `<span class="species-picker-emoji">${species.emoji}</span> ${species.name}` : (isEditing && editingPlant.species ? editingPlant.species : '🔍 Choose from the guide (optional)')}
         </button>
+        <button class="id-photo-btn identify-btn" id="identifyBtn" type="button">🔍 Identify from a photo</button>
+        <input type="file" id="identifyInput" accept="image/*" capture="environment" style="display:none;">
+        ${state.identifyLoading ? `<div class="identify-status">Identifying…</div>` : ''}
+        ${state.identifyError ? `<div class="identify-status identify-error">${escapeHtml(state.identifyError)}</div>` : ''}
+        ${state.identifyResults && state.identifyResults.length ? `
+          <div class="identify-results">
+            ${state.identifyResults.map((r, i) => `
+              <button type="button" class="identify-result" data-idx="${i}">
+                <span class="identify-result-name">${escapeHtml(r.commonNames[0] || r.scientificName)}</span>
+                <span class="identify-result-latin">${escapeHtml(r.scientificName)}</span>
+                <span class="identify-result-score">${Math.round(r.score * 100)}%</span>
+              </button>
+            `).join('')}
+          </div>
+        ` : ''}
       </div>
       <div class="field">
         <label>Room (optional)</label>
@@ -2526,6 +2547,85 @@ function wireModalPhoto() {
   };
 }
 
+function wireIdentify() {
+  const btn = document.getElementById('identifyBtn');
+  const input = document.getElementById('identifyInput');
+  if (!btn || !input) return;
+  btn.onclick = () => input.click();
+  input.onchange = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    await identifyPhoto(file);
+  };
+
+  document.querySelectorAll('.identify-result').forEach((el) => {
+    el.onclick = () => {
+      const idx = parseInt(el.dataset.idx, 10);
+      const result = state.identifyResults[idx];
+      if (!result) return;
+      applyIdentifyResult(result);
+    };
+  });
+}
+
+async function identifyPhoto(file) {
+  state.identifyLoading = true;
+  state.identifyError = null;
+  state.identifyResults = null;
+  render();
+  try {
+    const dataUrl = await resizeImageToDataUrl(file, 1024);
+    const res = await fetch('/api/identify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ imageBase64: dataUrl, organ: 'leaf' }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Could not identify this photo.');
+    state.identifyResults = data.results || [];
+    if (!state.identifyResults.length) {
+      state.identifyError = "Couldn't find a confident match — try a clearer, closer photo of a leaf.";
+    }
+  } catch (err) {
+    state.identifyError = err.message || 'Something went wrong — try again.';
+  }
+  state.identifyLoading = false;
+  render();
+}
+
+// If the identified species roughly matches something in our built-in
+// dictionary (by scientific name), use that richer entry — correct emoji,
+// watering frequency, and care notes — instead of a generic placeholder.
+function matchSpeciesDictionary(scientificName) {
+  const normalized = scientificName.toLowerCase().trim();
+  const genusSpecies = normalized.split(' ').slice(0, 2).join(' ');
+  return SPECIES_DICTIONARY.find((s) => {
+    const latin = (s.latin || '').toLowerCase();
+    if (!latin || latin.includes('assorted') || latin.includes('spp.')) return false;
+    return latin === normalized || latin === genusSpecies || normalized.includes(latin) || latin.includes(genusSpecies);
+  });
+}
+
+function applyIdentifyResult(result) {
+  const commonName = result.commonNames && result.commonNames[0];
+  const matched = matchSpeciesDictionary(result.scientificName);
+  if (matched) {
+    state.pendingSpecies = matched;
+  } else {
+    state.pendingSpecies = {
+      id: null,
+      name: commonName || result.scientificName,
+      latin: result.scientificName,
+      emoji: '🌿',
+      freq: 7,
+      desc: '',
+    };
+  }
+  state.identifyResults = null;
+  state.identifyError = null;
+  render();
+}
+
 // ---------- image handling ----------
 
 function resizeImageToDataUrl(file, maxDim) {
@@ -2557,8 +2657,8 @@ function resizeImageToDataUrl(file, maxDim) {
 // ---------- add / cancel plant ----------
 
 document.addEventListener('click', (e) => {
-  if (e.target.id === 'modalBackdrop') { state.showAddModal = false; state.editingPlantId = null; state.modalDraft = null; render(); }
-  if (e.target.id === 'cancelModal') { state.showAddModal = false; state.editingPlantId = null; state.modalDraft = null; render(); }
+  if (e.target.id === 'modalBackdrop') { state.showAddModal = false; state.editingPlantId = null; state.modalDraft = null; state.identifyResults = null; state.identifyError = null; render(); }
+  if (e.target.id === 'cancelModal') { state.showAddModal = false; state.editingPlantId = null; state.modalDraft = null; state.identifyResults = null; state.identifyError = null; render(); }
   if (e.target.id === 'badgesBackdrop') { state.showBadgesModal = false; render(); }
   if (e.target.id === 'closeBadges') { state.showBadgesModal = false; render(); }
   if (e.target.id === 'speciesPickerBackdrop') { state.showSpeciesPicker = false; render(); }
@@ -2711,6 +2811,8 @@ document.addEventListener('click', (e) => {
     state.pendingModalPhoto = null;
     state.pendingSpecies = null;
     state.modalDraft = null;
+    state.identifyResults = null;
+    state.identifyError = null;
     render();
     savePlants();
   }

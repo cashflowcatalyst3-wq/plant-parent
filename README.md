@@ -62,6 +62,21 @@ Heads up on a real platform limit: Vercel's free plan only allows cron jobs to r
 
 That's it — every 5 hours, cron-job.org pings your app, which picks a random plant tip or check-in message and sends it as a real push notification to everyone who's enabled reminders.
 
+## Plant photo identification (optional)
+
+Snap a photo of an unlabeled plant when adding it, and get a species guess instead of typing it in. Powered by [Pl@ntNet](https://plantnet.org), a nonprofit plant identification project — genuinely free, 500 identifications/day.
+
+**1. Get a free API key**
+- Go to https://my.plantnet.org and create a free account
+- Find your API key in your account dashboard
+
+**2. Add it to Vercel**
+- In Vercel: **Settings → Environment Variables**
+- Add: Name: `PLANTNET_API_KEY` → Value: the key you just copied
+- Redeploy so it takes effect
+
+That's it — when adding or editing a plant, tap "🔍 Identify from a photo" next to the Species field.
+
 ## Community leaderboard (optional)
 
 Anyone using the app can opt in to a public leaderboard (nicknames only — no other plant data is shared) ranking longest watering streak and total plants. To also get admin controls for it (adjust or zero out someone's streak, remove entries):
@@ -79,6 +94,9 @@ Anyone using the app can opt in to a public leaderboard (nicknames only — no o
 This page isn't linked from anywhere in the app itself — only people with the direct URL and your secret can reach it.
 
 ## What's new in this version
+- **Photo-based plant identification**: tap "🔍 Identify from a photo" when adding/editing a plant to get a species guess from a real photo, powered by the free Pl@ntNet API (see setup above).
+- **Two more leaderboards**: Raindrop Catch and Memory Match high scores, alongside the existing streak and plant-count boards.
+- **Water all plants button**: one tap waters everything that hasn't been done yet today, skipping anything already logged.
 - **Community leaderboard**: opt-in public rankings for longest streak and total plants, with unique appropriate nicknames, plus an admin page to manage entries (see above).
 - **Fertilizing & rotation trackers**: each plant's detail view now has its own "Feed now" and "Rotate now" buttons with day-based reminders, separate from watering.
 - **Health check-ins**: log how a plant is doing (thriving/okay/struggling/recovering) with an optional note, and see the history for that plant.

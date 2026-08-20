@@ -937,6 +937,36 @@
     text-align: center;
   }
   .id-photo-btn:hover { border-color: var(--sage); color: var(--ink); }
+  .identify-btn { margin-top: 8px; }
+  .identify-status {
+    font-size: 12px;
+    color: var(--soil);
+    margin-top: 8px;
+    text-align: center;
+  }
+  .identify-error { color: var(--clay); }
+  .identify-results {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-top: 8px;
+  }
+  .identify-result {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--panel2);
+    border: 1.5px solid var(--line);
+    border-radius: 8px;
+    padding: 8px 10px;
+    cursor: pointer;
+    font-family: 'Nunito', sans-serif;
+    text-align: left;
+  }
+  .identify-result:hover { border-color: var(--sage); background: var(--panel5); }
+  .identify-result-name { font-size: 13px; font-weight: 700; color: var(--ink); }
+  .identify-result-latin { font-size: 11px; font-style: italic; color: var(--soil); flex: 1; }
+  .identify-result-score { font-size: 11px; font-weight: 700; color: var(--sage); flex-shrink: 0; }
 
   .modal-photo-preview {
     display: block;
