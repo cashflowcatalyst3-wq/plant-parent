@@ -1063,7 +1063,7 @@ function renderPropagation() {
         species: '', speciesId: null, speciesDesc: '',
         room: '',
         frequency: freq,
-        lastWatered: new Date(Date.now() - (freq-1)*24*60*60*1000).toISOString(),
+        lastWatered: new Date().toISOString(),
         waterLog: [],
         photo: null,
         notes: prop.notes || '',
@@ -2787,7 +2787,7 @@ document.addEventListener('click', (e) => {
       }
       state.editingPlantId = null;
     } else {
-      const now = new Date(Date.now() - (freq-1)*24*60*60*1000).toISOString();
+      const now = new Date().toISOString();
       const p = {
         id: nextId++,
         name,
