@@ -7,10 +7,14 @@ import {
   NICKNAME_INDEX_KEY,
   BANNED_KEY,
 } from '../lib/nickname.js';
+import { checkAppPassword } from '../lib/appAuth.js';
 
 const redis = Redis.fromEnv();
 
 export default async function handler(req, res) {
+  if (!checkAppPassword(req)) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
   try {
     if (req.method === 'GET') {
       const memberIds = await redis.smembers(MEMBERS_KEY);

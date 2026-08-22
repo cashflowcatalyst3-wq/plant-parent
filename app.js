@@ -2577,7 +2577,7 @@ async function identifyPhoto(file) {
     const dataUrl = await resizeImageToDataUrl(file, 1024);
     const res = await fetch('/api/identify', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...appAuthHeaders() },
       body: JSON.stringify({ imageBase64: dataUrl, organ: 'leaf' }),
     });
     const data = await res.json();
@@ -2829,6 +2829,11 @@ function getDeviceId() {
   return id;
 }
 
+function appAuthHeaders() {
+  const password = localStorage.getItem('plant-parent-app-password');
+  return password ? { 'X-App-Password': password } : {};
+}
+
 function savePlants() {
   try {
     localStorage.setItem('plant-parent-plants', JSON.stringify(state.plants));
@@ -2869,7 +2874,7 @@ async function syncToServer() {
   try {
     await fetch('/api/sync', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...appAuthHeaders() },
       body: JSON.stringify({ deviceId: getDeviceId(), plants: state.plants, syncCode: state.syncCode || undefined })
     });
   } catch (err) {
@@ -2937,7 +2942,7 @@ async function fetchLeaderboard() {
   state.leaderboardError = null;
   render();
   try {
-    const res = await fetch('/api/leaderboard');
+    const res = await fetch('/api/leaderboard', { headers: appAuthHeaders() });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Could not load leaderboard');
     state.leaderboardData = { streaks: data.streaks || [], plants: data.plants || [], raindrop: data.raindrop || [], memory: data.memory || [] };
@@ -2955,7 +2960,7 @@ async function joinLeaderboard(nickname) {
   try {
     const res = await fetch('/api/leaderboard', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...appAuthHeaders() },
       body: JSON.stringify({
         deviceId: getDeviceId(),
         nickname,
@@ -2984,7 +2989,7 @@ async function refreshMyLeaderboardStats() {
   try {
     await fetch('/api/leaderboard', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...appAuthHeaders() },
       body: JSON.stringify({
         deviceId: getDeviceId(),
         nickname: state.leaderboardNickname,
@@ -3005,7 +3010,7 @@ async function leaveLeaderboard() {
   try {
     await fetch('/api/leaderboard', {
       method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...appAuthHeaders() },
       body: JSON.stringify({ deviceId: getDeviceId() }),
     });
   } catch (err) {
@@ -3091,7 +3096,7 @@ async function joinExistingSyncCode(code) {
   try {
     const res = await fetch('/api/sync-pull', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...appAuthHeaders() },
       body: JSON.stringify({ syncCode: code })
     });
     const data = await res.json();
@@ -3133,7 +3138,7 @@ async function pullSyncNow() {
   try {
     const res = await fetch('/api/sync-pull', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...appAuthHeaders() },
       body: JSON.stringify({ syncCode: state.syncCode })
     });
     const data = await res.json();
@@ -3213,7 +3218,7 @@ async function enableNotifications() {
     }
     await fetch('/api/subscribe', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'application/json', ...appAuthHeaders() },
       body: JSON.stringify({ deviceId: getDeviceId(), subscription })
     });
     await syncToServer();
@@ -3229,69 +3234,165 @@ async function enableNotifications() {
 
 // ---------- startup ----------
 
-loadPlants();
-state.activeId = null;
-state.notificationsEnabled = localStorage.getItem('plant-parent-notifications-enabled') === '1';
-try {
-  state.unlockedAchievements = JSON.parse(localStorage.getItem('plant-parent-achievements') || '[]');
-} catch (err) {
-  state.unlockedAchievements = [];
-}
-state.gameHighScore = parseInt(localStorage.getItem('plant-parent-game-highscore') || '0', 10) || 0;
-state.weatherEnabled = localStorage.getItem('plant-parent-weather-enabled') === '1';
-try {
-  state.weatherNudge = JSON.parse(localStorage.getItem('plant-parent-weather-nudge') || 'null');
-} catch (err) {
-  state.weatherNudge = null;
-}
-state.seasonalTipsEnabled = localStorage.getItem('plant-parent-seasonal-tips') !== '0';
-state.leaderboardJoined = localStorage.getItem('plant-parent-leaderboard-joined') === '1';
-state.leaderboardNickname = localStorage.getItem('plant-parent-leaderboard-nickname') || '';
-const storedLatitude = localStorage.getItem('plant-parent-latitude');
-state.latitude = storedLatitude !== null ? parseFloat(storedLatitude) : null;
-loadPropagations();
-state.theme = localStorage.getItem('plant-parent-theme') || 'sage';
-document.body.dataset.theme = state.theme;
-const storedDarkMode = localStorage.getItem('plant-parent-dark-mode');
-state.darkMode = storedDarkMode !== null
-  ? storedDarkMode === '1'
-  : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
-document.body.dataset.mode = state.darkMode ? 'dark' : 'light';
-state.soundEnabled = localStorage.getItem('plant-parent-sound') !== '0';
-state.memoryGameCompleted = localStorage.getItem('plant-parent-memory-completed') === '1';
-state.memoryHighScore = parseInt(localStorage.getItem('plant-parent-memory-highscore') || '0', 10) || 0;
-state.hasInvited = localStorage.getItem('plant-parent-has-invited') === '1';
-state.showWelcome = localStorage.getItem('plant-parent-welcome-seen') !== '1';
-state.syncCode = localStorage.getItem('plant-parent-sync-code') || null;
+function initApp() {
+  loadPlants();
+  state.activeId = null;
+  state.notificationsEnabled = localStorage.getItem('plant-parent-notifications-enabled') === '1';
+  try {
+    state.unlockedAchievements = JSON.parse(localStorage.getItem('plant-parent-achievements') || '[]');
+  } catch (err) {
+    state.unlockedAchievements = [];
+  }
+  state.gameHighScore = parseInt(localStorage.getItem('plant-parent-game-highscore') || '0', 10) || 0;
+  state.weatherEnabled = localStorage.getItem('plant-parent-weather-enabled') === '1';
+  try {
+    state.weatherNudge = JSON.parse(localStorage.getItem('plant-parent-weather-nudge') || 'null');
+  } catch (err) {
+    state.weatherNudge = null;
+  }
+  state.seasonalTipsEnabled = localStorage.getItem('plant-parent-seasonal-tips') !== '0';
+  state.leaderboardJoined = localStorage.getItem('plant-parent-leaderboard-joined') === '1';
+  state.leaderboardNickname = localStorage.getItem('plant-parent-leaderboard-nickname') || '';
+  const storedLatitude = localStorage.getItem('plant-parent-latitude');
+  state.latitude = storedLatitude !== null ? parseFloat(storedLatitude) : null;
+  loadPropagations();
+  state.theme = localStorage.getItem('plant-parent-theme') || 'sage';
+  document.body.dataset.theme = state.theme;
+  const storedDarkMode = localStorage.getItem('plant-parent-dark-mode');
+  state.darkMode = storedDarkMode !== null
+    ? storedDarkMode === '1'
+    : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
+  document.body.dataset.mode = state.darkMode ? 'dark' : 'light';
+  state.soundEnabled = localStorage.getItem('plant-parent-sound') !== '0';
+  state.memoryGameCompleted = localStorage.getItem('plant-parent-memory-completed') === '1';
+  state.memoryHighScore = parseInt(localStorage.getItem('plant-parent-memory-highscore') || '0', 10) || 0;
+  state.hasInvited = localStorage.getItem('plant-parent-has-invited') === '1';
+  state.showWelcome = localStorage.getItem('plant-parent-welcome-seen') !== '1';
+  state.syncCode = localStorage.getItem('plant-parent-sync-code') || null;
 
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('sw.js').catch((err) => console.error('SW registration failed', err));
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('sw.js').catch((err) => console.error('SW registration failed', err));
+  }
+
+  render();
+  maybeRefreshWeather();
+  hideLoadingScreen();
+
+  // If this device is linked to a sync code, quietly check for updates from
+  // other linked devices right on startup (no confirmation needed here since
+  // it's a normal refresh, not a first-time link).
+  if (state.syncCode) {
+    (async () => {
+      try {
+        const res = await fetch('/api/sync-pull', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', ...appAuthHeaders() },
+          body: JSON.stringify({ syncCode: state.syncCode })
+        });
+        const data = await res.json();
+        if (res.ok && Array.isArray(data.plants)) {
+          state.plants = data.plants;
+          nextId = state.plants.length ? Math.max(...state.plants.map(p => p.id)) + 1 : 1;
+          render();
+          savePlantsLocalOnly();
+        }
+      } catch (err) {
+        // offline or nothing to sync yet — local data stays as-is
+      }
+    })();
+  }
 }
 
-render();
-maybeRefreshWeather();
-hideLoadingScreen();
+function hideLockScreen() {
+  const el = document.getElementById('lockScreen');
+  if (el) el.remove();
+}
 
-// If this device is linked to a sync code, quietly check for updates from
-// other linked devices right on startup (no confirmation needed here since
-// it's a normal refresh, not a first-time link).
-if (state.syncCode) {
-  (async () => {
+function showLockScreen(errorText) {
+  hideLoadingScreen();
+  const wrap = document.createElement('div');
+  wrap.id = 'lockScreen';
+  wrap.className = 'lock-screen';
+  wrap.innerHTML = `
+    <div class="lock-card">
+      <div class="lock-mark">${icon('plants', 36)}</div>
+      <h2 class="lock-title"><span class="brand-plant">Plant</span> <span class="brand-parent">Parent</span></h2>
+      <p class="lock-hint">Enter the passcode to continue</p>
+      <input type="password" id="lockPasswordInput" class="lock-input" placeholder="Passcode" autocomplete="off">
+      ${errorText ? `<div class="lock-error">${escapeHtml(errorText)}</div>` : ''}
+      <button class="primary lock-submit" id="lockSubmitBtn">Unlock</button>
+    </div>
+  `;
+  document.body.appendChild(wrap);
+
+  const submit = async () => {
+    const input = document.getElementById('lockPasswordInput');
+    const password = input.value;
+    const btn = document.getElementById('lockSubmitBtn');
+    btn.disabled = true;
+    btn.textContent = 'Checking…';
     try {
-      const res = await fetch('/api/sync-pull', {
+      const res = await fetch('/api/auth', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ syncCode: state.syncCode })
+        body: JSON.stringify({ password }),
       });
       const data = await res.json();
-      if (res.ok && Array.isArray(data.plants)) {
-        state.plants = data.plants;
-        nextId = state.plants.length ? Math.max(...state.plants.map(p => p.id)) + 1 : 1;
-        render();
-        savePlantsLocalOnly();
+      if (!res.ok) {
+        hideLockScreen();
+        showLockScreen(data.error || 'Incorrect passcode.');
+        return;
       }
+      localStorage.setItem('plant-parent-app-password', password);
+      hideLockScreen();
+      initApp();
     } catch (err) {
-      // offline or nothing to sync yet — local data stays as-is
+      btn.disabled = false;
+      btn.textContent = 'Unlock';
+      const errEl = wrap.querySelector('.lock-error');
+      const msg = "Couldn't reach the server — try again.";
+      if (errEl) errEl.textContent = msg;
+      else wrap.querySelector('.lock-card').insertAdjacentHTML('beforeend', `<div class="lock-error">${msg}</div>`);
     }
-  })();
+  };
+
+  document.getElementById('lockSubmitBtn').onclick = submit;
+  document.getElementById('lockPasswordInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') submit();
+  });
+  document.getElementById('lockPasswordInput').focus();
 }
+
+async function bootApp() {
+  try {
+    const checkRes = await fetch('/api/auth');
+    const checkData = await checkRes.json();
+
+    if (!checkData.required) {
+      initApp();
+      return;
+    }
+
+    const stored = localStorage.getItem('plant-parent-app-password');
+    if (stored) {
+      const verifyRes = await fetch('/api/auth', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: stored }),
+      });
+      if (verifyRes.ok) {
+        initApp();
+        return;
+      }
+      localStorage.removeItem('plant-parent-app-password');
+    }
+
+    showLockScreen();
+  } catch (err) {
+    // If the gate check itself can't be reached, fail open rather than
+    // permanently locking out the legitimate owner over a network hiccup.
+    initApp();
+  }
+}
+
+bootApp();

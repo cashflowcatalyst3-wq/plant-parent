@@ -1,8 +1,13 @@
 // Plant species identification via Pl@ntNet's free API (my.plantnet.org).
 // Free tier: 500 identifications/day, no cost. Needs a free API key.
+import { checkAppPassword } from '../lib/appAuth.js';
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
+  }
+  if (!checkAppPassword(req)) {
+    return res.status(401).json({ error: 'Unauthorized' });
   }
   if (!process.env.PLANTNET_API_KEY) {
     return res.status(500).json({ error: 'PLANTNET_API_KEY is not set. Add it in Vercel → Settings → Environment Variables, then redeploy.' });
