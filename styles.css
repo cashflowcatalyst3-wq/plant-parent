@@ -131,66 +131,6 @@
     .loading-spinner { animation-duration: 1.6s; }
   }
 
-  .lock-screen {
-    position: fixed;
-    inset: 0;
-    z-index: 300;
-    background: var(--bg);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-  }
-  .lock-card {
-    width: 100%;
-    max-width: 320px;
-    background: var(--card);
-    border-radius: 16px;
-    box-shadow: var(--shadow);
-    padding: 32px 28px;
-    text-align: center;
-  }
-  .lock-mark {
-    display: flex;
-    justify-content: center;
-    color: var(--sage);
-    margin-bottom: 10px;
-  }
-  .lock-title {
-    font-family: 'Fraunces', serif;
-    font-weight: 600;
-    font-size: 24px;
-    letter-spacing: -0.01em;
-    margin: 0 0 6px;
-  }
-  .lock-title .brand-plant { color: var(--ink); }
-  .lock-title .brand-parent { color: var(--sage); }
-  .lock-hint {
-    font-size: 13px;
-    color: var(--soil);
-    margin: 0 0 18px;
-  }
-  .lock-input {
-    width: 100%;
-    box-sizing: border-box;
-    padding: 11px 14px;
-    border-radius: 10px;
-    border: 1.5px solid var(--line);
-    background: var(--panel2);
-    color: var(--ink);
-    font-family: 'Nunito', sans-serif;
-    font-size: 15px;
-    text-align: center;
-    margin-bottom: 12px;
-  }
-  .lock-input:focus { outline: 2px solid var(--sage); border-color: transparent; }
-  .lock-error {
-    font-size: 12px;
-    color: var(--clay);
-    margin: -4px 0 12px;
-  }
-  .lock-submit { width: 100%; }
-
   .main-content {
     max-width: 1000px;
     margin: 0 auto;

@@ -62,17 +62,6 @@ Heads up on a real platform limit: Vercel's free plan only allows cron jobs to r
 
 That's it — every 5 hours, cron-job.org pings your app, which picks a random plant tip or check-in message and sends it as a real push notification to everyone who's enabled reminders.
 
-## Access gate (optional)
-
-Since this app has no accounts, anyone who finds your `.vercel.app` URL can use it as if it were their own. If that's a problem, turn on a shared passcode:
-
-**1. Add the environment variable**
-- In Vercel: **Settings → Environment Variables**
-- Add: Name: `APP_PASSWORD` → Value: any passcode you choose
-- Redeploy so it takes effect
-
-That's it — everyone (including you) will need to enter that passcode once per device before the app loads. Don't set this variable at all if you don't want the gate; the app works exactly as before.
-
 ## Plant photo identification (optional)
 
 Snap a photo of an unlabeled plant when adding it, and get a species guess instead of typing it in. Powered by [Pl@ntNet](https://plantnet.org), a nonprofit plant identification project — genuinely free, 500 identifications/day.
@@ -87,6 +76,8 @@ Snap a photo of an unlabeled plant when adding it, and get a species guess inste
 - Redeploy so it takes effect
 
 That's it — when adding or editing a plant, tap "🔍 Identify from a photo" next to the Species field.
+
+This app is public, with no login — since Pl@ntNet's free tier (500/day) is shared across everyone who uses it, this feature is rate-limited per device and per network (20/device/day, 40/network/day) so no single visitor can use up the shared quota. No setup needed for this — it's automatic.
 
 ## Community leaderboard (optional)
 
@@ -105,7 +96,7 @@ Anyone using the app can opt in to a public leaderboard (nicknames only — no o
 This page isn't linked from anywhere in the app itself — only people with the direct URL and your secret can reach it.
 
 ## What's new in this version
-- **Optional access gate**: set an `APP_PASSWORD` env var to require a shared passcode before anyone can use the app, protecting it (and your backend) from strangers who find the URL. Off by default — see setup above.
+- **Fair-use rate limiting on plant ID**: since this app is public, the free Pl@ntNet identification quota is now protected with per-device and per-network daily limits, so no single visitor can use it all up. Automatic, no setup needed.
 - **Photo-based plant identification**: tap "🔍 Identify from a photo" when adding/editing a plant to get a species guess from a real photo, powered by the free Pl@ntNet API (see setup above).
 - **Two more leaderboards**: Raindrop Catch and Memory Match high scores, alongside the existing streak and plant-count boards.
 - **Water all plants button**: one tap waters everything that hasn't been done yet today, skipping anything already logged.

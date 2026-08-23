@@ -1,20 +1,48 @@
 // Plant species identification via Pl@ntNet's free API (my.plantnet.org).
 // Free tier: 500 identifications/day, no cost. Needs a free API key.
-import { checkAppPassword } from '../lib/appAuth.js';
+import { Redis } from '@upstash/redis';
+import { checkRateLimit, todayKey } from '../lib/rateLimit.js';
+
+const redis = Redis.fromEnv();
+
+// Pl@ntNet's whole free tier is 500/day, shared across everyone using this
+// app. These caps just stop any single visitor from using up a big chunk of
+// that on their own — not a login, just fair-use protection.
+const PER_DEVICE_DAILY_LIMIT = 20;
+const PER_IP_DAILY_LIMIT = 40;
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
-  if (!checkAppPassword(req)) {
-    return res.status(401).json({ error: 'Unauthorized' });
+
+  const { imageBase64, organ, deviceId } = req.body || {};
+
+  try {
+    const today = todayKey();
+    const ip = (req.headers['x-forwarded-for'] || '').split(',')[0].trim() || req.socket?.remoteAddress || 'unknown';
+
+    if (deviceId) {
+      const deviceCheck = await checkRateLimit(redis, `ratelimit:identify:device:${deviceId}:${today}`, PER_DEVICE_DAILY_LIMIT, 172800);
+      if (!deviceCheck.allowed) {
+        return res.status(429).json({ error: "You've hit today's identification limit on this device. Try again tomorrow." });
+      }
+    }
+
+    const ipCheck = await checkRateLimit(redis, `ratelimit:identify:ip:${ip}:${today}`, PER_IP_DAILY_LIMIT, 172800);
+    if (!ipCheck.allowed) {
+      return res.status(429).json({ error: "This connection has hit today's identification limit. Try again tomorrow." });
+    }
+  } catch (err) {
+    // if the rate-limit check itself fails, don't block identification over it
+    console.error('Rate limit check failed:', err);
   }
+
   if (!process.env.PLANTNET_API_KEY) {
     return res.status(500).json({ error: 'PLANTNET_API_KEY is not set. Add it in Vercel → Settings → Environment Variables, then redeploy.' });
   }
 
   try {
-    const { imageBase64, organ } = req.body || {};
     if (!imageBase64) {
       return res.status(400).json({ error: 'Missing photo' });
     }

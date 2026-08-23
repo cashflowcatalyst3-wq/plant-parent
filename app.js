@@ -2577,8 +2577,8 @@ async function identifyPhoto(file) {
     const dataUrl = await resizeImageToDataUrl(file, 1024);
     const res = await fetch('/api/identify', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...appAuthHeaders() },
-      body: JSON.stringify({ imageBase64: dataUrl, organ: 'leaf' }),
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ imageBase64: dataUrl, organ: 'leaf', deviceId: getDeviceId() }),
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Could not identify this photo.');
@@ -2829,11 +2829,6 @@ function getDeviceId() {
   return id;
 }
 
-function appAuthHeaders() {
-  const password = localStorage.getItem('plant-parent-app-password');
-  return password ? { 'X-App-Password': password } : {};
-}
-
 function savePlants() {
   try {
     localStorage.setItem('plant-parent-plants', JSON.stringify(state.plants));
@@ -2874,7 +2869,7 @@ async function syncToServer() {
   try {
     await fetch('/api/sync', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...appAuthHeaders() },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ deviceId: getDeviceId(), plants: state.plants, syncCode: state.syncCode || undefined })
     });
   } catch (err) {
@@ -2942,7 +2937,7 @@ async function fetchLeaderboard() {
   state.leaderboardError = null;
   render();
   try {
-    const res = await fetch('/api/leaderboard', { headers: appAuthHeaders() });
+    const res = await fetch('/api/leaderboard');
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Could not load leaderboard');
     state.leaderboardData = { streaks: data.streaks || [], plants: data.plants || [], raindrop: data.raindrop || [], memory: data.memory || [] };
@@ -2960,7 +2955,7 @@ async function joinLeaderboard(nickname) {
   try {
     const res = await fetch('/api/leaderboard', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...appAuthHeaders() },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         deviceId: getDeviceId(),
         nickname,
@@ -2989,7 +2984,7 @@ async function refreshMyLeaderboardStats() {
   try {
     await fetch('/api/leaderboard', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...appAuthHeaders() },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         deviceId: getDeviceId(),
         nickname: state.leaderboardNickname,
@@ -3010,7 +3005,7 @@ async function leaveLeaderboard() {
   try {
     await fetch('/api/leaderboard', {
       method: 'DELETE',
-      headers: { 'Content-Type': 'application/json', ...appAuthHeaders() },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ deviceId: getDeviceId() }),
     });
   } catch (err) {
@@ -3096,7 +3091,7 @@ async function joinExistingSyncCode(code) {
   try {
     const res = await fetch('/api/sync-pull', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...appAuthHeaders() },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ syncCode: code })
     });
     const data = await res.json();
@@ -3138,7 +3133,7 @@ async function pullSyncNow() {
   try {
     const res = await fetch('/api/sync-pull', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...appAuthHeaders() },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ syncCode: state.syncCode })
     });
     const data = await res.json();
@@ -3218,7 +3213,7 @@ async function enableNotifications() {
     }
     await fetch('/api/subscribe', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', ...appAuthHeaders() },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ deviceId: getDeviceId(), subscription })
     });
     await syncToServer();
@@ -3286,7 +3281,7 @@ function initApp() {
       try {
         const res = await fetch('/api/sync-pull', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', ...appAuthHeaders() },
+          headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ syncCode: state.syncCode })
         });
         const data = await res.json();
@@ -3303,96 +3298,4 @@ function initApp() {
   }
 }
 
-function hideLockScreen() {
-  const el = document.getElementById('lockScreen');
-  if (el) el.remove();
-}
-
-function showLockScreen(errorText) {
-  hideLoadingScreen();
-  const wrap = document.createElement('div');
-  wrap.id = 'lockScreen';
-  wrap.className = 'lock-screen';
-  wrap.innerHTML = `
-    <div class="lock-card">
-      <div class="lock-mark">${icon('plants', 36)}</div>
-      <h2 class="lock-title"><span class="brand-plant">Plant</span> <span class="brand-parent">Parent</span></h2>
-      <p class="lock-hint">Enter the passcode to continue</p>
-      <input type="password" id="lockPasswordInput" class="lock-input" placeholder="Passcode" autocomplete="off">
-      ${errorText ? `<div class="lock-error">${escapeHtml(errorText)}</div>` : ''}
-      <button class="primary lock-submit" id="lockSubmitBtn">Unlock</button>
-    </div>
-  `;
-  document.body.appendChild(wrap);
-
-  const submit = async () => {
-    const input = document.getElementById('lockPasswordInput');
-    const password = input.value;
-    const btn = document.getElementById('lockSubmitBtn');
-    btn.disabled = true;
-    btn.textContent = 'Checking…';
-    try {
-      const res = await fetch('/api/auth', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        hideLockScreen();
-        showLockScreen(data.error || 'Incorrect passcode.');
-        return;
-      }
-      localStorage.setItem('plant-parent-app-password', password);
-      hideLockScreen();
-      initApp();
-    } catch (err) {
-      btn.disabled = false;
-      btn.textContent = 'Unlock';
-      const errEl = wrap.querySelector('.lock-error');
-      const msg = "Couldn't reach the server — try again.";
-      if (errEl) errEl.textContent = msg;
-      else wrap.querySelector('.lock-card').insertAdjacentHTML('beforeend', `<div class="lock-error">${msg}</div>`);
-    }
-  };
-
-  document.getElementById('lockSubmitBtn').onclick = submit;
-  document.getElementById('lockPasswordInput').addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') submit();
-  });
-  document.getElementById('lockPasswordInput').focus();
-}
-
-async function bootApp() {
-  try {
-    const checkRes = await fetch('/api/auth');
-    const checkData = await checkRes.json();
-
-    if (!checkData.required) {
-      initApp();
-      return;
-    }
-
-    const stored = localStorage.getItem('plant-parent-app-password');
-    if (stored) {
-      const verifyRes = await fetch('/api/auth', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: stored }),
-      });
-      if (verifyRes.ok) {
-        initApp();
-        return;
-      }
-      localStorage.removeItem('plant-parent-app-password');
-    }
-
-    showLockScreen();
-  } catch (err) {
-    // If the gate check itself can't be reached, fail open rather than
-    // permanently locking out the legitimate owner over a network hiccup.
-    initApp();
-  }
-}
-
-bootApp();
+initApp();
