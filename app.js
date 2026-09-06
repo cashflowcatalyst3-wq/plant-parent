@@ -33,8 +33,32 @@ const SPECIES_DICTIONARY = [
   { id: 'other', name: 'Other / not sure', latin: '', emoji: '❓', shape: null, light: 'Varies', freq: 7, desc: '' },
 ];
 
+// Structured location picker: where a plant lives, then (for Indoor/Outdoor)
+// a specific room/area. Balcony has no sub-choice. "Other" reveals a free-text
+// field so nothing is lost if a user's exact space isn't listed.
+const INDOOR_ROOMS = ['Living Room', 'Bedroom', 'Kitchen', 'Dining Room', 'Bathroom', 'Study / Office', 'Hallway', 'Other'];
+const OUTDOOR_AREAS = ['Garden', 'Patio / Terrace', 'Yard', 'Other'];
+
+// Older saved plants (or ones edited via the quick panel field) may have a
+// plain free-text room string instead of the structured picker's value.
+// This maps that string back to {locationType, roomDetail, roomCustom} so
+// the modal can preselect the right options instead of defaulting blank.
+function deriveLocationFromRoom(roomStr) {
+  const r = (roomStr || '').trim();
+  if (!r) return { locationType: '', roomDetail: '', roomCustom: '' };
+  if (r.toLowerCase() === 'balcony') return { locationType: 'Balcony', roomDetail: '', roomCustom: '' };
+  if (INDOOR_ROOMS.includes(r)) return { locationType: 'Indoor', roomDetail: r, roomCustom: '' };
+  if (OUTDOOR_AREAS.includes(r) && r !== 'Other') return { locationType: 'Outdoor', roomDetail: r, roomCustom: '' };
+  // Unrecognized text (e.g. typed before this picker existed) — keep it via "Other".
+  return { locationType: 'Indoor', roomDetail: 'Other', roomCustom: r };
+}
+
+function roomOptionsHtml(locationType, selected) {
+  const list = locationType === 'Outdoor' ? OUTDOOR_AREAS : INDOOR_ROOMS;
+  return list.map(r => `<option value="${r}" ${r === selected ? 'selected' : ''}>${r}</option>`).join('');
+}
+
 const THEMES = [
-  { id: 'sage', name: 'Sage', sage: '#8DA377', sageLight: '#C4D97A', clay: '#B5613C', clayLight: '#D99A7D' },
   { id: 'terracotta', name: 'Terracotta', sage: '#C17A4E', sageLight: '#E0A97E', clay: '#5B7A9B', clayLight: '#8FAFC9' },
   { id: 'lavender', name: 'Lavender', sage: '#9B87C4', sageLight: '#C7B8E0', clay: '#C46B87', clayLight: '#E0A0B4' },
   { id: 'ocean', name: 'Ocean', sage: '#4E8FA6', sageLight: '#8FC1D4', clay: '#D9935E', clayLight: '#EFC08F' },
@@ -1394,7 +1418,7 @@ function render() {
               ${state.plants.length ? `<button class="primary water-all-btn" id="waterAllBtn">💧 Water all plants</button>` : ''}
               <select class="sort-select" id="sortSelect" aria-label="Sort plants by">
                 <option value="urgent" ${state.sortBy === 'urgent' ? 'selected' : ''}>Most urgent first</option>
-                <option value="az" ${state.sortBy === 'az' ? 'selected' : ''}>A–Z</option>
+                <option value="az" ${state.sortBy === 'az' ? 'selected' : ''}>Plant name (A–Z)</option>
                 <option value="room" ${state.sortBy === 'room' ? 'selected' : ''}>By room</option>
               </select>
               ${getRoomList().length ? `
@@ -1569,6 +1593,27 @@ function render() {
         const isDaily = Number(freqInput.value) === 1;
         twiceDailyField.style.display = isDaily ? '' : 'none';
         if (!isDaily) document.getElementById('modalTwiceDailyInput').checked = false;
+      });
+    }
+    const locationSelect = document.getElementById('modalLocationType');
+    const roomDetailField = document.getElementById('roomDetailField');
+    const roomDetailSelect = document.getElementById('modalRoomDetail');
+    const roomCustomField = document.getElementById('roomCustomField');
+    if (locationSelect) {
+      locationSelect.addEventListener('change', () => {
+        const val = locationSelect.value;
+        if (val === 'Indoor' || val === 'Outdoor') {
+          roomDetailField.style.display = '';
+          roomDetailSelect.innerHTML = roomOptionsHtml(val, '');
+        } else {
+          roomDetailField.style.display = 'none';
+        }
+        roomCustomField.style.display = 'none';
+      });
+    }
+    if (roomDetailSelect) {
+      roomDetailSelect.addEventListener('change', () => {
+        roomCustomField.style.display = roomDetailSelect.value === 'Other' ? '' : 'none';
       });
     }
   }
@@ -2434,7 +2479,9 @@ function formatHistoryDate(iso) {
 function captureModalDraft() {
   state.modalDraft = {
     name: document.getElementById('modalNameInput')?.value || '',
-    room: document.getElementById('modalRoomInput')?.value || '',
+    locationType: document.getElementById('modalLocationType')?.value || '',
+    roomDetail: document.getElementById('modalRoomDetail')?.value || '',
+    roomCustom: document.getElementById('modalRoomCustom')?.value || '',
     freq: document.getElementById('modalFreqInput')?.value || 7,
     twiceDaily: document.getElementById('modalTwiceDailyInput')?.checked || false,
   };
@@ -2449,7 +2496,10 @@ function renderModal() {
   const isEditing = !!editingPlant;
   const draft = state.modalDraft;
   const nameVal = draft ? draft.name : (isEditing ? editingPlant.name : '');
-  const roomVal = draft ? draft.room : (isEditing ? (editingPlant.room || '') : '');
+  const existingLocation = deriveLocationFromRoom(isEditing ? editingPlant.room : '');
+  const locationType = draft ? draft.locationType : existingLocation.locationType;
+  const roomDetail = draft ? draft.roomDetail : existingLocation.roomDetail;
+  const roomCustom = draft ? draft.roomCustom : existingLocation.roomCustom;
   const freqVal = draft ? draft.freq : (isEditing ? editingPlant.frequency : (species ? species.freq : 7));
   const twiceDailyVal = draft ? draft.twiceDaily : (isEditing && !!editingPlant.twiceDaily);
   const showTwiceDaily = Number(freqVal) === 1;
@@ -2489,8 +2539,23 @@ function renderModal() {
         ` : ''}
       </div>
       <div class="field">
-        <label>Room (optional)</label>
-        <input id="modalRoomInput" placeholder="e.g. Kitchen, Bedroom, Balcony" value="${roomVal}" aria-label="Room">
+        <label>Where does it live?</label>
+        <select id="modalLocationType" aria-label="Location type">
+          <option value="" ${!locationType ? 'selected' : ''}>Choose one…</option>
+          <option value="Indoor" ${locationType === 'Indoor' ? 'selected' : ''}>🏠 Indoor</option>
+          <option value="Outdoor" ${locationType === 'Outdoor' ? 'selected' : ''}>🌳 Outdoor</option>
+          <option value="Balcony" ${locationType === 'Balcony' ? 'selected' : ''}>🪴 Balcony</option>
+        </select>
+      </div>
+      <div class="field" id="roomDetailField" style="${(locationType === 'Indoor' || locationType === 'Outdoor') ? '' : 'display:none;'}">
+        <label>Which ${locationType === 'Outdoor' ? 'area' : 'room'}?</label>
+        <select id="modalRoomDetail" aria-label="Specific room or area">
+          ${roomOptionsHtml(locationType, roomDetail)}
+        </select>
+      </div>
+      <div class="field" id="roomCustomField" style="${roomDetail === 'Other' ? '' : 'display:none;'}">
+        <label>Name it</label>
+        <input id="modalRoomCustom" placeholder="e.g. Front room" value="${roomCustom || ''}" aria-label="Custom room name">
       </div>
       <div class="field">
         <label>Water every how many days?</label>
@@ -2766,7 +2831,13 @@ document.addEventListener('click', (e) => {
   if (e.target.id === 'saveModal') {
     const name = document.getElementById('modalNameInput').value.trim();
     const freq = parseInt(document.getElementById('modalFreqInput').value, 10) || 7;
-    const room = document.getElementById('modalRoomInput').value.trim();
+    const locationType = document.getElementById('modalLocationType').value;
+    const roomDetail = document.getElementById('modalRoomDetail')?.value || '';
+    const roomCustom = document.getElementById('modalRoomCustom')?.value.trim() || '';
+    let room = '';
+    if (locationType === 'Balcony') room = 'Balcony';
+    else if (roomDetail === 'Other') room = roomCustom;
+    else if (roomDetail) room = roomDetail;
     const twiceDaily = freq === 1 && document.getElementById('modalTwiceDailyInput').checked;
     if (!name) return;
     const species = state.pendingSpecies;
