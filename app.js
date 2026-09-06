@@ -153,6 +153,10 @@ const state = {
   showAboutModal: false,
   showWelcome: false,
   tutorialReturnView: 'shelf',
+  communityPosts: [],
+  communityLoading: false,
+  communityError: null,
+  communityLoaded: false,
   hasInvited: false,
   confirmDeletePlantId: null,
   lastDeletedPlant: null,
@@ -510,6 +514,61 @@ function renderTutorial() {
 
     <button class="primary welcome-btn" id="finishTutorial" style="width:100%;margin-top:8px;">Let's go 🌱</button>
   `;
+  return div;
+}
+
+function renderCommunity() {
+  const div = document.createElement('div');
+  div.className = 'settings-page';
+  const savedNickname = localStorage.getItem('plant-parent-community-nickname') || state.leaderboardNickname || '';
+
+  const postsHtml = state.communityPosts.length ? state.communityPosts.map(p => `
+    <div class="settings-row" style="align-items:flex-start;">
+      <div class="settings-row-label">
+        <div class="settings-row-name">${p.plantEmoji || '🌱'} ${escapeHtml(p.nickname)}</div>
+        <div class="settings-row-desc">${escapeHtml(p.tip)}</div>
+      </div>
+    </div>
+  `).join('') : `<div class="settings-row-desc" style="padding:12px 0;">No tips shared yet — be the first 🌱</div>`;
+
+  div.innerHTML = `
+    <div class="guide-hero">
+      <div class="guide-hero-title">🌍 Community</div>
+      <div class="guide-hero-sub">Plant-care tips and experiences from other plant parents</div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">Share a tip</div>
+      <div class="field">
+        <input id="communityNicknameInput" placeholder="Your name" value="${escapeHtml(savedNickname)}" maxlength="20" aria-label="Your name">
+      </div>
+      <div class="field">
+        <input id="communityTipInput" placeholder="Something that's worked for your plants…" maxlength="280" aria-label="Your tip">
+      </div>
+      ${state.communityError ? `<div class="identify-status identify-error">${escapeHtml(state.communityError)}</div>` : ''}
+      <button class="primary welcome-btn" id="communitySubmitBtn" style="width:100%;margin-top:4px;">Post tip</button>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">${state.communityLoading ? 'Loading…' : 'Recent tips'}</div>
+      ${postsHtml}
+    </div>
+  `;
+
+  const submitBtn = div.querySelector('#communitySubmitBtn');
+  if (submitBtn) {
+    submitBtn.onclick = () => {
+      const nickname = div.querySelector('#communityNicknameInput').value.trim();
+      const tip = div.querySelector('#communityTipInput').value.trim();
+      if (!nickname || !tip) {
+        state.communityError = 'Please add both your name and a tip.';
+        render();
+        return;
+      }
+      submitCommunityPost(nickname, tip);
+    };
+  }
+
   return div;
 }
 
@@ -1425,7 +1484,7 @@ function render() {
 
   app.innerHTML = `
     <div class="main-content ${viewChanged ? 'view-enter' : ''}">
-      ${state.currentView !== 'garden' && state.currentView !== 'dictionary' && state.currentView !== 'settings' && state.currentView !== 'tutorial' ? `
+      ${state.currentView !== 'garden' && state.currentView !== 'dictionary' && state.currentView !== 'settings' && state.currentView !== 'tutorial' && state.currentView !== 'community' ? `
         <header class="app-topbar">
           <span class="app-topbar-mark">${icon('plants', 28)}</span>
           <h1 class="app-topbar-title"><span class="brand-plant">Plant</span> <span class="brand-parent">Parent</span></h1>
@@ -1462,6 +1521,7 @@ function render() {
       ${state.currentView === 'propagation' ? `<div id="propagationView"></div>` : ''}
       ${state.currentView === 'settings' ? `<div id="settingsView"></div>` : ''}
       ${state.currentView === 'tutorial' ? `<div id="tutorialView"></div>` : ''}
+      ${state.currentView === 'community' ? `<div id="communityView"></div>` : ''}
       ${state.currentView === 'shelf' ? `
         <div class="layout ${state.mobileDetailOpen ? 'mobile-detail-open' : ''}">
           <div class="shelf-column">
@@ -1497,7 +1557,7 @@ function render() {
       <button class="bottom-nav-btn ${state.currentView === 'dictionary' ? 'bottom-nav-active' : ''}" id="navDictionary">
         <span class="bottom-nav-icon">${icon('guide')}</span><span class="bottom-nav-label">Guide</span>
       </button>
-      <button class="bottom-nav-btn ${state.showMoreMenu || ['settings','journal','propagation'].includes(state.currentView) ? 'bottom-nav-active' : ''}" id="navMore">
+      <button class="bottom-nav-btn ${state.showMoreMenu || ['settings','journal','propagation','community','tutorial'].includes(state.currentView) ? 'bottom-nav-active' : ''}" id="navMore">
         <span class="bottom-nav-icon">${icon('more')}</span><span class="bottom-nav-label">More</span>
       </button>
     </nav>
@@ -1512,6 +1572,10 @@ function render() {
           <button class="more-menu-item" id="navPropagation">
             <span class="more-menu-icon">${icon('cuttings')}</span>
             <span>Cuttings${state.propagations.length ? ` (${state.propagations.length})` : ''}</span>
+          </button>
+          <button class="more-menu-item" id="navCommunity">
+            <span class="more-menu-icon">${icon('journal')}</span>
+            <span>Community</span>
           </button>
           <div class="more-menu-divider"></div>
           <button class="more-menu-item" id="navBadges">
@@ -1565,6 +1629,9 @@ function render() {
     document.getElementById('settingsView').appendChild(renderSettings());
   } else if (state.currentView === 'tutorial') {
     document.getElementById('tutorialView').appendChild(renderTutorial());
+  } else if (state.currentView === 'community') {
+    document.getElementById('communityView').appendChild(renderCommunity());
+    if (!state.communityLoaded) { state.communityLoaded = true; fetchCommunityPosts(); }
   } else {
     const shelf = document.getElementById('shelf');
     getVisiblePlants().forEach(p => shelf.appendChild(renderCard(p)));
@@ -1624,6 +1691,7 @@ function render() {
     };
     document.getElementById('navJournal').onclick = () => { state.currentView = 'journal'; state.showMoreMenu = false; render(); };
     document.getElementById('navPropagation').onclick = () => { state.currentView = 'propagation'; state.showMoreMenu = false; render(); };
+    document.getElementById('navCommunity').onclick = () => { state.currentView = 'community'; state.showMoreMenu = false; render(); };
     document.getElementById('navSettings').onclick = () => { state.currentView = 'settings'; state.showMoreMenu = false; render(); };
     document.getElementById('moreMenuBackdrop').addEventListener('click', (e) => {
       if (e.target.id === 'moreMenuBackdrop') { state.showMoreMenu = false; render(); }
@@ -3061,6 +3129,40 @@ function getBestStreak() {
     if (s > best) best = s;
   }
   return best;
+}
+
+async function fetchCommunityPosts() {
+  state.communityLoading = true;
+  state.communityError = null;
+  render();
+  try {
+    const res = await fetch('/api/community');
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Could not load the community feed');
+    state.communityPosts = data.posts || [];
+  } catch (err) {
+    state.communityError = "Couldn't load community tips right now — try again in a bit.";
+  }
+  state.communityLoading = false;
+  render();
+}
+
+async function submitCommunityPost(nickname, tip) {
+  state.communityError = null;
+  try {
+    const res = await fetch('/api/community', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ deviceId: getDeviceId(), nickname, tip }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Could not post your tip');
+    localStorage.setItem('plant-parent-community-nickname', data.post.nickname);
+    await fetchCommunityPosts();
+  } catch (err) {
+    state.communityError = err.message || "Couldn't post your tip right now.";
+    render();
+  }
 }
 
 async function fetchLeaderboard() {
