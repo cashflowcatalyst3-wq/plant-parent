@@ -152,6 +152,7 @@ const state = {
   showInviteModal: false,
   showAboutModal: false,
   showWelcome: false,
+  tutorialReturnView: 'shelf',
   hasInvited: false,
   confirmDeletePlantId: null,
   lastDeletedPlant: null,
@@ -469,9 +470,47 @@ function renderWelcome() {
         <div class="welcome-feature"><span>🏆</span> Achievements, streaks, and a couple of mini-games</div>
         <div class="welcome-feature"><span>🔔</span> Real reminders, even when the app is closed</div>
       </div>
-      <button class="primary welcome-btn" id="dismissWelcome">Get started 🌱</button>
+      <button class="primary welcome-btn" id="dismissWelcome">Start</button>
     </div>
   </div>`;
+}
+
+function renderTutorial() {
+  const div = document.createElement('div');
+  div.className = 'settings-page';
+  div.innerHTML = `
+    <div class="guide-hero">
+      <div class="guide-hero-title">🌱 How Plant Parent works</div>
+      <div class="guide-hero-sub">A quick walkthrough — takes about a minute</div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">1. Add your first plant</div>
+      <div class="welcome-feature"><span>➕</span> Tap "+ Add a plant" on the Plants tab. Give it a name, or snap a photo and tap "Identify from a photo" to auto-fill its species and care needs.</div>
+      <div class="welcome-feature"><span>🏠</span> Pick where it lives — Indoor, Outdoor, or Balcony — so your shelf can be sorted and filtered by room later.</div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">2. Keep it watered</div>
+      <div class="welcome-feature"><span>💧</span> Tap the water drop on a plant's card whenever you water it. That resets its countdown and builds your care streak.</div>
+      <div class="welcome-feature"><span>🔥</span> Water on schedule and you'll unlock streak badges — check "Badges" in the More menu anytime.</div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">3. Turn on real reminders</div>
+      <div class="welcome-feature"><span>🔔</span> In Settings, switch on "Push reminders" so your phone notifies you when a plant is overdue — even with the app closed.</div>
+    </div>
+
+    <div class="settings-section">
+      <div class="settings-section-title">4. Explore the rest</div>
+      <div class="welcome-feature"><span>📖</span> The Guide tab has care info for dozens of common houseplants.</div>
+      <div class="welcome-feature"><span>🌻</span> The Garden tab visually grows the better you keep up with care.</div>
+      <div class="welcome-feature"><span>📝</span> Journal (in the More menu) is for notes and photos over time; Cuttings tracks anything you're propagating.</div>
+    </div>
+
+    <button class="primary welcome-btn" id="finishTutorial" style="width:100%;margin-top:8px;">Let's go 🌱</button>
+  `;
+  return div;
 }
 
 // ---------- about / support ----------
@@ -934,6 +973,17 @@ function renderSettings() {
     </div>
 
     <div class="settings-section">
+      <div class="settings-section-title">Help</div>
+      <div class="settings-row">
+        <div class="settings-row-label">
+          <div class="settings-row-name">How to use this app</div>
+          <div class="settings-row-desc">A quick walkthrough of the basics</div>
+        </div>
+        <button class="secondary" id="settingsTutorialBtn">${icon('guide', 16)} View</button>
+      </div>
+    </div>
+
+    <div class="settings-section">
       <div class="settings-section-title">Appearance</div>
       <div class="settings-row">
         <div class="settings-row-label">
@@ -1028,6 +1078,7 @@ function renderSettings() {
     </div>
   `;
 
+  div.querySelector('#settingsTutorialBtn').onclick = () => { state.tutorialReturnView = 'settings'; state.currentView = 'tutorial'; render(); };
   div.querySelector('#settingsThemeBtn').onclick = () => { state.showThemeModal = true; render(); };
   div.querySelector('#settingsDarkModeBtn').onclick = () => toggleDarkMode();
   div.querySelector('#settingsSoundBtn').onclick = () => toggleSound();
@@ -1374,7 +1425,7 @@ function render() {
 
   app.innerHTML = `
     <div class="main-content ${viewChanged ? 'view-enter' : ''}">
-      ${state.currentView !== 'garden' && state.currentView !== 'dictionary' && state.currentView !== 'settings' ? `
+      ${state.currentView !== 'garden' && state.currentView !== 'dictionary' && state.currentView !== 'settings' && state.currentView !== 'tutorial' ? `
         <header class="app-topbar">
           <span class="app-topbar-mark">${icon('plants', 28)}</span>
           <h1 class="app-topbar-title"><span class="brand-plant">Plant</span> <span class="brand-parent">Parent</span></h1>
@@ -1410,6 +1461,7 @@ function render() {
       ${state.currentView === 'journal' ? `<div id="journalView"></div>` : ''}
       ${state.currentView === 'propagation' ? `<div id="propagationView"></div>` : ''}
       ${state.currentView === 'settings' ? `<div id="settingsView"></div>` : ''}
+      ${state.currentView === 'tutorial' ? `<div id="tutorialView"></div>` : ''}
       ${state.currentView === 'shelf' ? `
         <div class="layout ${state.mobileDetailOpen ? 'mobile-detail-open' : ''}">
           <div class="shelf-column">
@@ -1511,6 +1563,8 @@ function render() {
     document.getElementById('propagationView').appendChild(renderPropagation());
   } else if (state.currentView === 'settings') {
     document.getElementById('settingsView').appendChild(renderSettings());
+  } else if (state.currentView === 'tutorial') {
+    document.getElementById('tutorialView').appendChild(renderTutorial());
   } else {
     const shelf = document.getElementById('shelf');
     getVisiblePlants().forEach(p => shelf.appendChild(renderCard(p)));
@@ -2778,6 +2832,12 @@ document.addEventListener('click', (e) => {
   if (e.target.id === 'dismissWelcome') {
     state.showWelcome = false;
     localStorage.setItem('plant-parent-welcome-seen', '1');
+    state.tutorialReturnView = 'shelf';
+    state.currentView = 'tutorial';
+    render();
+  }
+  if (e.target.id === 'finishTutorial') {
+    state.currentView = state.tutorialReturnView || 'shelf';
     render();
   }
   if (e.target.id === 'shareInvite') { shareAppLink(); }
