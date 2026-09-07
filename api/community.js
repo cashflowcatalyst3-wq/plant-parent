@@ -12,7 +12,7 @@ const redis = Redis.fromEnv();
 const POSTS_KEY = 'community-posts'; // sorted set of post ids, scored by time
 const MAX_POSTS_RETURNED = 30;
 const MAX_STORED_POSTS = 200; // keep the feed bounded so this stays a mockup, not an unbounded store
-const MAX_TIP_LENGTH = 280;
+const MAX_TIP_LENGTH = 700; // generous byte cap; the ~100-word limit itself is enforced client-side
 
 export default async function handler(req, res) {
   try {
