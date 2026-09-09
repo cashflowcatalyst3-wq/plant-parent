@@ -122,6 +122,7 @@ const state = {
   celebrationQueue: [],
   currentView: 'home', // 'home' | 'hub' | 'learning' | 'shelf' | 'garden' | 'dictionary' | ...
   hubReturnTo: 'hub',
+  learningReturnTo: 'hub',
   sortBy: 'urgent', // 'urgent' | 'az' | 'room'
   filterRoom: null, // null = all rooms
   weatherEnabled: false,
@@ -497,7 +498,11 @@ function renderHome() {
     </div>
     <button class="primary welcome-btn" id="homeStartBtn" style="width:100%;margin-top:20px;">Start</button>
   `;
-  div.querySelector('#homeStartBtn').onclick = () => { state.currentView = 'hub'; render(); };
+  div.querySelector('#homeStartBtn').onclick = () => {
+    localStorage.setItem('plant-parent-onboarding-done', '1');
+    state.currentView = 'hub';
+    render();
+  };
   return div;
 }
 
@@ -514,7 +519,7 @@ function renderHub() {
     <button class="primary welcome-btn" id="hubPlantParentBtn" style="width:100%;margin-top:12px;">🪴 Plant Parent section</button>
     <button class="secondary" id="hubBackBtn" style="width:100%;margin-top:20px;">← Back</button>
   `;
-  div.querySelector('#hubLearningBtn').onclick = () => { state.currentView = 'learning'; render(); };
+  div.querySelector('#hubLearningBtn').onclick = () => { state.learningReturnTo = 'hub'; state.currentView = 'learning'; render(); };
   div.querySelector('#hubCommunityBtn').onclick = () => { state.hubReturnTo = 'hub'; state.currentView = 'community'; state.communityLoaded = false; render(); };
   div.querySelector('#hubPlantParentBtn').onclick = () => {
     state.hubReturnTo = 'hub';
@@ -549,7 +554,7 @@ function renderLearning() {
     </div>
     <button class="secondary" id="learningBackBtn" style="width:100%;margin-top:16px;">← Back</button>
   `;
-  div.querySelector('#learningBackBtn').onclick = () => { state.currentView = 'hub'; render(); };
+  div.querySelector('#learningBackBtn').onclick = () => { state.currentView = state.learningReturnTo || 'hub'; render(); };
   return div;
 }
 
@@ -1573,7 +1578,6 @@ function render() {
         <header class="app-topbar">
           <span class="app-topbar-mark">${icon('plants', 28)}</span>
           <h1 class="app-topbar-title"><span class="brand-plant">Plant</span> <span class="brand-parent">Parent</span></h1>
-          ${state.currentView === 'shelf' ? `<button class="secondary" id="topbarBackToHub" style="margin-left:auto;padding:6px 12px;font-size:13px;">← Menu</button>` : ''}
         </header>
 
         ${!state.mobileDetailOpen ? `
@@ -1647,7 +1651,7 @@ function render() {
       <button class="bottom-nav-btn ${state.currentView === 'dictionary' ? 'bottom-nav-active' : ''}" id="navDictionary">
         <span class="bottom-nav-icon">${icon('guide')}</span><span class="bottom-nav-label">Guide</span>
       </button>
-      <button class="bottom-nav-btn ${state.showMoreMenu || ['settings','journal','propagation','community','tutorial'].includes(state.currentView) ? 'bottom-nav-active' : ''}" id="navMore">
+      <button class="bottom-nav-btn ${state.showMoreMenu || ['settings','journal','propagation','community','tutorial','learning'].includes(state.currentView) ? 'bottom-nav-active' : ''}" id="navMore">
         <span class="bottom-nav-icon">${icon('more')}</span><span class="bottom-nav-label">More</span>
       </button>
     </nav>
@@ -1667,6 +1671,10 @@ function render() {
           <button class="more-menu-item" id="navCommunity">
             <span class="more-menu-icon">${icon('journal')}</span>
             <span>Community</span>
+          </button>
+          <button class="more-menu-item" id="navLearning">
+            <span class="more-menu-icon">${icon('guide')}</span>
+            <span>Learning</span>
           </button>
           <div class="more-menu-divider"></div>
           <button class="more-menu-item" id="navBadges">
@@ -1790,6 +1798,7 @@ function render() {
     document.getElementById('navJournal').onclick = () => { state.currentView = 'journal'; state.showMoreMenu = false; render(); };
     document.getElementById('navPropagation').onclick = () => { state.currentView = 'propagation'; state.showMoreMenu = false; render(); };
     document.getElementById('navCommunity').onclick = () => { state.hubReturnTo = 'shelf'; state.currentView = 'community'; state.showMoreMenu = false; render(); };
+    document.getElementById('navLearning').onclick = () => { state.learningReturnTo = 'shelf'; state.currentView = 'learning'; state.showMoreMenu = false; render(); };
     document.getElementById('navSettings').onclick = () => { state.currentView = 'settings'; state.showMoreMenu = false; render(); };
     document.getElementById('moreMenuBackdrop').addEventListener('click', (e) => {
       if (e.target.id === 'moreMenuBackdrop') { state.showMoreMenu = false; render(); }
@@ -1797,8 +1806,6 @@ function render() {
   }
   }
 
-  const topbarBackBtn = document.getElementById('topbarBackToHub');
-  if (topbarBackBtn) topbarBackBtn.onclick = () => { state.currentView = state.hubReturnTo || 'hub'; render(); };
 
   if (state.showAddModal) {
     document.getElementById('modalNameInput')?.focus();
@@ -3597,7 +3604,8 @@ function initApp() {
   state.memoryGameCompleted = localStorage.getItem('plant-parent-memory-completed') === '1';
   state.memoryHighScore = parseInt(localStorage.getItem('plant-parent-memory-highscore') || '0', 10) || 0;
   state.hasInvited = localStorage.getItem('plant-parent-has-invited') === '1';
-  state.showWelcome = false; // superseded by the always-shown Home page
+  state.showWelcome = false; // superseded by the Home page shown to first-time openers only
+  state.currentView = (localStorage.getItem('plant-parent-onboarding-done') === '1') ? 'shelf' : 'home';
   state.syncCode = localStorage.getItem('plant-parent-sync-code') || null;
 
   if ('serviceWorker' in navigator) {
