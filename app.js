@@ -115,6 +115,13 @@ const state = {
   identifyLoading: false,
   identifyResults: null,
   identifyError: null,
+  pendingModalPhotoFile: null,
+  plantIdLoading: false,
+  plantIdResults: null,
+  plantIdError: null,
+  plantIdPhoto: null,
+  plantIdPhotoFile: null,
+  plantIdReturnTo: 'shelf',
   editingPlantId: null, // if set, the Add Plant modal is in edit mode for this plant
   modalDraft: null, // preserves typed name/room/freq across re-renders (e.g. opening the species picker)
   unlockedAchievements: [],
@@ -662,7 +669,115 @@ function renderCommunity() {
   return div;
 }
 
-// ---------- about / support ----------
+// ---------- standalone "what plant is this?" tool ----------
+// Separate from the Add-a-Plant identify flow: this is for identifying any
+// plant you come across, with no intent to add it to your shelf. Kept to
+// once/day per device (client-side) since it's a bonus/exploration feature,
+// not core onboarding — the Add-a-Plant flow keeps its own, more generous
+// server-side allowance for actually building your collection.
+function plantIdUsedToday() {
+  return localStorage.getItem('plant-parent-plantid-last-used') === todayStr();
+}
+
+function renderPlantId() {
+  const div = document.createElement('div');
+  div.className = 'settings-page';
+  const usedToday = plantIdUsedToday();
+
+  const resultsHtml = state.plantIdResults && state.plantIdResults.length ? `
+    <div class="identify-results">
+      ${state.plantIdResults.map((r) => `
+        <div class="identify-result" style="cursor:default;">
+          <span class="identify-result-name">${escapeHtml(r.commonNames[0] || r.scientificName)}</span>
+          <span class="identify-result-latin">${escapeHtml(r.scientificName)}</span>
+          <span class="identify-result-score">${Math.round(r.score * 100)}%</span>
+        </div>
+      `).join('')}
+    </div>
+  ` : '';
+
+  div.innerHTML = `
+    <div class="guide-hero">
+      <div class="guide-hero-title">🔍 What plant is this?</div>
+      <div class="guide-hero-sub">Snap a photo of any plant to find out what it is — no need to add it to your shelf.</div>
+    </div>
+    <div class="settings-section">
+      ${usedToday ? `
+        <div class="identify-hint" style="padding:16px 0;">You've already used this today — come back tomorrow for another free check.</div>
+      ` : `
+        <button class="id-photo-btn" id="plantIdPhotoBtn" type="button">📷 ${state.plantIdPhoto ? 'Change photo' : 'Take or choose a photo'}</button>
+        <input type="file" id="plantIdPhotoInput" accept="image/*" capture="environment" style="display:none;">
+        ${state.plantIdPhoto ? `<img src="${state.plantIdPhoto}" alt="Selected plant photo preview" class="modal-photo-preview">` : ''}
+        ${state.plantIdPhoto ? `
+          <button class="identify-cta-btn" id="plantIdGoBtn" type="button">
+            <span class="identify-cta-emoji">✨</span>
+            <span class="identify-cta-text">
+              <span class="identify-cta-title">Identify this plant</span>
+              <span class="identify-cta-sub">Uses today's one free check</span>
+            </span>
+          </button>
+        ` : ''}
+      `}
+      ${state.plantIdLoading ? `<div class="identify-status">Identifying…</div>` : ''}
+      ${state.plantIdError ? `<div class="identify-status identify-error">${escapeHtml(state.plantIdError)}</div>` : ''}
+      ${resultsHtml}
+    </div>
+    <button class="secondary" id="plantIdBackBtn" style="width:100%;margin-top:16px;">← Back</button>
+  `;
+
+  div.querySelector('#plantIdBackBtn').onclick = () => { state.currentView = state.plantIdReturnTo || 'shelf'; render(); };
+
+  const photoBtn = div.querySelector('#plantIdPhotoBtn');
+  const photoInput = div.querySelector('#plantIdPhotoInput');
+  if (photoBtn && photoInput) {
+    photoBtn.onclick = () => photoInput.click();
+    photoInput.onchange = async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      state.plantIdPhotoFile = file;
+      state.plantIdResults = null;
+      state.plantIdError = null;
+      state.plantIdPhoto = await resizeImageToDataUrl(file, 300);
+      render();
+    };
+  }
+
+  const goBtn = div.querySelector('#plantIdGoBtn');
+  if (goBtn) {
+    goBtn.onclick = async () => {
+      if (!state.plantIdPhotoFile || plantIdUsedToday()) return;
+      state.plantIdLoading = true;
+      state.plantIdError = null;
+      state.plantIdResults = null;
+      render();
+      try {
+        const dataUrl = await resizeImageToDataUrl(state.plantIdPhotoFile, 1024);
+        const res = await fetch('/api/identify', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ imageBase64: dataUrl, organ: 'leaf', deviceId: getDeviceId() }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Could not identify this photo.');
+        state.plantIdResults = data.results || [];
+        if (!state.plantIdResults.length) {
+          state.plantIdError = "Couldn't find a confident match — try a clearer, closer photo of a leaf.";
+        }
+        // Mark today's free check as used regardless of match quality — it
+        // still cost an API call, so it still counts against the daily cap.
+        localStorage.setItem('plant-parent-plantid-last-used', todayStr());
+      } catch (err) {
+        state.plantIdError = err.message || 'Something went wrong — try again.';
+      }
+      state.plantIdLoading = false;
+      render();
+    };
+  }
+
+  return div;
+}
+
+
 
 function renderAboutModal() {
   const speciesCount = SPECIES_DICTIONARY.length - 1; // exclude "Other"
@@ -1574,7 +1689,7 @@ function render() {
 
   app.innerHTML = `
     <div class="main-content ${viewChanged ? 'view-enter' : ''}">
-      ${state.currentView !== 'garden' && state.currentView !== 'dictionary' && state.currentView !== 'settings' && state.currentView !== 'tutorial' && state.currentView !== 'community' && state.currentView !== 'home' && state.currentView !== 'hub' && state.currentView !== 'learning' ? `
+      ${state.currentView !== 'garden' && state.currentView !== 'dictionary' && state.currentView !== 'settings' && state.currentView !== 'tutorial' && state.currentView !== 'community' && state.currentView !== 'home' && state.currentView !== 'hub' && state.currentView !== 'learning' && state.currentView !== 'plantid' ? `
         <header class="app-topbar">
           <span class="app-topbar-mark">${icon('plants', 28)}</span>
           <h1 class="app-topbar-title"><span class="brand-plant">Plant</span> <span class="brand-parent">Parent</span></h1>
@@ -1615,6 +1730,7 @@ function render() {
       ${state.currentView === 'home' ? `<div id="homeView"></div>` : ''}
       ${state.currentView === 'hub' ? `<div id="hubView"></div>` : ''}
       ${state.currentView === 'learning' ? `<div id="learningView"></div>` : ''}
+      ${state.currentView === 'plantid' ? `<div id="plantIdView"></div>` : ''}
       ${state.currentView === 'shelf' ? `
         <div class="layout ${state.mobileDetailOpen ? 'mobile-detail-open' : ''}">
           <div class="shelf-column">
@@ -1651,7 +1767,7 @@ function render() {
       <button class="bottom-nav-btn ${state.currentView === 'dictionary' ? 'bottom-nav-active' : ''}" id="navDictionary">
         <span class="bottom-nav-icon">${icon('guide')}</span><span class="bottom-nav-label">Guide</span>
       </button>
-      <button class="bottom-nav-btn ${state.showMoreMenu || ['settings','journal','propagation','community','tutorial','learning'].includes(state.currentView) ? 'bottom-nav-active' : ''}" id="navMore">
+      <button class="bottom-nav-btn ${state.showMoreMenu || ['settings','journal','propagation','community','tutorial','learning','plantid'].includes(state.currentView) ? 'bottom-nav-active' : ''}" id="navMore">
         <span class="bottom-nav-icon">${icon('more')}</span><span class="bottom-nav-label">More</span>
       </button>
     </nav>
@@ -1675,6 +1791,10 @@ function render() {
           <button class="more-menu-item" id="navLearning">
             <span class="more-menu-icon">${icon('guide')}</span>
             <span>Learning</span>
+          </button>
+          <button class="more-menu-item" id="navPlantId">
+            <span class="more-menu-icon">${icon('guide')}</span>
+            <span>What's this plant?</span>
           </button>
           <div class="more-menu-divider"></div>
           <button class="more-menu-item" id="navBadges">
@@ -1737,6 +1857,8 @@ function render() {
     document.getElementById('hubView').appendChild(renderHub());
   } else if (state.currentView === 'learning') {
     document.getElementById('learningView').appendChild(renderLearning());
+  } else if (state.currentView === 'plantid') {
+    document.getElementById('plantIdView').appendChild(renderPlantId());
   } else {
     const shelf = document.getElementById('shelf');
     getVisiblePlants().forEach(p => shelf.appendChild(renderCard(p)));
@@ -1799,6 +1921,7 @@ function render() {
     document.getElementById('navPropagation').onclick = () => { state.currentView = 'propagation'; state.showMoreMenu = false; render(); };
     document.getElementById('navCommunity').onclick = () => { state.hubReturnTo = 'shelf'; state.currentView = 'community'; state.showMoreMenu = false; render(); };
     document.getElementById('navLearning').onclick = () => { state.learningReturnTo = 'shelf'; state.currentView = 'learning'; state.showMoreMenu = false; render(); };
+    document.getElementById('navPlantId').onclick = () => { state.plantIdReturnTo = 'shelf'; state.currentView = 'plantid'; state.showMoreMenu = false; render(); };
     document.getElementById('navSettings').onclick = () => { state.currentView = 'settings'; state.showMoreMenu = false; render(); };
     document.getElementById('moreMenuBackdrop').addEventListener('click', (e) => {
       if (e.target.id === 'moreMenuBackdrop') { state.showMoreMenu = false; render(); }
@@ -2743,18 +2866,15 @@ function renderModal() {
         <button class="id-photo-btn" id="modalPhotoBtn" type="button">📷 ${state.pendingModalPhoto ? 'Change photo' : 'Add a photo'}</button>
         <input type="file" id="modalPhotoInput" accept="image/*" capture="environment" style="display:none;">
         ${preview}
-      </div>
-      <div class="field">
-        <label>Name</label>
-        <input id="modalNameInput" placeholder="e.g. Fig in the corner" value="${nameVal}" aria-label="Plant name">
-      </div>
-      <div class="field">
-        <label>Species</label>
-        <button class="species-picker-btn" id="openSpeciesPicker" type="button">
-          ${species ? `<span class="species-picker-emoji">${species.emoji}</span> ${species.name}` : (isEditing && editingPlant.species ? editingPlant.species : '🔍 Choose from the guide (optional)')}
-        </button>
-        <button class="id-photo-btn identify-btn" id="identifyBtn" type="button">🔍 Identify from a photo</button>
-        <input type="file" id="identifyInput" accept="image/*" capture="environment" style="display:none;">
+        ${state.pendingModalPhoto ? `
+          <button class="identify-cta-btn" id="identifyBtn" type="button">
+            <span class="identify-cta-emoji">✨</span>
+            <span class="identify-cta-text">
+              <span class="identify-cta-title">Identify this plant</span>
+              <span class="identify-cta-sub">Auto-fill species &amp; care from your photo</span>
+            </span>
+          </button>
+        ` : `<div class="identify-hint">Add a photo above, then tap to identify the species automatically.</div>`}
         ${state.identifyLoading ? `<div class="identify-status">Identifying…</div>` : ''}
         ${state.identifyError ? `<div class="identify-status identify-error">${escapeHtml(state.identifyError)}</div>` : ''}
         ${state.identifyResults && state.identifyResults.length ? `
@@ -2768,6 +2888,16 @@ function renderModal() {
             `).join('')}
           </div>
         ` : ''}
+      </div>
+      <div class="field">
+        <label>Name</label>
+        <input id="modalNameInput" placeholder="e.g. Fig in the corner" value="${nameVal}" aria-label="Plant name">
+      </div>
+      <div class="field">
+        <label>Species</label>
+        <button class="species-picker-btn" id="openSpeciesPicker" type="button">
+          ${species ? `<span class="species-picker-emoji">${species.emoji}</span> ${species.name}` : (isEditing && editingPlant.species ? editingPlant.species : '🔍 Choose from the guide (optional)')}
+        </button>
       </div>
       <div class="field">
         <label>Where does it live?</label>
@@ -2838,6 +2968,7 @@ function wireModalPhoto() {
   input.onchange = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    state.pendingModalPhotoFile = file;
     state.pendingModalPhoto = await resizeImageToDataUrl(file, 300);
     render();
   };
@@ -2845,14 +2976,12 @@ function wireModalPhoto() {
 
 function wireIdentify() {
   const btn = document.getElementById('identifyBtn');
-  const input = document.getElementById('identifyInput');
-  if (!btn || !input) return;
-  btn.onclick = () => input.click();
-  input.onchange = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    await identifyPhoto(file);
-  };
+  if (btn) {
+    btn.onclick = async () => {
+      if (!state.pendingModalPhotoFile) return;
+      await identifyPhoto(state.pendingModalPhotoFile);
+    };
+  }
 
   document.querySelectorAll('.identify-result').forEach((el) => {
     el.onclick = () => {
