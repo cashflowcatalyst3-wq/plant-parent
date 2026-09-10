@@ -1,0 +1,8 @@
+[{
+      "relation": ["delegate_permission/common.handle_all_urls"],
+      "target": {
+        "namespace": "android_app",
+        "package_name": "app.vercel.plant_parent_beryl.twa",
+        "sha256_cert_fingerprints": ["B2:10:5F:E6:75:A7:E5:BB:55:57:7C:EB:56:86:75:D6:73:DC:FC:4C:00:AE:A5:B8:2D:F8:84:11:46:A5:5E:22"]
+      }
+    }]
