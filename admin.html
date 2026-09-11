@@ -38,6 +38,9 @@
   .message-row input { width: 130px; }
   .push-yes { color: #6E8F58; font-weight: 700; }
   .push-no { color: #B7AF9D; }
+  .test-badge { font-size: 10px; background: #DDE9D6; color: #4C6E3B; padding: 2px 6px; border-radius: 10px; margin-left: 6px; }
+  .plants-editor { width: 100%; box-sizing: border-box; font-family: monospace; font-size: 11px; min-height: 90px; padding: 8px; border: 1.5px solid #ddd; border-radius: 8px; margin-top: 6px; }
+  .tip-cell { max-width: 320px; }
 </style>
 </head>
 <body>
@@ -56,7 +59,12 @@
   <div id="globalError"></div>
 
   <h2>📋 All devices</h2>
-  <p class="hint">Every device that's ever synced or subscribed to notifications. "Nickname" only shows if that device also joined the public leaderboard.</p>
+  <p class="hint">Every device that's ever synced or subscribed to notifications. "Nickname" only shows if that device also joined the public leaderboard. Devices you create below for testing are labeled "TEST" and behave exactly like a real device — you can edit their plants directly to test overdue badges, notifications, and streaks without waiting for real days to pass.</p>
+  <div class="announce-box">
+    <input type="text" id="testDeviceLabel" placeholder="Optional label, e.g. judge-demo">
+    <button class="primary" id="createTestDeviceBtn">➕ Create test device</button>
+    <span id="createTestStatus" class="hint" style="margin:0;"></span>
+  </div>
   <div id="deviceStatus"></div>
   <table>
     <thead>
@@ -83,6 +91,16 @@
   </div>
   <p class="hint" style="margin-top:6px;">The weekly digest only actually sends on Sundays regardless — this runs the same job your cron runs daily either way.</p>
   <div id="testStatus" class="hint"></div>
+
+  <h2>💬 Community posts</h2>
+  <p class="hint">Every tip posted to the public Community wall, including which device it came from — the device ID is never shown to the public, only here. Delete removes it from the live feed immediately.</p>
+  <div id="communityStatus" class="hint"></div>
+  <table>
+    <thead>
+      <tr><th>From</th><th>Tip</th><th>Posted</th><th>Actions</th></tr>
+    </thead>
+    <tbody id="communityBody"></tbody>
+  </table>
 
   <h2>🏆 Leaderboard admin</h2>
   <p class="hint">Adjust anyone's streak, plant count, or nickname. Manual changes stick — the person's own device won't silently overwrite them. "Clear override" restores their real values from before your first change and lets their device resume syncing normally. Banning removes someone and blocks them from rejoining until you unban.</p>
@@ -366,6 +384,7 @@ async function loadDevices() {
     if (!res.ok) throw new Error(data.error || 'Failed to load devices');
     allDevices = data.devices || [];
     renderDevices(allDevices);
+    renderCommunityPosts(data.communityPosts || []);
     statusEl.textContent = `${allDevices.length} device${allDevices.length === 1 ? '' : 's'}`;
   } catch (err) {
     statusEl.textContent = '';
@@ -384,6 +403,7 @@ function renderDevices(devices) {
       <td>
         ${d.nickname ? escapeHtml(d.nickname) + '<br>' : ''}
         <span class="device-id">${escapeHtml(d.deviceId)}</span>
+        ${d.deviceId.startsWith('test-') ? '<span class="test-badge">TEST</span>' : ''}
         ${d.plantNames && d.plantNames.length ? `<br><span class="plant-names">${escapeHtml(d.plantNames.join(', '))}</span>` : ''}
       </td>
       <td>${d.plantCount}</td>
@@ -396,12 +416,46 @@ function renderDevices(devices) {
             <input type="text" data-field="msg-body" placeholder="Message">
             <button class="secondary" data-act="message">Send</button>
           </div>
+          <button class="secondary" data-act="edit">✏️ Edit plants</button>
           <button class="danger" data-act="wipe">Wipe device</button>
+        </div>
+        <textarea class="plants-editor" data-editor style="display:none;">${escapeHtml(JSON.stringify(d.plants || [], null, 2))}</textarea>
+        <div class="row-actions" data-editor-actions style="display:none;margin-top:6px;">
+          <button class="primary" data-act="savePlants">Save plants</button>
+          <span data-editor-status class="hint" style="margin:0;"></span>
         </div>
       </td>
     </tr>
   `).join('');
 
+  body.querySelectorAll('button[data-act="edit"]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const row = btn.closest('tr');
+      const editor = row.querySelector('[data-editor]');
+      const actions = row.querySelector('[data-editor-actions]');
+      const showing = editor.style.display !== 'none';
+      editor.style.display = showing ? 'none' : 'block';
+      actions.style.display = showing ? 'none' : 'flex';
+    });
+  });
+  body.querySelectorAll('button[data-act="savePlants"]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const row = btn.closest('tr');
+      const deviceId = row.dataset.device;
+      const editor = row.querySelector('[data-editor]');
+      const statusEl = row.querySelector('[data-editor-status]');
+      let parsed;
+      try {
+        parsed = JSON.parse(editor.value);
+        if (!Array.isArray(parsed)) throw new Error('Must be a JSON array of plants');
+      } catch (err) {
+        statusEl.textContent = `Invalid JSON: ${err.message}`;
+        return;
+      }
+      statusEl.textContent = 'Saving…';
+      savePlants(deviceId, parsed, statusEl);
+    });
+  });
   body.querySelectorAll('button[data-act="message"]').forEach(btn => {
     btn.addEventListener('click', () => {
       const row = btn.closest('tr');
@@ -420,6 +474,97 @@ function renderDevices(devices) {
     });
   });
 }
+
+async function savePlants(deviceId, plants, statusEl) {
+  const errorEl = document.getElementById('globalError');
+  errorEl.textContent = '';
+  try {
+    const res = await fetch('/api/admin', {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ action: 'setPlants', deviceId, plants })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to save plants');
+    if (statusEl) statusEl.textContent = 'Saved ✓';
+    loadDevices();
+  } catch (err) {
+    if (statusEl) statusEl.textContent = '';
+    errorEl.textContent = err.message;
+  }
+}
+
+async function createTestDevice() {
+  const errorEl = document.getElementById('globalError');
+  const statusEl = document.getElementById('createTestStatus');
+  const label = document.getElementById('testDeviceLabel').value.trim();
+  errorEl.textContent = '';
+  statusEl.textContent = 'Creating…';
+  try {
+    const res = await fetch('/api/admin', {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ action: 'createTestDevice', label })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to create test device');
+    statusEl.textContent = `Created ${data.deviceId} with a sample overdue plant.`;
+    document.getElementById('testDeviceLabel').value = '';
+    loadDevices();
+  } catch (err) {
+    statusEl.textContent = '';
+    errorEl.textContent = err.message;
+  }
+}
+
+function renderCommunityPosts(posts) {
+  const body = document.getElementById('communityBody');
+  const statusEl = document.getElementById('communityStatus');
+  statusEl.textContent = `${posts.length} post${posts.length === 1 ? '' : 's'}`;
+  if (!posts.length) {
+    body.innerHTML = `<tr><td colspan="4" style="color:#7A7566;">No community posts yet.</td></tr>`;
+    return;
+  }
+  body.innerHTML = posts.map(p => `
+    <tr data-post="${escapeHtml(p.id)}">
+      <td>
+        ${escapeHtml(p.nickname)}<br>
+        <span class="device-id">${escapeHtml(p.deviceId || 'unknown')}</span>
+      </td>
+      <td class="tip-cell">${escapeHtml(p.tip)}</td>
+      <td>${p.createdAt ? new Date(p.createdAt).toLocaleString() : ''}</td>
+      <td><button class="danger" data-act="deletePost">🗑️ Delete</button></td>
+    </tr>
+  `).join('');
+
+  body.querySelectorAll('button[data-act="deletePost"]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const postId = btn.closest('tr').dataset.post;
+      if (confirm('Delete this community post? This removes it from the live feed immediately.')) {
+        deleteCommunityPost(postId);
+      }
+    });
+  });
+}
+
+async function deleteCommunityPost(postId) {
+  const errorEl = document.getElementById('globalError');
+  errorEl.textContent = '';
+  try {
+    const res = await fetch('/api/admin', {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ action: 'deleteCommunityPost', postId })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to delete post');
+    loadDevices();
+  } catch (err) {
+    errorEl.textContent = err.message;
+  }
+}
+
+document.getElementById('createTestDeviceBtn').addEventListener('click', createTestDevice);
 
 async function sendPush(deviceId, title, msgBody) {
   const errorEl = document.getElementById('globalError');
