@@ -22,7 +22,10 @@ export default async function handler(req, res) {
         return res.status(200).json({ ok: true, posts: [] });
       }
       const posts = await Promise.all(ids.map((id) => redis.get(`community-post:${id}`)));
-      return res.status(200).json({ ok: true, posts: posts.filter(Boolean) });
+      // Public feed never exposes which device a post came from — that's
+      // admin-only, surfaced separately via /api/admin for moderation.
+      const publicPosts = posts.filter(Boolean).map(({ deviceId, ...rest }) => rest);
+      return res.status(200).json({ ok: true, posts: publicPosts });
     }
 
     if (req.method === 'POST') {
@@ -50,6 +53,7 @@ export default async function handler(req, res) {
       const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
       const post = {
         id,
+        deviceId,
         nickname: cleanNickname,
         tip: cleanTip,
         plantEmoji: '🌱',
