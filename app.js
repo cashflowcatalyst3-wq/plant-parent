@@ -106,6 +106,7 @@ const state = {
   plants: [],
   activeId: null,
   showAddModal: false,
+  modalJustOpened: false,
   showBadgesModal: false,
   showSpeciesPicker: false,
   showMoreMenu: false,
@@ -538,6 +539,7 @@ function renderHub() {
     state.identifyResults = null;
     state.identifyError = null;
     state.showAddModal = true;
+    state.modalJustOpened = true;
     render();
   };
   div.querySelector('#hubBackBtn').onclick = () => { state.currentView = 'home'; render(); };
@@ -1865,7 +1867,7 @@ function render() {
     const addBtn = document.createElement('div');
     addBtn.className = 'add-btn';
     addBtn.textContent = '+ Add a plant';
-    addBtn.onclick = () => { state.pendingModalPhoto = null; state.pendingSpecies = null; state.editingPlantId = null; state.modalDraft = null; state.identifyResults = null; state.identifyError = null; state.showAddModal = true; render(); };
+    addBtn.onclick = () => { state.pendingModalPhoto = null; state.pendingSpecies = null; state.editingPlantId = null; state.modalDraft = null; state.identifyResults = null; state.identifyError = null; state.showAddModal = true; state.modalJustOpened = true; render(); };
     shelf.appendChild(addBtn);
 
     const panel = document.getElementById('panel');
@@ -1931,7 +1933,10 @@ function render() {
 
 
   if (state.showAddModal) {
-    document.getElementById('modalNameInput')?.focus();
+    if (state.modalJustOpened) {
+      state.modalJustOpened = false;
+      document.getElementById('modalNameInput')?.focus();
+    }
     wireModalPhoto();
     wireIdentify();
     const openBtn = document.getElementById('openSpeciesPicker');
@@ -2222,6 +2227,7 @@ function wireDictionaryAddButtons(grid) {
       state.editingPlantId = null;
       state.modalDraft = null;
       state.showAddModal = true;
+      state.modalJustOpened = true;
       render();
     };
   });
@@ -2775,6 +2781,7 @@ function renderDetail(p) {
     state.identifyResults = null;
     state.identifyError = null;
     state.showAddModal = true;
+    state.modalJustOpened = true;
     render();
   };
   div.querySelector('#shareBtn').onclick = async (e) => {
