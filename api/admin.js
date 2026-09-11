@@ -4,6 +4,7 @@ import { NICKNAME_INDEX_KEY, MEMBERS_KEY as LEADERBOARD_MEMBERS_KEY } from '../l
 
 const redis = Redis.fromEnv();
 const DEVICES_KEY = 'devices';
+const COMMUNITY_POSTS_KEY = 'community-posts'; // must match api/community.js
 
 function isAuthorized(req) {
   const secret = req.headers['x-admin-secret'];
@@ -39,17 +40,56 @@ export default async function handler(req, res) {
           deviceId: id,
           plantCount: plantList.length,
           plantNames: plantList.map((p) => p.name).filter(Boolean),
+          plants: plantList,
           overdueCount,
           pushEnabled: !!sub,
           nickname: leaderboardEntry ? leaderboardEntry.nickname : null,
         };
       }));
       devices.sort((a, b) => b.plantCount - a.plantCount);
-      return res.status(200).json({ ok: true, devices });
+
+      const postIds = await redis.zrange(COMMUNITY_POSTS_KEY, 0, -1, { rev: true });
+      const communityPosts = postIds && postIds.length
+        ? (await Promise.all(postIds.map((id) => redis.get(`community-post:${id}`)))).filter(Boolean)
+        : [];
+
+      return res.status(200).json({ ok: true, devices, communityPosts });
     }
 
     if (req.method === 'POST') {
-      const { action, deviceId, title, body } = req.body || {};
+      const { action, deviceId, title, body, plants, postId, label } = req.body || {};
+
+      if (action === 'createTestDevice') {
+        const id = `test-${label ? String(label).toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 20) + '-' : ''}${Math.random().toString(36).slice(2, 8)}`;
+        // Default sample plant is already overdue, so it's immediately useful
+        // for testing overdue badges and push notifications without waiting.
+        const defaultPlants = Array.isArray(plants) && plants.length ? plants : [{
+          id: `p-${Math.random().toString(36).slice(2, 10)}`,
+          name: 'Test Fern',
+          room: 'Living Room',
+          frequency: 3,
+          lastWatered: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+          waterLog: [],
+        }];
+        await redis.set(`plants:${id}`, defaultPlants);
+        await redis.sadd(DEVICES_KEY, id);
+        return res.status(200).json({ ok: true, deviceId: id, plants: defaultPlants });
+      }
+
+      if (action === 'setPlants') {
+        if (!deviceId) return res.status(400).json({ error: 'Missing deviceId' });
+        if (!Array.isArray(plants)) return res.status(400).json({ error: 'plants must be an array' });
+        await redis.set(`plants:${deviceId}`, plants);
+        await redis.sadd(DEVICES_KEY, deviceId); // in case this is a brand-new id being seeded directly
+        return res.status(200).json({ ok: true, plants });
+      }
+
+      if (action === 'deleteCommunityPost') {
+        if (!postId) return res.status(400).json({ error: 'Missing postId' });
+        await redis.zrem(COMMUNITY_POSTS_KEY, postId);
+        await redis.del(`community-post:${postId}`);
+        return res.status(200).json({ ok: true });
+      }
 
       if (action === 'wipeDevice') {
         if (!deviceId) return res.status(400).json({ error: 'Missing deviceId' });
