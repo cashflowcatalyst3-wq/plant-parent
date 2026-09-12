@@ -508,7 +508,7 @@ function renderHome() {
   `;
   div.querySelector('#homeStartBtn').onclick = () => {
     localStorage.setItem('plant-parent-onboarding-done', '1');
-    state.currentView = 'hub';
+    state.currentView = 'permissions';
     render();
   };
   return div;
@@ -545,6 +545,39 @@ function renderHub() {
   div.querySelector('#hubBackBtn').onclick = () => { state.currentView = 'home'; render(); };
   return div;
 }
+
+function renderPermissions() {
+  const div = document.createElement('div');
+  div.className = 'settings-page';
+  div.innerHTML = `
+    <div class="guide-hero">
+      <div class="guide-hero-title">🔔 A couple of quick permissions</div>
+      <div class="guide-hero-sub">Both are optional — you can always turn them on later in Settings.</div>
+    </div>
+    <div class="settings-section">
+      <div class="settings-row">
+        <div class="settings-row-label">
+          <div class="settings-row-name">🔔 Push reminders</div>
+          <div class="settings-row-desc">Get notified on your phone when a plant is overdue — even with the app closed.</div>
+        </div>
+        <button class="secondary ${state.notificationsEnabled ? 'settings-toggle-on' : ''}" id="permNotifBtn">${state.notificationsEnabled ? 'On' : 'Turn on'}</button>
+      </div>
+      <div class="settings-row">
+        <div class="settings-row-label">
+          <div class="settings-row-name">🌦️ Weather-aware tips</div>
+          <div class="settings-row-desc">Uses your rough location to nudge you when recent rain or heat changes how often to water.</div>
+        </div>
+        <button class="secondary ${state.weatherEnabled ? 'settings-toggle-on' : ''}" id="permWeatherBtn">${state.weatherEnabled ? 'On' : 'Turn on'}</button>
+      </div>
+    </div>
+    <button class="primary welcome-btn" id="permContinueBtn" style="width:100%;margin-top:16px;">Continue</button>
+  `;
+  div.querySelector('#permNotifBtn').onclick = () => enableNotifications();
+  div.querySelector('#permWeatherBtn').onclick = () => fetchWeather();
+  div.querySelector('#permContinueBtn').onclick = () => { state.currentView = 'hub'; render(); };
+  return div;
+}
+
 
 function renderLearning() {
   const div = document.createElement('div');
@@ -1691,7 +1724,7 @@ function render() {
 
   app.innerHTML = `
     <div class="main-content ${viewChanged ? 'view-enter' : ''}">
-      ${state.currentView !== 'garden' && state.currentView !== 'dictionary' && state.currentView !== 'settings' && state.currentView !== 'tutorial' && state.currentView !== 'community' && state.currentView !== 'home' && state.currentView !== 'hub' && state.currentView !== 'learning' && state.currentView !== 'plantid' ? `
+      ${state.currentView !== 'garden' && state.currentView !== 'dictionary' && state.currentView !== 'settings' && state.currentView !== 'tutorial' && state.currentView !== 'community' && state.currentView !== 'home' && state.currentView !== 'hub' && state.currentView !== 'learning' && state.currentView !== 'plantid' && state.currentView !== 'permissions' ? `
         <header class="app-topbar">
           <span class="app-topbar-mark">${icon('plants', 28)}</span>
           <h1 class="app-topbar-title"><span class="brand-plant">Plant</span> <span class="brand-parent">Parent</span></h1>
@@ -1731,6 +1764,7 @@ function render() {
       ${state.currentView === 'community' ? `<div id="communityView"></div>` : ''}
       ${state.currentView === 'home' ? `<div id="homeView"></div>` : ''}
       ${state.currentView === 'hub' ? `<div id="hubView"></div>` : ''}
+      ${state.currentView === 'permissions' ? `<div id="permissionsView"></div>` : ''}
       ${state.currentView === 'learning' ? `<div id="learningView"></div>` : ''}
       ${state.currentView === 'plantid' ? `<div id="plantIdView"></div>` : ''}
       ${state.currentView === 'shelf' ? `
@@ -1758,7 +1792,7 @@ function render() {
       ` : ''}
     </div>
 
-    ${!['home','hub','learning'].includes(state.currentView) ? `
+    ${!['home','hub','learning','permissions'].includes(state.currentView) ? `
     <nav class="bottom-nav">
       <button class="bottom-nav-btn ${state.currentView === 'shelf' ? 'bottom-nav-active' : ''}" id="navShelf">
         <span class="bottom-nav-icon">${icon('plants')}</span><span class="bottom-nav-label">Plants</span>
@@ -1857,6 +1891,8 @@ function render() {
     document.getElementById('homeView').appendChild(renderHome());
   } else if (state.currentView === 'hub') {
     document.getElementById('hubView').appendChild(renderHub());
+  } else if (state.currentView === 'permissions') {
+    document.getElementById('permissionsView').appendChild(renderPermissions());
   } else if (state.currentView === 'learning') {
     document.getElementById('learningView').appendChild(renderLearning());
   } else if (state.currentView === 'plantid') {
