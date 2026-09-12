@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Plant Parent — Admin</title>
+<title>Plant Parent, Admin</title>
 <style>
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #F6F3EC; color: #2B2B26; margin: 0; padding: 24px; }
   h1 { font-size: 20px; margin: 0 0 4px; }
@@ -58,22 +58,22 @@
   <p class="hint">Enter your ADMIN_SECRET (set in Vercel env vars).</p>
   <div class="password-field">
     <input type="password" id="secretInput" placeholder="Admin secret">
-    <button type="button" class="password-toggle" id="secretToggle" aria-label="Show password">👁</button>
+    <button type="button" class="password-toggle" id="secretToggle" aria-label="Show password"> </button>
   </div>
   <button class="primary" id="loginBtn" style="width:100%;">Enter</button>
   <div id="loginError" style="color:#C0392B;font-size:13px;margin-top:8px;"></div>
 </div>
 
 <div id="adminPanel" style="display:none;max-width:960px;margin:0 auto;">
-  <h1>🛠️ Plant Parent Admin</h1>
-  <p class="hint">Full control over the app — every device's data, push notifications, and manual test triggers, plus the leaderboard tools below.</p>
+  <h1> Plant Parent Admin</h1>
+  <p class="hint">Full control over the app, every device's data, push notifications, and manual test triggers, plus the leaderboard tools below.</p>
   <div id="globalError"></div>
 
-  <h2>📋 All devices</h2>
-  <p class="hint">Every device that's ever synced or subscribed to notifications. "Nickname" only shows if that device also joined the public leaderboard. Devices you create below for testing are labeled "TEST" and behave exactly like a real device — you can edit their plants directly to test overdue badges, notifications, and streaks without waiting for real days to pass.</p>
+  <h2> All devices</h2>
+  <p class="hint">Every device that's ever synced or subscribed to notifications. "Nickname" only shows if that device also joined the public leaderboard. Devices you create below for testing are labeled "TEST" and behave exactly like a real device, you can edit their plants directly to test overdue badges, notifications, and streaks without waiting for real days to pass.</p>
   <div class="announce-box">
     <input type="text" id="testDeviceLabel" placeholder="Optional label, e.g. judge-demo">
-    <button class="primary" id="createTestDeviceBtn">➕ Create test device</button>
+    <button class="primary" id="createTestDeviceBtn"> Create test device</button>
     <span id="createTestStatus" class="hint" style="margin:0;"></span>
   </div>
   <div id="deviceStatus"></div>
@@ -84,30 +84,30 @@
     <tbody id="devicesBody"></tbody>
   </table>
 
-  <h2>📣 Send an announcement</h2>
+  <h2> Send an announcement</h2>
   <p class="hint">Sends a real push notification. Only reaches devices that have notifications enabled.</p>
   <div class="announce-box">
-    <input type="text" id="announceTitle" placeholder="Title, e.g. 🌱 Heads up">
+    <input type="text" id="announceTitle" placeholder="Title, e.g. Heads up">
     <input type="text" id="announceBody" placeholder="Message">
     <button class="primary" id="announceAllBtn">Send to everyone</button>
     <span id="announceStatus" class="hint" style="margin:0;"></span>
   </div>
 
-  <h2>🧪 Testing tools</h2>
-  <p class="hint">Manually run the same jobs your daily cron and 5-hour scheduler trigger automatically — useful for testing without waiting. Needs your CRON_SECRET (different from your admin secret), remembered only for this browser tab.</p>
+  <h2> Testing tools</h2>
+  <p class="hint">Manually run the same jobs your daily cron and 5-hour scheduler trigger automatically, useful for testing without waiting. Needs your CRON_SECRET (different from your admin secret), remembered only for this browser tab.</p>
   <div class="announce-box">
     <div class="password-field">
       <input type="password" id="cronSecretInput" placeholder="CRON_SECRET">
-      <button type="button" class="password-toggle" id="cronSecretToggle" aria-label="Show password">👁</button>
+      <button type="button" class="password-toggle" id="cronSecretToggle" aria-label="Show password"> </button>
     </div>
     <button class="secondary" id="runOverdueBtn">Run daily check (overdue + Sunday digest)</button>
     <button class="secondary" id="runTipBtn">Send a random check-in tip</button>
   </div>
-  <p class="hint" style="margin-top:6px;">The weekly digest only actually sends on Sundays regardless — this runs the same job your cron runs daily either way.</p>
+  <p class="hint" style="margin-top:6px;">The weekly digest only actually sends on Sundays regardless, this runs the same job your cron runs daily either way.</p>
   <div id="testStatus" class="hint"></div>
 
-  <h2>💬 Community posts</h2>
-  <p class="hint">Every tip posted to the public Community wall, including which device it came from — the device ID is never shown to the public, only here. Delete removes it from the live feed immediately.</p>
+  <h2> Community posts</h2>
+  <p class="hint">Every tip posted to the public Community wall, including which device it came from, the device ID is never shown to the public, only here. Delete removes it from the live feed immediately.</p>
   <div id="communityStatus" class="hint"></div>
   <table>
     <thead>
@@ -116,8 +116,8 @@
     <tbody id="communityBody"></tbody>
   </table>
 
-  <h2>🏆 Leaderboard admin</h2>
-  <p class="hint">Adjust anyone's streak, plant count, or nickname. Manual changes stick — the person's own device won't silently overwrite them. "Clear override" restores their real values from before your first change and lets their device resume syncing normally. Banning removes someone and blocks them from rejoining until you unban.</p>
+  <h2> Leaderboard admin</h2>
+  <p class="hint">Adjust anyone's streak, plant count, or nickname. Manual changes stick, the person's own device won't silently overwrite them. "Clear override" restores their real values from before your first change and lets their device resume syncing normally. Banning removes someone and blocks them from rejoining until you unban.</p>
   <div id="status"></div>
   <div id="error"></div>
   <input type="text" id="searchInput" placeholder="Search by nickname…">
@@ -128,7 +128,7 @@
     <tbody id="entriesBody"></tbody>
   </table>
 
-  <h2>🚫 Banned devices</h2>
+  <h2> Banned devices</h2>
   <table>
     <thead>
       <tr><th>Nickname (at time of ban)</th><th>Device ID</th><th>Actions</th></tr>
@@ -430,7 +430,7 @@ function renderDevices(devices) {
             <input type="text" data-field="msg-body" placeholder="Message">
             <button class="secondary" data-act="message">Send</button>
           </div>
-          <button class="secondary" data-act="edit">✏️ Edit plants</button>
+          <button class="secondary" data-act="edit"> Edit plants</button>
           <button class="danger" data-act="wipe">Wipe device</button>
         </div>
         <textarea class="plants-editor" data-editor style="display:none;">${escapeHtml(JSON.stringify(d.plants || [], null, 2))}</textarea>
@@ -500,7 +500,7 @@ async function savePlants(deviceId, plants, statusEl) {
     });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Failed to save plants');
-    if (statusEl) statusEl.textContent = 'Saved ✓';
+    if (statusEl) statusEl.textContent = 'Saved ';
     loadDevices();
   } catch (err) {
     if (statusEl) statusEl.textContent = '';
@@ -547,7 +547,7 @@ function renderCommunityPosts(posts) {
       </td>
       <td class="tip-cell">${escapeHtml(p.tip)}</td>
       <td>${p.createdAt ? new Date(p.createdAt).toLocaleString() : ''}</td>
-      <td><button class="danger" data-act="deletePost">🗑️ Delete</button></td>
+      <td><button class="danger" data-act="deletePost"> Delete</button></td>
     </tr>
   `).join('');
 
@@ -685,7 +685,7 @@ document.getElementById('loginBtn').onclick = async () => {
     sessionStorage.setItem('pp-admin-secret', secret);
     showPanel();
   } catch (err) {
-    errorEl.textContent = "Couldn't reach the server — try again in a moment.";
+    errorEl.textContent = "Couldn't reach the server, try again in a moment.";
   }
 };
 document.getElementById('secretInput').addEventListener('keydown', (e) => {
@@ -699,7 +699,7 @@ function wirePasswordToggle(inputId, toggleId) {
   toggle.addEventListener('click', () => {
     const showing = input.type === 'text';
     input.type = showing ? 'password' : 'text';
-    toggle.textContent = showing ? '👁' : '🙈';
+    toggle.textContent = showing ? ' ' : '🙈';
     toggle.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
   });
 }

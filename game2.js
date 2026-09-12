@@ -1,6 +1,6 @@
 (function () {
-  const BASE_PAIRS = 6;   // level 1 starts at 6 pairs (12 cards)
-  const MAX_PAIRS = 12;   // grid size caps here; later levels get harder via time/preview instead
+  const BASE_PAIRS = 6; // level 1 starts at 6 pairs (12 cards)
+  const MAX_PAIRS = 12; // grid size caps here; later levels get harder via time/preview instead
   const MISS_TIME_PENALTY = 3; // seconds lost per mismatch, once the clock is running
 
   let level = 1;
@@ -143,7 +143,7 @@
     if (!el) return;
     const mult = comboMultiplier();
     if (matchStreak >= 3) {
-      el.textContent = `🔥 ${matchStreak}-streak · ${mult}x`;
+      el.textContent = ` ${matchStreak}-streak · ${mult}x`;
       el.classList.add('game-combo-active');
     } else {
       el.textContent = '';
@@ -169,13 +169,13 @@
     cards.forEach(c => c.isFlipped = true);
     renderGrid();
     const previewSeconds = computePreviewSeconds(lvl);
-    setHint(`Memorize the board — flipping in ${Math.ceil(previewSeconds)}s!`);
+    setHint(`Memorize the board, flipping in ${Math.ceil(previewSeconds)}s!`);
 
     previewTimer = setTimeout(() => {
       cards.forEach(c => c.isFlipped = false);
       renderGrid();
       lockBoard = false;
-      setHint('Match pairs before time runs out — a miss costs 3s!');
+      setHint('Match pairs before time runs out, a miss costs 3s!');
       beginCountdown(lvl, pairsThisLevel);
     }, previewSeconds * 1000);
   }
@@ -200,7 +200,7 @@
     grid.innerHTML = cards.map(c => `
       <div class="memory-card ${c.isFlipped || c.isMatched ? 'memory-card-flipped' : ''} ${c.isMatched ? 'memory-card-matched' : ''}" data-id="${c.id}">
         <div class="memory-card-inner">
-          <div class="memory-card-back">🌿</div>
+          <div class="memory-card-back"> </div>
           <div class="memory-card-front">${c.value}</div>
         </div>
       </div>
@@ -308,12 +308,12 @@
 
     const modal = backdrop.querySelector('.modal');
     modal.innerHTML = `
-      <h3>Time's up! 🧠</h3>
+      <h3>Time's up! </h3>
       <div class="game-result">
         <div class="game-result-score">${score}</div>
         <div class="game-result-label">points scored</div>
         <div class="game-result-sub">Reached level ${level} · best streak ${bestCombo}</div>
-        ${isNewHigh ? '<div class="game-new-high">✨ New high score!</div>' : ''}
+        ${isNewHigh ? '<div class="game-new-high"> New high score!</div>' : ''}
       </div>
       <div class="modal-actions">
         <button class="secondary" id="closeMemoryResult">Close</button>

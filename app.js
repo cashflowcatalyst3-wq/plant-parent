@@ -7,16 +7,16 @@ const SPECIES_DICTIONARY = [
   { id: 'fiddle-leaf-fig', name: 'Fiddle-leaf Fig', latin: 'Ficus lyrata', emoji: '🌳', shape: 'broad-leaf', light: 'Bright, indirect', freq: 7, desc: 'Loves consistent bright light and dislikes being moved around. Sensitive to overwatering and drafts.' },
   { id: 'snake-plant', name: 'Snake Plant', latin: 'Sansevieria', emoji: '🗡️', shape: 'spiky', light: 'Low to bright', freq: 14, desc: 'Extremely drought-tolerant with striking upright leaves. A forgiving choice for beginners.' },
   { id: 'monstera', name: 'Monstera', latin: 'Monstera deliciosa', emoji: '🌿', shape: 'split-leaf', light: 'Bright, indirect', freq: 7, desc: 'Known for its iconic split leaves. Enjoys humidity and steady, moderate watering.' },
-  { id: 'succulent', name: 'Succulent', latin: 'assorted species', emoji: '🌵', shape: 'rosette', light: 'Bright, direct', freq: 18, desc: 'Stores water in thick leaves — thrives on bright sun and being left alone between waterings.' },
+  { id: 'succulent', name: 'Succulent', latin: 'assorted species', emoji: '🌵', shape: 'rosette', light: 'Bright, direct', freq: 18, desc: 'Stores water in thick leaves, thrives on bright sun and being left alone between waterings.' },
   { id: 'zz-plant', name: 'ZZ Plant', latin: 'Zamioculcas zamiifolia', emoji: '🪴', shape: 'tall-cane', light: 'Low to medium', freq: 16, desc: 'Nearly indestructible. Tolerates low light and infrequent watering better than almost anything.' },
-  { id: 'peace-lily', name: 'Peace Lily', latin: 'Spathiphyllum', emoji: '🌸', shape: 'flower', accent: '#F7F4EA', light: 'Low to medium', freq: 7, desc: 'Droops dramatically when thirsty, then perks right back up soon after watering — an easy read.' },
+  { id: 'peace-lily', name: 'Peace Lily', latin: 'Spathiphyllum', emoji: '🌸', shape: 'flower', accent: '#F7F4EA', light: 'Low to medium', freq: 7, desc: 'Droops dramatically when thirsty, then perks right back up soon after watering, an easy read.' },
   { id: 'spider-plant', name: 'Spider Plant', latin: 'Chlorophytum comosum', emoji: '🕷️', shape: 'spider', light: 'Medium to bright', freq: 7, desc: 'Fast-growing and forgiving. Produces little plantlets you can snip off and propagate.' },
   { id: 'orchid', name: 'Orchid', latin: 'Phalaenopsis', emoji: '🌺', shape: 'flower', accent: '#D17BA8', light: 'Bright, indirect', freq: 10, desc: 'Prefers infrequent, deep watering and good airflow around its roots rather than damp soil.' },
   { id: 'aloe', name: 'Aloe Vera', latin: 'Aloe vera', emoji: '🪴', shape: 'spiky', light: 'Bright, direct', freq: 21, desc: 'A succulent with soothing gel inside its leaves. Water sparingly and let it dry out fully.' },
   { id: 'rubber-plant', name: 'Rubber Plant', latin: 'Ficus elastica', emoji: '🍂', shape: 'broad-leaf', light: 'Bright, indirect', freq: 9, desc: 'Glossy, sturdy leaves. Wiping them occasionally helps it photosynthesize better.' },
   { id: 'philodendron', name: 'Philodendron', latin: 'Philodendron spp.', emoji: '🌿', shape: 'trailing', light: 'Medium, indirect', freq: 7, desc: 'Easygoing trailing or climbing plant, forgiving of inconsistent watering schedules.' },
   { id: 'cactus', name: 'Cactus', latin: 'assorted species', emoji: '🌵', shape: 'cactus', light: 'Bright, direct', freq: 21, desc: 'Built for drought. Overwatering, not underwatering, is the most common way to lose one.' },
-  { id: 'fern', name: 'Boston Fern', latin: 'Nephrolepis exaltata', emoji: '🌿', shape: 'fern', light: 'Medium, indirect', freq: 4, desc: 'Loves humidity and consistently moist — but never soggy — soil.' },
+  { id: 'fern', name: 'Boston Fern', latin: 'Nephrolepis exaltata', emoji: '🌿', shape: 'fern', light: 'Medium, indirect', freq: 4, desc: 'Loves humidity and consistently moist, but never soggy, soil.' },
   { id: 'basil', name: 'Basil', latin: 'Ocimum basilicum', emoji: '🌱', shape: 'herb', light: 'Bright, direct', freq: 3, desc: 'A thirsty kitchen herb. Keep the soil consistently moist for the best flavor.' },
   { id: 'bird-of-paradise', name: 'Bird of Paradise', latin: 'Strelitzia reginae', emoji: '🦩', shape: 'fan', light: 'Bright, direct to indirect', freq: 8, desc: 'A dramatic statement plant with large paddle leaves. Likes generous space and regular feeding.' },
   { id: 'calathea', name: 'Calathea', latin: 'Calathea spp.', emoji: '🎋', shape: 'broad-leaf', patterned: true, light: 'Medium, indirect', freq: 6, desc: 'Prized for patterned leaves that fold up at night. Fussy about humidity and water quality.' },
@@ -25,7 +25,7 @@ const SPECIES_DICTIONARY = [
   { id: 'croton', name: 'Croton', latin: 'Codiaeum variegatum', emoji: '🍁', shape: 'broad-leaf', accent: '#C9622E', light: 'Bright, direct', freq: 6, desc: 'Bold, colorful leaves that need strong light to keep their vivid patterns.' },
   { id: 'anthurium', name: 'Anthurium', latin: 'Anthurium andraeanum', emoji: '❤️', shape: 'flower', accent: '#D94F4F', light: 'Bright, indirect', freq: 8, desc: 'Glossy, heart-shaped blooms. Likes humidity and to dry slightly between waterings.' },
   { id: 'chinese-money-plant', name: 'Chinese Money Plant', latin: 'Pilea peperomioides', emoji: '🪙', shape: 'coin', light: 'Bright, indirect', freq: 7, desc: 'Round coin-like leaves on a plant that\'s easy to propagate and share with friends.' },
-  { id: 'air-plant', name: 'Air Plant', latin: 'Tillandsia spp.', emoji: '🌬️', shape: 'airplant', light: 'Bright, indirect', freq: 7, desc: 'No soil needed — mist or soak occasionally instead of traditional watering.' },
+  { id: 'air-plant', name: 'Air Plant', latin: 'Tillandsia spp.', emoji: '🌬️', shape: 'airplant', light: 'Bright, indirect', freq: 7, desc: 'No soil needed, mist or soak occasionally instead of traditional watering.' },
   { id: 'christmas-cactus', name: 'Christmas Cactus', latin: 'Schlumbergera', emoji: '🎄', shape: 'cactus', accent: '#E07BA0', light: 'Bright, indirect', freq: 10, desc: 'Unlike desert cacti, this one prefers slightly moist soil and blooms in winter.' },
   { id: 'english-ivy', name: 'English Ivy', latin: 'Hedera helix', emoji: '🍇', shape: 'trailing', light: 'Medium, indirect', freq: 6, desc: 'A fast, trailing climber. Keep soil lightly moist and give it room to spread.' },
   { id: 'prayer-plant', name: 'Prayer Plant', latin: 'Maranta leuconeura', emoji: '🙏', shape: 'broad-leaf', patterned: true, light: 'Medium, indirect', freq: 6, desc: 'Leaves fold up like praying hands at night. Enjoys humidity and consistent moisture.' },
@@ -59,33 +59,33 @@ function roomOptionsHtml(locationType, selected) {
 }
 
 const THEMES = [
-  { id: 'terracotta', name: 'Terracotta', sage: '#C17A4E', sageLight: '#E0A97E', clay: '#5B7A9B', clayLight: '#8FAFC9' },
-  { id: 'lavender', name: 'Lavender', sage: '#9B87C4', sageLight: '#C7B8E0', clay: '#C46B87', clayLight: '#E0A0B4' },
-  { id: 'ocean', name: 'Ocean', sage: '#4E8FA6', sageLight: '#8FC1D4', clay: '#D9935E', clayLight: '#EFC08F' },
+  { id: 'terracotta', name: 'Terracotta', sage: '#C17A4E', sageLight: '#E0A97E', clay: '#6E7F52', clayLight: '#A8B98A' },
+  { id: 'honey', name: 'Honey', sage: '#C9A227', sageLight: '#E8CB6B', clay: '#8B6F4E', clayLight: '#C4A882' },
+  { id: 'moss', name: 'Moss', sage: '#5B7A52', sageLight: '#8FAF7E', clay: '#D9935E', clayLight: '#EFC08F' },
   { id: 'blush', name: 'Blush', sage: '#C9748A', sageLight: '#E5AEBB', clay: '#7A9B6E', clayLight: '#A8C49C' },
 ];
 
 const ACHIEVEMENTS = [
-  { id: 'first-sprout', emoji: '🌱', name: 'First Sprout', desc: 'Add your first plant' },
-  { id: 'full-shelf', emoji: '🪴', name: 'Full Shelf', desc: 'Grow your collection to 5 plants' },
-  { id: 'botanical-garden', emoji: '🌳', name: 'Botanical Garden', desc: 'Grow your collection to 10 plants' },
-  { id: 'green-thumb', emoji: '🔥', name: 'Green Thumb', desc: '7-day watering streak on one plant' },
-  { id: 'plant-parent-pro', emoji: '🏆', name: 'Plant Parent Pro', desc: '30-day watering streak on one plant' },
-  { id: 'note-taker', emoji: '📝', name: 'Note Taker', desc: 'Write your first plant note' },
-  { id: 'snapshot', emoji: '📸', name: 'Snapshot', desc: 'Add a photo to a plant' },
-  { id: 'stay-alert', emoji: '🔔', name: 'Stay Alert', desc: 'Turn on push reminders' },
-  { id: 'rainmaker', emoji: '💧', name: 'Rainmaker', desc: 'Score 30+ in Raindrop Catch' },
-  { id: 'sharpshooter', emoji: '🎯', name: 'Sharpshooter', desc: 'Score 50+ in Raindrop Catch' },
-  { id: 'memory-master', emoji: '🧠', name: 'Memory Master', desc: 'Complete a round of Memory Match' },
-  { id: 'memory-whiz', emoji: '🧩', name: 'Memory Whiz', desc: 'Score 300+ in Memory Match' },
-  { id: 'community-builder', emoji: '🤝', name: 'Community Builder', desc: 'Invite a friend to Plant Parent' },
+  { id: 'first-sprout', emoji: 'sprout', name: 'First Sprout', desc: 'Add your first plant' },
+  { id: 'full-shelf', emoji: 'plants', name: 'Full Shelf', desc: 'Grow your collection to 5 plants' },
+  { id: 'botanical-garden', emoji: 'garden', name: 'Botanical Garden', desc: 'Grow your collection to 10 plants' },
+  { id: 'green-thumb', emoji: 'flame', name: 'Green Thumb', desc: '7-day watering streak on one plant' },
+  { id: 'plant-parent-pro', emoji: 'trophy', name: 'Plant Parent Pro', desc: '30-day watering streak on one plant' },
+  { id: 'note-taker', emoji: 'journal', name: 'Note Taker', desc: 'Write your first plant note' },
+  { id: 'snapshot', emoji: 'camera', name: 'Snapshot', desc: 'Add a photo to a plant' },
+  { id: 'stay-alert', emoji: 'bell', name: 'Stay Alert', desc: 'Turn on push reminders' },
+  { id: 'rainmaker', emoji: 'drop', name: 'Rainmaker', desc: 'Score 30+ in Raindrop Catch' },
+  { id: 'sharpshooter', emoji: 'drop', name: 'Sharpshooter', desc: 'Score 50+ in Raindrop Catch' },
+  { id: 'memory-master', emoji: 'brain', name: 'Memory Master', desc: 'Complete a round of Memory Match' },
+  { id: 'memory-whiz', emoji: 'brain', name: 'Memory Whiz', desc: 'Score 300+ in Memory Match' },
+  { id: 'community-builder', emoji: 'invite', name: 'Community Builder', desc: 'Invite a friend to Plant Parent' },
 ];
 
 const DAILY_TASKS = [
-  { id: 'water-one', emoji: '💧', label: 'Water any one plant today', check: (s) => s.plants.some(p => daysSince(p.lastWatered) === 0) },
-  { id: 'play-game', emoji: '🎮', label: 'Play a round of Raindrop Catch', check: () => localStorage.getItem('plant-parent-last-game-date') === todayStr() },
-  { id: 'write-note', emoji: '📝', label: 'Add or update a note on a plant', check: (s) => s.plants.some(p => p.notesUpdatedAt && p.notesUpdatedAt.slice(0,10) === todayStr()) },
-  { id: 'visit-garden', emoji: '🌻', label: 'Visit your Garden view', check: () => localStorage.getItem('plant-parent-last-garden-date') === todayStr() },
+  { id: 'water-one', emoji: 'drop', label: 'Water any one plant today', check: (s) => s.plants.some(p => daysSince(p.lastWatered) === 0) },
+  { id: 'play-game', emoji: 'game', label: 'Play a round of Raindrop Catch', check: () => localStorage.getItem('plant-parent-last-game-date') === todayStr() },
+  { id: 'write-note', emoji: 'journal', label: 'Add or update a note on a plant', check: (s) => s.plants.some(p => p.notesUpdatedAt && p.notesUpdatedAt.slice(0,10) === todayStr()) },
+  { id: 'visit-garden', emoji: 'garden', label: 'Visit your Garden view', check: () => localStorage.getItem('plant-parent-last-garden-date') === todayStr() },
 ];
 
 function todayStr() {
@@ -232,10 +232,10 @@ function rotateDaysLeft(p) {
 }
 
 const MOOD_LABELS = {
-  thriving: '🌿 Thriving',
-  okay: '😐 Okay',
-  struggling: '😟 Struggling',
-  recovering: '🌱 Recovering',
+  thriving: ' Thriving',
+  okay: ' Okay',
+  struggling: ' Struggling',
+  recovering: ' Recovering',
 };
 function moodLabel(mood) {
   return MOOD_LABELS[mood] || mood;
@@ -298,9 +298,9 @@ function getVisiblePlants() {
 
 function moodEmoji(plant) {
   const pct = ringPercent(plant);
-  if (pct >= 1) return '😢';
-  if (pct >= 0.7) return '😌';
-  return '🌿';
+  if (pct >= 1) return ' ';
+  if (pct >= 0.7) return ' ';
+  return ' ';
 }
 
 function recordGameScore(score) {
@@ -449,7 +449,7 @@ function showNextCelebration() {
   toast.id = 'celebrationToast';
   toast.className = 'celebration-toast';
   toast.innerHTML = `
-    <div class="celebration-emoji">${badge.emoji}</div>
+    <div class="celebration-emoji">${icon(badge.emoji, 32)}</div>
     <div class="celebration-text">
       <div class="celebration-title">Badge unlocked!</div>
       <div class="celebration-name">${badge.name}</div>
@@ -474,15 +474,15 @@ function renderWelcome() {
   return `
   <div class="welcome-backdrop" id="welcomeBackdrop">
     <div class="welcome-card">
-      <div class="welcome-flourish">🌿</div>
+      <div class="welcome-flourish"> </div>
       <h2 class="welcome-title">Plant Parent</h2>
       <p class="welcome-subtitle">a shelf that keeps time for you</p>
       <div class="welcome-features">
-        <div class="welcome-feature"><span>💧</span> Watering rings that never let a plant slip your mind</div>
-        <div class="welcome-feature"><span>🌻</span> A garden that visibly grows the better you care for it</div>
-        <div class="welcome-feature"><span>📖</span> A species guide with care tips for 27 common houseplants</div>
-        <div class="welcome-feature"><span>🏆</span> Achievements, streaks, and a couple of mini-games</div>
-        <div class="welcome-feature"><span>🔔</span> Real reminders, even when the app is closed</div>
+        <div class="welcome-feature"><span> </span> Watering rings that never let a plant slip your mind</div>
+        <div class="welcome-feature"><span> </span> A garden that visibly grows the better you care for it</div>
+        <div class="welcome-feature"><span> </span> A species guide with care tips for 27 common houseplants</div>
+        <div class="welcome-feature"><span> </span> Achievements, streaks, and a couple of mini-games</div>
+        <div class="welcome-feature"><span> </span> Real reminders, even when the app is closed</div>
       </div>
       <button class="primary welcome-btn" id="dismissWelcome">Start</button>
     </div>
@@ -494,11 +494,11 @@ function renderHome() {
   div.className = 'settings-page';
   div.innerHTML = `
     <div class="guide-hero">
-      <div class="guide-hero-title">🌱 Plant Parent</div>
+      <div class="guide-hero-title"> Plant Parent</div>
       <div class="guide-hero-sub">
         Plant Parent helps you keep every plant on a real watering schedule, with reminders
         that reach your phone even when the app is closed. Track care streaks, identify a
-        species from a photo, and swap tips with other plant parents — all in one place.
+        species from a photo, and swap tips with other plant parents, all in one place.
       </div>
       <div class="welcome-feature" style="justify-content:center;margin-top:16px;opacity:0.75;">
         <span>Created by Aaron Shibu</span>
@@ -522,9 +522,9 @@ function renderHub() {
       <div class="guide-hero-title">Where to?</div>
       <div class="guide-hero-sub">Pick a section to get started</div>
     </div>
-    <button class="primary welcome-btn" id="hubLearningBtn" style="width:100%;margin-top:8px;">📖 Learning section</button>
-    <button class="primary welcome-btn" id="hubCommunityBtn" style="width:100%;margin-top:12px;">🌍 Community section</button>
-    <button class="primary welcome-btn" id="hubPlantParentBtn" style="width:100%;margin-top:12px;">🪴 Plant Parent section</button>
+    <button class="primary welcome-btn" id="hubLearningBtn" style="width:100%;margin-top:8px;"> Learning section</button>
+    <button class="primary welcome-btn" id="hubCommunityBtn" style="width:100%;margin-top:12px;"> Community section</button>
+    <button class="primary welcome-btn" id="hubPlantParentBtn" style="width:100%;margin-top:12px;"> Plant Parent section</button>
     <button class="secondary" id="hubBackBtn" style="width:100%;margin-top:20px;">← Back</button>
   `;
   div.querySelector('#hubLearningBtn').onclick = () => { state.learningReturnTo = 'hub'; state.currentView = 'learning'; render(); };
@@ -551,20 +551,20 @@ function renderPermissions() {
   div.className = 'settings-page';
   div.innerHTML = `
     <div class="guide-hero">
-      <div class="guide-hero-title">🔔 A couple of quick permissions</div>
-      <div class="guide-hero-sub">Both are optional — you can always turn them on later in Settings.</div>
+      <div class="guide-hero-title"> A couple of quick permissions</div>
+      <div class="guide-hero-sub">Both are optional, you can always turn them on later in Settings.</div>
     </div>
     <div class="settings-section">
       <div class="settings-row">
         <div class="settings-row-label">
-          <div class="settings-row-name">🔔 Push reminders</div>
-          <div class="settings-row-desc">Get notified on your phone when a plant is overdue — even with the app closed.</div>
+          <div class="settings-row-name"> Push reminders</div>
+          <div class="settings-row-desc">Get notified on your phone when a plant is overdue, even with the app closed.</div>
         </div>
         <button class="secondary ${state.notificationsEnabled ? 'settings-toggle-on' : ''}" id="permNotifBtn">${state.notificationsEnabled ? 'On' : 'Turn on'}</button>
       </div>
       <div class="settings-row">
         <div class="settings-row-label">
-          <div class="settings-row-name">🌦️ Weather-aware tips</div>
+          <div class="settings-row-name"> Weather-aware tips</div>
           <div class="settings-row-desc">Uses your rough location to nudge you when recent rain or heat changes how often to water.</div>
         </div>
         <button class="secondary ${state.weatherEnabled ? 'settings-toggle-on' : ''}" id="permWeatherBtn">${state.weatherEnabled ? 'On' : 'Turn on'}</button>
@@ -584,15 +584,15 @@ function renderLearning() {
   div.className = 'settings-page';
   div.innerHTML = `
     <div class="guide-hero">
-      <div class="guide-hero-title">📖 Caring for your plants</div>
+      <div class="guide-hero-title"> Caring for your plants</div>
       <div class="guide-hero-sub">A few habits that make the biggest difference</div>
     </div>
     <div class="settings-section">
-      <div class="welcome-feature"><span>💧</span> Water less often than you think — most houseplants prefer to dry out partway between waterings rather than staying constantly damp.</div>
-      <div class="welcome-feature"><span>☀️</span> Match light to the plant, not the room. A spot that looks bright to you may still be too dim for a sun-loving plant a few feet from the window.</div>
-      <div class="welcome-feature"><span>🌡️</span> Sudden temperature swings (drafty windows, heating vents) stress plants more than a slightly imperfect but stable spot.</div>
-      <div class="welcome-feature"><span>🪴</span> Repot only when roots are crowding the pot — going too big too soon can hold excess water and cause root rot.</div>
-      <div class="welcome-feature"><span>🔍</span> Check the undersides of leaves occasionally — that's where early pest problems usually show up first.</div>
+      <div class="welcome-feature"><span> </span> Water less often than you think, most houseplants prefer to dry out partway between waterings rather than staying constantly damp.</div>
+      <div class="welcome-feature"><span> </span> Match light to the plant, not the room. A spot that looks bright to you may still be too dim for a sun-loving plant a few feet from the window.</div>
+      <div class="welcome-feature"><span> </span> Sudden temperature swings (drafty windows, heating vents) stress plants more than a slightly imperfect but stable spot.</div>
+      <div class="welcome-feature"><span> </span> Repot only when roots are crowding the pot, going too big too soon can hold excess water and cause root rot.</div>
+      <div class="welcome-feature"><span> </span> Check the undersides of leaves occasionally, that's where early pest problems usually show up first.</div>
     </div>
     <button class="secondary" id="learningBackBtn" style="width:100%;margin-top:16px;">← Back</button>
   `;
@@ -606,35 +606,35 @@ function renderTutorial() {
   div.className = 'settings-page';
   div.innerHTML = `
     <div class="guide-hero">
-      <div class="guide-hero-title">🌱 How Plant Parent works</div>
-      <div class="guide-hero-sub">A quick walkthrough — takes about a minute</div>
+      <div class="guide-hero-title"> How Plant Parent works</div>
+      <div class="guide-hero-sub">A quick walkthrough, takes about a minute</div>
     </div>
 
     <div class="settings-section">
       <div class="settings-section-title">1. Add your first plant</div>
-      <div class="welcome-feature"><span>➕</span> Tap "+ Add a plant" on the Plants tab. Give it a name, or snap a photo and tap "Identify from a photo" to auto-fill its species and care needs.</div>
-      <div class="welcome-feature"><span>🏠</span> Pick where it lives — Indoor, Outdoor, or Balcony — so your shelf can be sorted and filtered by room later.</div>
+      <div class="welcome-feature"><span> </span> Tap "+ Add a plant" on the Plants tab. Give it a name, or snap a photo and tap "Identify from a photo" to auto-fill its species and care needs.</div>
+      <div class="welcome-feature"><span> </span> Pick where it lives, Indoor, Outdoor, or Balcony, so your shelf can be sorted and filtered by room later.</div>
     </div>
 
     <div class="settings-section">
       <div class="settings-section-title">2. Keep it watered</div>
-      <div class="welcome-feature"><span>💧</span> Tap the water drop on a plant's card whenever you water it. That resets its countdown and builds your care streak.</div>
-      <div class="welcome-feature"><span>🔥</span> Water on schedule and you'll unlock streak badges — check "Badges" in the More menu anytime.</div>
+      <div class="welcome-feature"><span> </span> Tap the water drop on a plant's card whenever you water it. That resets its countdown and builds your care streak.</div>
+      <div class="welcome-feature"><span> </span> Water on schedule and you'll unlock streak badges, check "Badges" in the More menu anytime.</div>
     </div>
 
     <div class="settings-section">
       <div class="settings-section-title">3. Turn on real reminders</div>
-      <div class="welcome-feature"><span>🔔</span> In Settings, switch on "Push reminders" so your phone notifies you when a plant is overdue — even with the app closed.</div>
+      <div class="welcome-feature"><span> </span> In Settings, switch on "Push reminders" so your phone notifies you when a plant is overdue, even with the app closed.</div>
     </div>
 
     <div class="settings-section">
       <div class="settings-section-title">4. Explore the rest</div>
-      <div class="welcome-feature"><span>📖</span> The Guide tab has care info for dozens of common houseplants.</div>
-      <div class="welcome-feature"><span>🌻</span> The Garden tab visually grows the better you keep up with care.</div>
-      <div class="welcome-feature"><span>📝</span> Journal (in the More menu) is for notes and photos over time; Cuttings tracks anything you're propagating.</div>
+      <div class="welcome-feature"><span> </span> The Guide tab has care info for dozens of common houseplants.</div>
+      <div class="welcome-feature"><span> </span> The Garden tab visually grows the better you keep up with care.</div>
+      <div class="welcome-feature"><span> </span> Journal (in the More menu) is for notes and photos over time; Cuttings tracks anything you're propagating.</div>
     </div>
 
-    <button class="primary welcome-btn" id="finishTutorial" style="width:100%;margin-top:8px;">Let's go 🌱</button>
+    <button class="primary welcome-btn" id="finishTutorial" style="width:100%;margin-top:8px;">Let's go </button>
   `;
   return div;
 }
@@ -647,15 +647,15 @@ function renderCommunity() {
   const postsHtml = state.communityPosts.length ? state.communityPosts.map(p => `
     <div class="settings-row" style="align-items:flex-start;">
       <div class="settings-row-label">
-        <div class="settings-row-name">${p.plantEmoji || '🌱'} ${escapeHtml(p.nickname)}</div>
+        <div class="settings-row-name">${p.plantEmoji || ' '} ${escapeHtml(p.nickname)}</div>
         <div class="settings-row-desc">${escapeHtml(p.tip)}</div>
       </div>
     </div>
-  `).join('') : `<div class="settings-row-desc" style="padding:12px 0;">No tips shared yet — be the first 🌱</div>`;
+  `).join('') : `<div class="settings-row-desc" style="padding:12px 0;">No tips shared yet, be the first </div>`;
 
   div.innerHTML = `
     <div class="guide-hero">
-      <div class="guide-hero-title">🌍 Community</div>
+      <div class="guide-hero-title"> Community</div>
       <div class="guide-hero-sub">Plant-care tips and experiences from other plant parents</div>
     </div>
 
@@ -733,19 +733,19 @@ function renderPlantId() {
 
   div.innerHTML = `
     <div class="guide-hero">
-      <div class="guide-hero-title">🔍 What plant is this?</div>
-      <div class="guide-hero-sub">Snap a photo of any plant to find out what it is — no need to add it to your shelf.</div>
+      <div class="guide-hero-title"> What plant is this?</div>
+      <div class="guide-hero-sub">Snap a photo of any plant to find out what it is, no need to add it to your shelf.</div>
     </div>
     <div class="settings-section">
       ${usedToday ? `
-        <div class="identify-hint" style="padding:16px 0;">You've already used this today — come back tomorrow for another free check.</div>
+        <div class="identify-hint" style="padding:16px 0;">You've already used this today, come back tomorrow for another free check.</div>
       ` : `
-        <button class="id-photo-btn" id="plantIdPhotoBtn" type="button">📷 ${state.plantIdPhoto ? 'Change photo' : 'Take or choose a photo'}</button>
+        <button class="id-photo-btn" id="plantIdPhotoBtn" type="button"> ${state.plantIdPhoto ? 'Change photo' : 'Take or choose a photo'}</button>
         <input type="file" id="plantIdPhotoInput" accept="image/*" capture="environment" style="display:none;">
         ${state.plantIdPhoto ? `<img src="${state.plantIdPhoto}" alt="Selected plant photo preview" class="modal-photo-preview">` : ''}
         ${state.plantIdPhoto ? `
           <button class="identify-cta-btn" id="plantIdGoBtn" type="button">
-            <span class="identify-cta-emoji">✨</span>
+            <span class="identify-cta-emoji"> </span>
             <span class="identify-cta-text">
               <span class="identify-cta-title">Identify this plant</span>
               <span class="identify-cta-sub">Uses today's one free check</span>
@@ -796,13 +796,13 @@ function renderPlantId() {
         if (!res.ok) throw new Error(data.error || 'Could not identify this photo.');
         state.plantIdResults = data.results || [];
         if (!state.plantIdResults.length) {
-          state.plantIdError = "Couldn't find a confident match — try a clearer, closer photo of a leaf.";
+          state.plantIdError = "Couldn't find a confident match, try a clearer, closer photo of a leaf.";
         }
         // Mark today's free check as used regardless of match quality — it
         // still cost an API call, so it still counts against the daily cap.
         localStorage.setItem('plant-parent-plantid-last-used', todayStr());
       } catch (err) {
-        state.plantIdError = err.message || 'Something went wrong — try again.';
+        state.plantIdError = err.message || 'Something went wrong, try again.';
       }
       state.plantIdLoading = false;
       render();
@@ -828,11 +828,11 @@ function renderAboutModal() {
   return `
   <div class="modal-backdrop" id="aboutBackdrop">
     <div class="modal about-modal">
-      <div class="about-hero">🌿</div>
+      <div class="about-hero"> </div>
       <h3>About Plant Parent</h3>
       <p class="about-story">
         I built Plant Parent because I kept forgetting to water my own plants and killing them one by one.
-        It started as a simple watering tracker, and grew — one idea at a time — into a full plant-care
+        It started as a simple watering tracker, and grew, one idea at a time, into a full plant-care
         companion: photos, care streaks, a species guide, weather-aware tips, even a couple of small games
         for when you just want to relax with your plants for a minute.
       </p>
@@ -844,10 +844,10 @@ function renderAboutModal() {
       ${state.plants.length ? `
         <div class="about-journey">
           <div class="about-journey-title">Your journey so far</div>
-          <div class="about-journey-row"><span>🪴</span> ${state.plants.length} plant${state.plants.length === 1 ? '' : 's'} in your care</div>
-          <div class="about-journey-row"><span>💧</span> ${totalWaterings} watering${totalWaterings === 1 ? '' : 's'} logged</div>
-          <div class="about-journey-row"><span>🔥</span> Best streak: ${longestStreak} in a row</div>
-          ${daysSinceStart > 0 ? `<div class="about-journey-row"><span>📅</span> ${daysSinceStart} day${daysSinceStart === 1 ? '' : 's'} since your first plant</div>` : ''}
+          <div class="about-journey-row"><span> </span> ${state.plants.length} plant${state.plants.length === 1 ? '' : 's'} in your care</div>
+          <div class="about-journey-row"><span> </span> ${totalWaterings} watering${totalWaterings === 1 ? '' : 's'} logged</div>
+          <div class="about-journey-row"><span> </span> Best streak: ${longestStreak} in a row</div>
+          ${daysSinceStart > 0 ? `<div class="about-journey-row"><span> </span> ${daysSinceStart} day${daysSinceStart === 1 ? '' : 's'} since your first plant</div>` : ''}
         </div>
       ` : ''}
       <div class="modal-actions">
@@ -888,6 +888,19 @@ const ICONS = {
   moon: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z"/></svg>`,
   sun: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 3v2M12 19v2M4.2 4.2l1.4 1.4M18.4 18.4l1.4 1.4M3 12h2M19 12h2M4.2 19.8l1.4-1.4M18.4 5.6l1.4-1.4"/></svg>`,
   leaf: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19c0-8 4-13 14-14-1 10-6 14-14 14Z"/><path d="M6 18c3-3 5-6 6-10"/></svg>`,
+  drop: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c4 5 7 8.5 7 12a7 7 0 1 1-14 0c0-3.5 3-7 7-12Z"/></svg>`,
+  rain: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 15h10a3.5 3.5 0 0 0 0-7 5 5 0 0 0-9.6-1.5A4 4 0 0 0 7 15Z"/><path d="M8 18l-1 3M12 18l-1 3M16 18l-1 3"/></svg>`,
+  snow: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M4.5 7.5l15 9M19.5 7.5l-15 9"/></svg>`,
+  flower: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="2.2"/><path d="M12 9.8a2.5 2.5 0 1 1 0-5 2.5 2.5 0 0 1 0 5Z"/><path d="M12 14.2a2.5 2.5 0 1 1 0 5 2.5 2.5 0 0 1 0-5Z"/><path d="M9.8 12a2.5 2.5 0 1 1-5 0 2.5 2.5 0 0 1 5 0Z"/><path d="M14.2 12a2.5 2.5 0 1 1 5 0 2.5 2.5 0 0 1-5 0Z"/></svg>`,
+  sprout: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21v-8"/><path d="M12 13c0-3-2-4-5-4 .5 3 2 4 5 4Z"/><path d="M12 13c0-2 1.5-3 4-3-.5 2-1.5 3-4 3Z"/></svg>`,
+  wilt: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v6"/><path d="M12 10c0 5-3 8-3 8"/><path d="M12 10c2 1 4 3 4 6"/></svg>`,
+  neutral: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12h8"/></svg>`,
+  flame: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c1 3-2 4-2 7a4 4 0 1 0 8 0c0-1-1-2-1-2 .3 2-1 3-1 3 .3-3-2-4-2-6-1 1-2 2-2 2 .3-2 0-3 0-4Z"/></svg>`,
+  camera: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2.5"/><path d="M8 7l1.5-2.5h5L16 7"/><circle cx="12" cy="13.5" r="3.5"/></svg>`,
+  trash: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14"/><path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/><path d="M7 7l1 12a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2l1-12"/><path d="M10 11v6M14 11v6"/></svg>`,
+  lock: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>`,
+  check: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg>`,
+  invite: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20c0-3 2-5 5-5s5 2 5 5"/><path d="M14 20c0-2.2 1.5-4 4-4s4 1.8 4 4"/></svg>`,
 };
 
 function icon(name, size) {
@@ -900,7 +913,7 @@ function renderDeleteConfirmModal() {
   return `
   <div class="modal-backdrop" id="deleteConfirmBackdrop">
     <div class="modal delete-confirm-modal">
-      <div class="delete-confirm-emoji">🥀</div>
+      <div class="delete-confirm-emoji"> </div>
       <h3>Remove ${plant.name}?</h3>
       <p class="delete-confirm-text">This deletes its photo, notes, and full watering history. This can't be undone after a few seconds, but you'll get a brief chance to undo right after.</p>
       <div class="modal-actions">
@@ -979,7 +992,7 @@ function renderInviteModal() {
   <div class="modal-backdrop" id="inviteBackdrop">
     <div class="modal invite-modal">
       <h3>Invite a friend</h3>
-      <p class="invite-text">Scan this with a phone camera, or share the link below — anyone can install their own copy of Plant Parent for free.</p>
+      <p class="invite-text">Scan this with a phone camera, or share the link below, anyone can install their own copy of Plant Parent for free.</p>
       <img src="${qrUrl}" alt="QR code linking to this Plant Parent app" class="invite-qr">
       <div class="invite-link-row">
         <input class="invite-link-input" id="inviteLinkInput" value="${url}" readonly>
@@ -987,7 +1000,7 @@ function renderInviteModal() {
       </div>
       <div class="modal-actions">
         <button class="secondary" id="closeInvite">Close</button>
-        <button class="primary" id="shareInvite">📤 Share</button>
+        <button class="primary" id="shareInvite"> Share</button>
       </div>
     </div>
   </div>`;
@@ -997,7 +1010,7 @@ async function shareAppLink() {
   const url = window.location.origin + window.location.pathname;
   if (navigator.share) {
     try {
-      await navigator.share({ title: 'Plant Parent', text: 'Come take care of your plants with me 🌿', url });
+      await navigator.share({ title: 'Plant Parent', text: 'Come take care of your plants with me ', url });
       markInvited();
     } catch (err) {
       // user cancelled — no action needed
@@ -1118,7 +1131,7 @@ async function generateShareCard(plant) {
     ctx.font = '110px serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText('🌱', photoX, photoY + 10);
+    ctx.fillText(' ', photoX, photoY + 10);
   }
   ctx.restore();
 
@@ -1149,7 +1162,7 @@ async function generateShareCard(plant) {
 
   ctx.font = '600 18px Georgia, serif';
   ctx.fillStyle = colors.sage;
-  ctx.fillText('🌿 Plant Parent', W / 2, H - 60);
+  ctx.fillText(' Plant Parent', W / 2, H - 60);
 
   return canvas;
 }
@@ -1179,7 +1192,7 @@ async function shareCard(plant) {
     const file = new File([blob], `${plant.name.replace(/\s+/g, '-')}-plant-parent.png`, { type: 'image/png' });
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       try {
-        await navigator.share({ files: [file], title: plant.name, text: `${plant.name} on Plant Parent 🌿` });
+        await navigator.share({ files: [file], title: plant.name, text: `${plant.name} on Plant Parent ` });
         return;
       } catch (err) {
         // user cancelled or share failed — fall through to download
@@ -1202,13 +1215,13 @@ function buildJournalEvents() {
   const events = [];
   state.plants.forEach(p => {
     if (p.createdAt) {
-      events.push({ date: p.createdAt, emoji: '🌱', text: `Added <strong>${p.name}</strong> to your shelf` });
+      events.push({ date: p.createdAt, emoji: 'sprout', text: `Added <strong>${p.name}</strong> to your shelf` });
     }
     (p.waterLog || []).forEach(iso => {
-      events.push({ date: iso, emoji: '💧', text: `Watered <strong>${p.name}</strong>` });
+      events.push({ date: iso, emoji: 'drop', text: `Watered <strong>${p.name}</strong>` });
     });
     if (p.notesUpdatedAt) {
-      events.push({ date: p.notesUpdatedAt, emoji: '📝', text: `Updated notes on <strong>${p.name}</strong>` });
+      events.push({ date: p.notesUpdatedAt, emoji: 'journal', text: `Updated notes on <strong>${p.name}</strong>` });
     }
   });
   return events.sort((a, b) => new Date(b.date) - new Date(a.date));
@@ -1226,7 +1239,7 @@ function renderJournal() {
   const events = buildJournalEvents();
 
   if (events.length === 0) {
-    div.innerHTML = `<div class="garden-empty">No activity yet — water a plant or add a note to start your journal.</div>`;
+    div.innerHTML = `<div class="garden-empty">No activity yet, water a plant or add a note to start your journal.</div>`;
     return div;
   }
 
@@ -1242,7 +1255,7 @@ function renderJournal() {
       <div class="journal-group-label">${label}</div>
       ${evs.map(ev => `
         <div class="journal-event">
-          <span class="journal-event-emoji">${ev.emoji}</span>
+          <span class="journal-event-emoji">${icon(ev.emoji, 18)}</span>
           <span class="journal-event-text">${ev.text}</span>
           <span class="journal-event-time">${new Date(ev.date).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}</span>
         </div>
@@ -1267,7 +1280,7 @@ function renderSettings() {
 
   div.innerHTML = `
     <div class="guide-hero">
-      <div class="guide-hero-title">⚙️ Settings</div>
+      <div class="guide-hero-title"> Settings</div>
       <div class="guide-hero-sub">Everything about how Plant Parent looks and behaves</div>
     </div>
 
@@ -1406,14 +1419,14 @@ function renderPropagation() {
   } else {
     div.innerHTML = state.propagations.map(prop => `
       <div class="prop-card" data-id="${prop.id}">
-        <div class="prop-emoji">🌱</div>
+        <div class="prop-emoji"> </div>
         <div class="prop-info">
           <div class="prop-name">${prop.name}</div>
           <div class="prop-days">Rooting for ${daysRooting(prop)} day${daysRooting(prop) === 1 ? '' : 's'}</div>
           ${prop.notes ? `<div class="prop-notes">${prop.notes}</div>` : ''}
         </div>
         <div class="prop-actions">
-          <button class="secondary prop-graduate-btn" data-id="${prop.id}">🌳 Graduate</button>
+          <button class="secondary prop-graduate-btn" data-id="${prop.id}"> Graduate</button>
           <button class="secondary prop-remove-btn" data-id="${prop.id}">Remove</button>
         </div>
       </div>
@@ -1468,10 +1481,10 @@ function renderCheckinModal() {
   const p = state.plants.find(x => x.id === state.checkinPlantId);
   if (!p) return '';
   const moods = [
-    { id: 'thriving', emoji: '🌿', label: 'Thriving' },
-    { id: 'okay', emoji: '😐', label: 'Okay' },
-    { id: 'struggling', emoji: '😟', label: 'Struggling' },
-    { id: 'recovering', emoji: '🌱', label: 'Recovering' },
+    { id: 'thriving', emoji: 'leaf', label: 'Thriving' },
+    { id: 'okay', emoji: 'neutral', label: 'Okay' },
+    { id: 'struggling', emoji: 'wilt', label: 'Struggling' },
+    { id: 'recovering', emoji: 'sprout', label: 'Recovering' },
   ];
   return `
   <div class="modal-backdrop" id="checkinBackdrop">
@@ -1480,7 +1493,7 @@ function renderCheckinModal() {
       <div class="mood-picker">
         ${moods.map(m => `
           <button class="mood-option ${state.checkinDraftMood === m.id ? 'mood-option-selected' : ''}" data-mood="${m.id}">
-            <span class="mood-option-emoji">${m.emoji}</span>
+            <span class="mood-option-emoji">${icon(m.emoji, 20)}</span>
             <span class="mood-option-label">${m.label}</span>
           </button>
         `).join('')}
@@ -1587,7 +1600,7 @@ function importBackup(file) {
       savePlants();
       alert('Backup restored!');
     } catch (err) {
-      alert("Couldn't read that file — make sure it's a Plant Parent backup.");
+      alert("Couldn't read that file, make sure it's a Plant Parent backup.");
     }
   };
   reader.readAsText(file);
@@ -1597,25 +1610,25 @@ function importBackup(file) {
 
 function getWeatherNudge(precipMm, tempC, humidity) {
   if (precipMm >= 8) {
-    return { emoji: '🌧️', text: `It's rained a fair amount nearby the last few days (${precipMm.toFixed(0)}mm). Your plants may need a bit less water than usual — check the soil before watering.` };
+    return { emoji: 'rain', text: `It's rained a fair amount nearby the last few days (${precipMm.toFixed(0)}mm). Your plants may need a bit less water than usual, so check the soil before watering.` };
   }
   if (precipMm >= 2) {
-    return { emoji: '🌦️', text: `A little rain nearby lately. If any of your plants sit near an open window or balcony, they may not need their full usual watering.` };
+    return { emoji: 'cloud', text: `A little rain nearby lately. If any of your plants sit near an open window or balcony, they may not need their full usual watering.` };
   }
   if (tempC >= 28 && humidity <= 40) {
-    return { emoji: '☀️', text: `Hot and dry the last few days (${Math.round(tempC)}°C, ${Math.round(humidity)}% humidity). Thirsty plants may dry out faster than usual — worth checking a little early.` };
+    return { emoji: 'sun', text: `Hot and dry the last few days (${Math.round(tempC)}°C, ${Math.round(humidity)}% humidity). Thirsty plants may dry out faster than usual, so it's worth checking a little early.` };
   }
   if (humidity <= 30) {
-    return { emoji: '🍂', text: `Low humidity lately (${Math.round(humidity)}%). Plants that like moisture, like ferns, may appreciate a light misting between waterings.` };
+    return { emoji: 'leaf', text: `Low humidity lately (${Math.round(humidity)}%). Plants that like moisture, like ferns, may appreciate a light misting between waterings.` };
   }
-  return { emoji: '🌤️', text: `Weather's been steady nearby — no changes needed to your usual watering routine.` };
+  return { emoji: 'cloud', text: `Weather's been steady nearby, so no changes needed to your usual watering routine.` };
 }
 
 const SEASON_TIPS = {
-  winter: { emoji: '❄️', text: "It's winter — growth slows down for most houseplants, so they typically need less water and no fertilizer until spring." },
-  spring: { emoji: '🌱', text: "It's spring — prime growing season. A good time to repot, propagate, and start feeding again if you paused over winter." },
-  summer: { emoji: '☀️', text: "It's summer — longer days and warmth mean plants often dry out faster. Worth checking soil a little more often." },
-  fall: { emoji: '🍂', text: "It's fall — as days shorten, growth slows. A good time to ease off fertilizing and watch for less frequent watering needs." },
+  winter: { emoji: 'snow', text: "It's winter, and growth slows down for most houseplants, so they typically need less water and no fertilizer until spring." },
+  spring: { emoji: 'sprout', text: "It's spring, prime growing season. A good time to repot, propagate, and start feeding again if you paused over winter." },
+  summer: { emoji: 'sun', text: "It's summer, and longer days and warmth mean plants often dry out faster. Worth checking soil a little more often." },
+  fall: { emoji: 'leaf', text: "It's fall, and as days shorten, growth slows. A good time to ease off fertilizing and watch for less frequent watering needs." },
 };
 
 function getHemisphere() {
@@ -1732,7 +1745,7 @@ function render() {
 
         ${!state.mobileDetailOpen ? `
           <div class="daily-card ${taskDone ? 'daily-card-done' : ''}">
-            <div class="daily-emoji">${taskDone ? '✅' : task.emoji}</div>
+            <div class="daily-emoji">${icon(taskDone ? 'check' : task.emoji, 22)}</div>
             <div class="daily-text">
               <div class="daily-label">Today's little thing</div>
               <div class="daily-task">${task.label}</div>
@@ -1741,14 +1754,14 @@ function render() {
 
           ${state.weatherEnabled && state.weatherNudge ? `
             <div class="weather-card">
-              <div class="weather-emoji">${state.weatherNudge.emoji}</div>
+              <div class="weather-emoji">${icon(state.weatherNudge.emoji, 26)}</div>
               <div class="weather-text">${state.weatherNudge.text}</div>
             </div>
           ` : ''}
 
           ${state.seasonalTipsEnabled ? (() => { const tip = getSeasonalTip(); return `
             <div class="weather-card">
-              <div class="weather-emoji">${tip.emoji}</div>
+              <div class="weather-emoji">${icon(tip.emoji, 26)}</div>
               <div class="weather-text">${tip.text}</div>
             </div>
           `; })() : ''}
@@ -1772,7 +1785,7 @@ function render() {
           <div class="shelf-column">
             ${state.plants.length ? renderShelfOverviewStrip() : ''}
             <div class="shelf-controls">
-              ${state.plants.length ? `<button class="primary water-all-btn" id="waterAllBtn">💧 Water all plants</button>` : ''}
+              ${state.plants.length ? `<button class="primary water-all-btn" id="waterAllBtn"> Water all plants</button>` : ''}
               <select class="sort-select" id="sortSelect" aria-label="Sort plants by">
                 <option value="urgent" ${state.sortBy === 'urgent' ? 'selected' : ''}>Most urgent first</option>
                 <option value="az" ${state.sortBy === 'az' ? 'selected' : ''}>Plant name (A–Z)</option>
@@ -1921,10 +1934,10 @@ function render() {
       if (count > 0) {
         fireConfetti(rect.left + rect.width / 2, rect.top);
         playWaterSound();
-        showMessageToast(`💧 Watered ${count} plant${count === 1 ? '' : 's'}!`);
+        showMessageToast(` Watered ${count} plant${count === 1 ? '' : 's'}!`);
         savePlants();
       } else {
-        showMessageToast(`Everything's already watered today 🌿`);
+        showMessageToast(`Everything's already watered today `);
       }
       render();
     };
@@ -2208,16 +2221,16 @@ function speciesIllustrationSVG(species) {
       `;
       break;
     default:
-      content = `<text x="50" y="62" font-size="40" text-anchor="middle">🌱</text>`;
+      content = `<circle cx="50" cy="55" r="18" fill="var(--sage-light)"/><circle cx="50" cy="55" r="8" fill="var(--sage)"/>`;
   }
 
   return `<svg viewBox="0 0 100 100" width="100%" height="100%">${content}</svg>`;
 }
 
 function speciesDifficulty(species) {
-  if (species.freq >= 14) return { label: 'Low maintenance', emoji: '🟢', tier: 'easy' };
-  if (species.freq >= 7) return { label: 'Easy care', emoji: '🟡', tier: 'moderate' };
-  return { label: 'Needs attention', emoji: '🔴', tier: 'demanding' };
+  if (species.freq >= 14) return { label: 'Low maintenance', dotColor: 'var(--sage)', tier: 'easy' };
+  if (species.freq >= 7) return { label: 'Easy care', dotColor: 'var(--mustard)', tier: 'moderate' };
+  return { label: 'Needs attention', dotColor: 'var(--clay)', tier: 'demanding' };
 }
 
 function lightCategory(lightText) {
@@ -2230,7 +2243,7 @@ function lightCategory(lightText) {
 
 function buildDictionaryCardsHtml(list, search) {
   if (list.length === 0) {
-    return `<div class="guide-no-results">No plants match "${search}" — try a different search or filter.</div>`;
+    return `<div class="guide-no-results">No plants match "${search}", try a different search or filter.</div>`;
   }
   return list.map(s => {
     const diff = speciesDifficulty(s);
@@ -2238,13 +2251,13 @@ function buildDictionaryCardsHtml(list, search) {
       <div class="dictionary-card dictionary-card-${diff.tier}" data-id="${s.id}">
         <div class="dictionary-illustration">${speciesIllustrationSVG(s)}</div>
         <div class="dictionary-card-top">
-          <div class="dictionary-difficulty-badge">${diff.emoji} ${diff.label}</div>
+          <div class="dictionary-difficulty-badge"><span class="difficulty-dot" style="background:${diff.dotColor};"></span> ${diff.label}</div>
         </div>
         <div class="dictionary-name">${s.name}</div>
         ${s.latin ? `<div class="dictionary-latin">${s.latin}</div>` : ''}
         <div class="dictionary-meta-row">
-          <span class="dictionary-meta-pill">☀️ ${s.light}</span>
-          <span class="dictionary-meta-pill">💧 every ${s.freq}d</span>
+          <span class="dictionary-meta-pill"> ${s.light}</span>
+          <span class="dictionary-meta-pill"> every ${s.freq}d</span>
         </div>
         <div class="dictionary-desc">${s.desc}</div>
         <button class="secondary dictionary-add-btn" data-id="${s.id}">+ Add one like this</button>
@@ -2291,11 +2304,11 @@ function renderDictionary() {
 
   wrapper.innerHTML = `
     <div class="guide-hero">
-      <div class="guide-hero-title">📖 Species Guide</div>
+      <div class="guide-hero-title"> Species Guide</div>
       <div class="guide-hero-sub">${species.length} plants, with care basics for each</div>
     </div>
     <div class="guide-controls">
-      <input type="text" id="guideSearchInput" class="guide-search" placeholder="🔍 Search by name…" value="${search}">
+      <input type="text" id="guideSearchInput" class="guide-search" placeholder=" Search by name…" value="${search}">
       <div class="guide-light-chips">
         <button class="room-chip ${!lightFilter ? 'room-chip-active' : ''}" data-light="">All light</button>
         <button class="room-chip ${lightFilter === 'low' ? 'room-chip-active' : ''}" data-light="low">Low light</button>
@@ -2355,11 +2368,11 @@ function gardenTier(plant) {
   const pct = ringPercent(plant);
   const streak = calcStreak(plant);
   const score = (1 - pct) * 0.65 + Math.min(streak / 10, 1) * 0.35;
-  if (score < 0.25) return { emoji: '🥀', size: 30, label: 'wilting' };
-  if (score < 0.5) return { emoji: '🌱', size: 38, label: 'sprouting' };
-  if (score < 0.75) return { emoji: '🌿', size: 48, label: 'growing' };
-  if (score < 0.92) return { emoji: '🪴', size: 58, label: 'thriving' };
-  return { emoji: '🌸', size: 64, label: 'blooming' };
+  if (score < 0.25) return { emoji: 'wilt', size: 30, label: 'wilting' };
+  if (score < 0.5) return { emoji: 'sprout', size: 38, label: 'sprouting' };
+  if (score < 0.75) return { emoji: 'leaf', size: 48, label: 'growing' };
+  if (score < 0.92) return { emoji: 'plants', size: 58, label: 'thriving' };
+  return { emoji: 'flower', size: 64, label: 'blooming' };
 }
 
 function renderGarden() {
@@ -2376,7 +2389,7 @@ function renderGarden() {
       </div>
       <div class="garden-hill garden-hill-back"></div>
       <div class="garden-hill garden-hill-front"></div>
-      <div class="garden-empty">Your garden is empty — add a plant to watch it grow here.</div>
+      <div class="garden-empty">Your garden is empty, add a plant to watch it grow here.</div>
     `;
     wrapper.appendChild(scene);
     wrapper.appendChild(renderGardenCuttings());
@@ -2390,16 +2403,16 @@ function renderGarden() {
   }, 0) / state.plants.length;
 
   let summary;
-  if (avgScore >= 0.75) summary = '🌻 Your garden is flourishing!';
-  else if (avgScore >= 0.45) summary = '🌿 Your garden is doing alright.';
-  else summary = '💧 A few plants could use some water.';
+  if (avgScore >= 0.75) summary = ' Your garden is flourishing!';
+  else if (avgScore >= 0.45) summary = ' Your garden is doing alright.';
+  else summary = ' A few plants could use some water.';
 
   const leafCount = Math.min(6, 2 + Math.floor(state.plants.length / 2));
   const leaves = Array.from({ length: leafCount }, (_, i) => {
     const left = 8 + Math.random() * 84;
     const duration = 8 + Math.random() * 6;
     const delay = Math.random() * 8;
-    const emoji = ['🍃', '🌸', '✨'][i % 3];
+    const emoji = [' ', ' ', ' '][i % 3];
     return `<span class="garden-leaf" style="left:${left}%; animation-duration:${duration}s; animation-delay:-${delay}s;">${emoji}</span>`;
   }).join('');
 
@@ -2418,8 +2431,8 @@ function renderGarden() {
         ${state.plants.map(p => {
           const tier = gardenTier(p);
           return `
-            <div class="garden-plant" data-id="${p.id}" title="${p.name} — ${tier.label}" role="button" tabindex="0" aria-label="${p.name}, ${tier.label}">
-              <div class="garden-plant-emoji" style="font-size:${tier.size}px;">${tier.emoji}</div>
+            <div class="garden-plant" data-id="${p.id}" title="${p.name}, ${tier.label}" role="button" tabindex="0" aria-label="${p.name}, ${tier.label}">
+              <div class="garden-plant-emoji">${icon(tier.emoji, tier.size)}</div>
               <div class="garden-pot"></div>
               <div class="garden-plant-shadow"></div>
               <div class="garden-plant-name">${p.name}</div>
@@ -2473,12 +2486,12 @@ function renderGardenStats() {
       <div class="garden-stat-label">combined streak days</div>
     </div>
     <div class="garden-stat-card garden-stat-highlight">
-      <div class="garden-stat-icon">🌟</div>
+      <div class="garden-stat-icon"> </div>
       <div class="garden-stat-title">Star of the garden</div>
       <div class="garden-stat-name">${star.name}</div>
     </div>
     <div class="garden-stat-card garden-stat-highlight">
-      <div class="garden-stat-icon">💧</div>
+      <div class="garden-stat-icon"> </div>
       <div class="garden-stat-title">Needs attention</div>
       <div class="garden-stat-name">${needsAttention.name}</div>
     </div>
@@ -2494,16 +2507,16 @@ function renderGardenCuttings() {
   const count = state.propagations.length;
   div.innerHTML = `
     <div class="garden-cuttings-header">
-      <span class="garden-cuttings-title">🌱 Cuttings rooting</span>
+      <span class="garden-cuttings-title"> Cuttings rooting</span>
       ${count ? `<span class="garden-cuttings-count">${count}</span>` : ''}
     </div>
     ${count === 0 ? `
-      <div class="garden-cuttings-empty">No cuttings rooting yet — start one from the Cuttings screen.</div>
+      <div class="garden-cuttings-empty">No cuttings rooting yet, start one from the Cuttings screen.</div>
     ` : `
       <div class="garden-cuttings-row">
         ${state.propagations.map(prop => `
           <div class="garden-cutting-chip" data-id="${prop.id}" role="button" tabindex="0" aria-label="${prop.name}, rooting ${daysRooting(prop)} day${daysRooting(prop) === 1 ? '' : 's'}">
-            <span class="garden-cutting-emoji">🌱</span>
+            <span class="garden-cutting-emoji"> </span>
             <span class="garden-cutting-name">${prop.name}</span>
             <span class="garden-cutting-days">${daysRooting(prop)}d</span>
           </div>
@@ -2539,7 +2552,7 @@ function renderBadgesModal() {
           const unlocked = state.unlockedAchievements.includes(a.id);
           return `
             <div class="badge-item ${unlocked ? '' : 'badge-locked'}">
-              <div class="badge-emoji">${unlocked ? a.emoji : '🔒'}</div>
+              <div class="badge-emoji">${icon(unlocked ? a.emoji : 'lock', 28)}</div>
               <div class="badge-name">${a.name}</div>
               <div class="badge-desc">${a.desc}</div>
             </div>
@@ -2561,7 +2574,7 @@ function ringPortrait(p, size, strokeWidth) {
   const photoSize = size - strokeWidth * 2.6;
   const inner = p.photo
     ? `<img src="${p.photo}" alt="Photo of ${p.name}" class="ring-photo" style="width:${photoSize}px;height:${photoSize}px;">`
-    : `<div class="ring-photo ring-photo-placeholder" style="width:${photoSize}px;height:${photoSize}px;font-size:${photoSize*0.4}px;" role="img" aria-label="No photo yet">🌱</div>`;
+    : `<div class="ring-photo ring-photo-placeholder" style="width:${photoSize}px;height:${photoSize}px;font-size:${photoSize*0.4}px;" role="img" aria-label="No photo yet"> </div>`;
   return `
     <div class="ring-wrap" style="width:${size}px;height:${size}px;">
       <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
@@ -2605,7 +2618,7 @@ function renderEmpty() {
     div.innerHTML = `
       <svg class="big-ring" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="none" stroke="var(--sage)" stroke-width="6" stroke-dasharray="8 10"/></svg>
       <div style="font-family:'Fraunces',serif;font-size:18px;">Your shelf is empty</div>
-      <div style="font-size:13px;">Add your first plant to get started 🌱</div>
+      <div style="font-size:13px;">Add your first plant to get started </div>
     `;
   } else {
     div.innerHTML = `
@@ -2675,13 +2688,13 @@ function renderDetail(p) {
         <div class="species">${p.species || 'species unlabeled'}</div>
         <div class="row-actions">
           ${p.twiceDaily ? `
-            <button class="primary ${wateredSlotToday(p, 'morning') ? 'water-done' : ''}" id="waterMorningBtn">🌅 Morning${wateredSlotToday(p, 'morning') ? ' ✓' : ''}</button>
-            <button class="primary ${wateredSlotToday(p, 'night') ? 'water-done' : ''}" id="waterNightBtn">🌙 Night${wateredSlotToday(p, 'night') ? ' ✓' : ''}</button>
+            <button class="primary ${wateredSlotToday(p, 'morning') ? 'water-done' : ''}" id="waterMorningBtn"> Morning${wateredSlotToday(p, 'morning') ? ' ' : ''}</button>
+            <button class="primary ${wateredSlotToday(p, 'night') ? 'water-done' : ''}" id="waterNightBtn"> Night${wateredSlotToday(p, 'night') ? ' ' : ''}</button>
           ` : `
             <button class="primary" id="waterBtn">Water now</button>
           `}
-          <button class="secondary" id="editBtn">✏️ Edit</button>
-          <button class="secondary" id="shareBtn">📤 Share</button>
+          <button class="secondary" id="editBtn"> Edit</button>
+          <button class="secondary" id="shareBtn"> Share</button>
           <button class="secondary" id="removeBtn">Remove plant</button>
         </div>
       </div>
@@ -2693,11 +2706,11 @@ function renderDetail(p) {
       last watered ${daysSince(p.lastWatered)} day${daysSince(p.lastWatered)===1?'':'s'} ago ·
       ${left} day${left===1?'':'s'} left
     </div>
-    <input class="room-input" id="roomInput" placeholder="📍 Add a room (e.g. Kitchen)" value="${p.room || ''}" aria-label="Room">
+    <input class="room-input" id="roomInput" placeholder=" Add a room (e.g. Kitchen)" value="${p.room || ''}" aria-label="Room">
 
     <div class="settings-row">
       <div class="settings-row-label">
-        <div class="settings-row-name">🌾 Feeding</div>
+        <div class="settings-row-name"> Feeding</div>
         <div class="settings-row-desc">${p.lastFertilized
           ? `Every ${p.fertilizeFrequency || 21} days · fed ${daysSince(p.lastFertilized)} day${daysSince(p.lastFertilized) === 1 ? '' : 's'} ago · ${(() => { const d = fertilizeDaysLeft(p); return d <= 0 ? 'due now' : `${d} day${d === 1 ? '' : 's'} left`; })()}`
           : 'Not tracked yet'}</div>
@@ -2706,7 +2719,7 @@ function renderDetail(p) {
     </div>
     <div class="settings-row">
       <div class="settings-row-label">
-        <div class="settings-row-name">☀️ Rotation</div>
+        <div class="settings-row-name"> Rotation</div>
         <div class="settings-row-desc">${p.lastRotated
           ? `Every ${p.rotateFrequency || 7} days · rotated ${daysSince(p.lastRotated)} day${daysSince(p.lastRotated) === 1 ? '' : 's'} ago · ${(() => { const d = rotateDaysLeft(p); return d <= 0 ? 'due now' : `${d} day${d === 1 ? '' : 's'} left`; })()}`
           : 'Not tracked yet'}</div>
@@ -2716,7 +2729,7 @@ function renderDetail(p) {
 
     <div class="section-label">notes</div>
     <textarea class="notes-input" id="notesInput" aria-label="Notes" placeholder="e.g. repot in spring, keep away from cold drafts…">${p.notes || ''}</textarea>
-    ${p.speciesDesc ? `<div class="species-desc">🌿 <strong>${p.species}:</strong> ${p.speciesDesc}</div>` : ''}
+    ${p.speciesDesc ? `<div class="species-desc"> <strong>${p.species}:</strong> ${p.speciesDesc}</div>` : ''}
 
     <div class="section-label">streak</div>
     <div class="streak-row">
@@ -2733,14 +2746,14 @@ function renderDetail(p) {
 
     <div class="settings-row">
       <div class="settings-row-label">
-        <div class="settings-row-name">📝 Health check-ins</div>
+        <div class="settings-row-name"> Health check-ins</div>
         <div class="settings-row-desc">Log how ${p.name} is doing over time</div>
       </div>
       <button class="secondary" id="checkinBtn">Check in</button>
     </div>
     ${healthLog.length ? `
       <ul class="history-list">
-        ${healthLog.map(h => `<li>${moodLabel(h.mood)} · ${formatHistoryDate(h.date)}${h.note ? ` — ${escapeHtml(h.note)}` : ''}</li>`).join('')}
+        ${healthLog.map(h => `<li>${moodLabel(h.mood)} · ${formatHistoryDate(h.date)}${h.note ? `, ${escapeHtml(h.note)}` : ''}</li>`).join('')}
       </ul>
     ` : `<div style="font-size:13px;color:var(--soil);">No check-ins yet.</div>`}
   `;
@@ -2870,7 +2883,7 @@ function formatHistoryDate(iso) {
   const label = d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
   const ago = daysSince(iso);
   const agoText = ago === 0 ? 'today' : ago === 1 ? '1 day ago' : `${ago} days ago`;
-  return `${label} — ${agoText}`;
+  return `${label}, ${agoText}`;
 }
 
 function captureModalDraft() {
@@ -2906,12 +2919,12 @@ function renderModal() {
       <h3>${isEditing ? 'Edit plant' : 'Add a plant'}</h3>
       <div class="field">
         <label>Photo (optional)</label>
-        <button class="id-photo-btn" id="modalPhotoBtn" type="button">📷 ${state.pendingModalPhoto ? 'Change photo' : 'Add a photo'}</button>
+        <button class="id-photo-btn" id="modalPhotoBtn" type="button"> ${state.pendingModalPhoto ? 'Change photo' : 'Add a photo'}</button>
         <input type="file" id="modalPhotoInput" accept="image/*" capture="environment" style="display:none;">
         ${preview}
         ${state.pendingModalPhoto ? `
           <button class="identify-cta-btn" id="identifyBtn" type="button">
-            <span class="identify-cta-emoji">✨</span>
+            <span class="identify-cta-emoji"> </span>
             <span class="identify-cta-text">
               <span class="identify-cta-title">Identify this plant</span>
               <span class="identify-cta-sub">Auto-fill species &amp; care from your photo</span>
@@ -2939,16 +2952,16 @@ function renderModal() {
       <div class="field">
         <label>Species</label>
         <button class="species-picker-btn" id="openSpeciesPicker" type="button">
-          ${species ? `<span class="species-picker-emoji">${species.emoji}</span> ${species.name}` : (isEditing && editingPlant.species ? editingPlant.species : '🔍 Choose from the guide (optional)')}
+          ${species ? `<span class="species-picker-emoji">${speciesIllustrationSVG(species)}</span> ${species.name}` : (isEditing && editingPlant.species ? editingPlant.species : 'Choose from the guide (optional)')}
         </button>
       </div>
       <div class="field">
         <label>Where does it live?</label>
         <select id="modalLocationType" aria-label="Location type">
           <option value="" ${!locationType ? 'selected' : ''}>Choose one…</option>
-          <option value="Indoor" ${locationType === 'Indoor' ? 'selected' : ''}>🏠 Indoor</option>
-          <option value="Outdoor" ${locationType === 'Outdoor' ? 'selected' : ''}>🌳 Outdoor</option>
-          <option value="Balcony" ${locationType === 'Balcony' ? 'selected' : ''}>🪴 Balcony</option>
+          <option value="Indoor" ${locationType === 'Indoor' ? 'selected' : ''}> Indoor</option>
+          <option value="Outdoor" ${locationType === 'Outdoor' ? 'selected' : ''}> Outdoor</option>
+          <option value="Balcony" ${locationType === 'Balcony' ? 'selected' : ''}> Balcony</option>
         </select>
       </div>
       <div class="field" id="roomDetailField" style="${(locationType === 'Indoor' || locationType === 'Outdoor') ? '' : 'display:none;'}">
@@ -2988,7 +3001,7 @@ function renderSpeciesPicker() {
       <div class="species-picker-list">
         ${SPECIES_DICTIONARY.map(s => `
           <div class="species-picker-row" data-id="${s.id}">
-            <span class="species-picker-row-emoji">${s.emoji}</span>
+            <span class="species-picker-row-emoji">${speciesIllustrationSVG(s)}</span>
             <div>
               <div class="species-picker-row-name">${s.name}</div>
               ${s.latin ? `<div class="species-picker-row-latin">${s.latin}</div>` : ''}
@@ -3052,10 +3065,10 @@ async function identifyPhoto(file) {
     if (!res.ok) throw new Error(data.error || 'Could not identify this photo.');
     state.identifyResults = data.results || [];
     if (!state.identifyResults.length) {
-      state.identifyError = "Couldn't find a confident match — try a clearer, closer photo of a leaf.";
+      state.identifyError = "Couldn't find a confident match, try a clearer, closer photo of a leaf.";
     }
   } catch (err) {
-    state.identifyError = err.message || 'Something went wrong — try again.';
+    state.identifyError = err.message || 'Something went wrong, try again.';
   }
   state.identifyLoading = false;
   render();
@@ -3084,7 +3097,8 @@ function applyIdentifyResult(result) {
       id: null,
       name: commonName || result.scientificName,
       latin: result.scientificName,
-      emoji: '🌿',
+      emoji: 'leaf',
+      shape: 'broad-leaf',
       freq: 7,
       desc: '',
     };
@@ -3377,13 +3391,13 @@ function renderSyncModal() {
         <div class="sync-code-display">${state.syncCode}</div>
         <div class="modal-actions">
           <button class="secondary" id="copySyncCode">Copy code</button>
-          <button class="primary" id="pullSyncNow">🔄 Sync now</button>
+          <button class="primary" id="pullSyncNow"> Sync now</button>
         </div>
         <button class="sync-stop-btn" id="stopSyncing">Stop syncing this device</button>
       ` : `
-        <p class="about-story">Link this device with another so you see the same plants on both. No account needed — just a short code.</p>
+        <p class="about-story">Link this device with another so you see the same plants on both. No account needed, just a short code.</p>
         <div class="sync-choice-row">
-          <button class="primary" id="createSyncCode">✨ Create a new sync code</button>
+          <button class="primary" id="createSyncCode"> Create a new sync code</button>
         </div>
         <div class="sync-divider">or</div>
         <div class="field">
@@ -3422,7 +3436,7 @@ async function fetchCommunityPosts() {
     if (!res.ok) throw new Error(data.error || 'Could not load the community feed');
     state.communityPosts = data.posts || [];
   } catch (err) {
-    state.communityError = "Couldn't load community tips right now — try again in a bit.";
+    state.communityError = "Couldn't load community tips right now, try again in a bit.";
   }
   state.communityLoading = false;
   render();
@@ -3456,7 +3470,7 @@ async function fetchLeaderboard() {
     if (!res.ok) throw new Error(data.error || 'Could not load leaderboard');
     state.leaderboardData = { streaks: data.streaks || [], plants: data.plants || [], raindrop: data.raindrop || [], memory: data.memory || [] };
   } catch (err) {
-    state.leaderboardError = "Couldn't load the leaderboard right now — try again in a bit.";
+    state.leaderboardError = "Couldn't load the leaderboard right now, try again in a bit.";
   }
   state.leaderboardLoading = false;
   render();
@@ -3546,9 +3560,9 @@ function renderLeaderboardModal() {
   return `
   <div class="modal-backdrop" id="leaderboardBackdrop">
     <div class="modal leaderboard-modal">
-      <h3>🏆 Leaderboard</h3>
+      <h3> Leaderboard</h3>
       ${!state.leaderboardJoined ? `
-        <p class="about-story">See how your garden compares with everyone else using Plant Parent. Your nickname, watering streak, plant count, and mini-game high scores are visible to anyone who opens this leaderboard — no other info about you or your plants is shared.</p>
+        <p class="about-story">See how your garden compares with everyone else using Plant Parent. Your nickname, watering streak, plant count, and mini-game high scores are visible to anyone who opens this leaderboard, no other info about you or your plants is shared.</p>
         <div class="field">
           <label>Choose a nickname</label>
           <input id="leaderboardNicknameInput" placeholder="e.g. Fern Whisperer" maxlength="20">
@@ -3560,14 +3574,14 @@ function renderLeaderboardModal() {
         </div>
       ` : `
         <div class="leaderboard-tabs">
-          <button class="leaderboard-tab ${state.leaderboardTab === 'streak' ? 'leaderboard-tab-active' : ''}" id="leaderboardTabStreak">🔥 Streak</button>
-          <button class="leaderboard-tab ${state.leaderboardTab === 'plants' ? 'leaderboard-tab-active' : ''}" id="leaderboardTabPlants">🪴 Plants</button>
-          <button class="leaderboard-tab ${state.leaderboardTab === 'raindrop' ? 'leaderboard-tab-active' : ''}" id="leaderboardTabRaindrop">💧 Raindrop</button>
-          <button class="leaderboard-tab ${state.leaderboardTab === 'memory' ? 'leaderboard-tab-active' : ''}" id="leaderboardTabMemory">🧠 Memory</button>
+          <button class="leaderboard-tab ${state.leaderboardTab === 'streak' ? 'leaderboard-tab-active' : ''}" id="leaderboardTabStreak"> Streak</button>
+          <button class="leaderboard-tab ${state.leaderboardTab === 'plants' ? 'leaderboard-tab-active' : ''}" id="leaderboardTabPlants"> Plants</button>
+          <button class="leaderboard-tab ${state.leaderboardTab === 'raindrop' ? 'leaderboard-tab-active' : ''}" id="leaderboardTabRaindrop"> Raindrop</button>
+          <button class="leaderboard-tab ${state.leaderboardTab === 'memory' ? 'leaderboard-tab-active' : ''}" id="leaderboardTabMemory"> Memory</button>
         </div>
         ${state.leaderboardLoading ? `<div class="sync-status">Loading…</div>` : ''}
         ${state.leaderboardError ? `<div class="sync-status">${state.leaderboardError}</div>` : ''}
-        ${!state.leaderboardLoading && list.length === 0 ? `<div class="sync-status">No one's on the board yet — be the first!</div>` : ''}
+        ${!state.leaderboardLoading && list.length === 0 ? `<div class="sync-status">No one's on the board yet, be the first!</div>` : ''}
         ${list.length ? `
           <ol class="leaderboard-list">
             ${list.map((entry, i) => `

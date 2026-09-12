@@ -9,7 +9,7 @@
   let elapsed = 0; // seconds since game start, drives difficulty ramp
 
   const GAME_LENGTH = 30;
-  const HAZARD_TYPES = ['🥀', '🐛'];
+  const HAZARD_TYPES = [' ', ' '];
 
   function comboMultiplier() {
     // +1x every 5-catch combo streak, capped at 4x so skilled play meaningfully
@@ -60,7 +60,7 @@
         </div>
         <div class="game-combo" id="gameCombo"></div>
         <div class="game-area" id="gameArea"></div>
-        <div class="game-hint">Tap 💧 drops — avoid 🥀 and 🐛. Chain catches for a combo multiplier!</div>
+        <div class="game-hint">Tap drops, avoid and . Chain catches for a combo multiplier!</div>
         <div class="modal-actions">
           <button class="secondary" id="closeGame">Close</button>
         </div>
@@ -112,7 +112,7 @@
     if (!el) return;
     const mult = comboMultiplier();
     if (combo >= 3) {
-      el.textContent = `🔥 ${combo}-combo · ${mult}x`;
+      el.textContent = ` ${combo}-combo · ${mult}x`;
       el.classList.add('game-combo-active');
     } else {
       el.textContent = '';
@@ -161,12 +161,12 @@
 
     const modal = backdrop.querySelector('.modal');
     modal.innerHTML = `
-      <h3>Time's up! 🌦️</h3>
+      <h3>Time's up! </h3>
       <div class="game-result">
         <div class="game-result-score">${score}</div>
         <div class="game-result-label">points scored</div>
         <div class="game-result-sub">Best combo: ${bestCombo} in a row</div>
-        ${isNewHigh ? '<div class="game-new-high">✨ New high score!</div>' : ''}
+        ${isNewHigh ? '<div class="game-new-high"> New high score!</div>' : ''}
       </div>
       <div class="modal-actions">
         <button class="secondary" id="closeGameResult">Close</button>
