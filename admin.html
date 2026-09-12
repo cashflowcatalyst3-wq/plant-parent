@@ -38,6 +38,14 @@
   .message-row input { width: 130px; }
   .push-yes { color: #6E8F58; font-weight: 700; }
   .push-no { color: #B7AF9D; }
+  .password-field { position: relative; display: block; width: 100%; }
+  .password-field input { padding-right: 34px !important; width: 100%; box-sizing: border-box; }
+  .password-toggle {
+    position: absolute; right: 4px; top: 50%; transform: translateY(-50%);
+    background: none; border: none; cursor: pointer; font-size: 14px;
+    padding: 4px 6px; line-height: 1; opacity: 0.6;
+  }
+  .password-toggle:hover { opacity: 1; }
   .test-badge { font-size: 10px; background: #DDE9D6; color: #4C6E3B; padding: 2px 6px; border-radius: 10px; margin-left: 6px; }
   .plants-editor { width: 100%; box-sizing: border-box; font-family: monospace; font-size: 11px; min-height: 90px; padding: 8px; border: 1.5px solid #ddd; border-radius: 8px; margin-top: 6px; }
   .tip-cell { max-width: 320px; }
@@ -48,7 +56,10 @@
 <div id="loginBox">
   <h1>Admin login</h1>
   <p class="hint">Enter your ADMIN_SECRET (set in Vercel env vars).</p>
-  <input type="password" id="secretInput" placeholder="Admin secret">
+  <div class="password-field">
+    <input type="password" id="secretInput" placeholder="Admin secret">
+    <button type="button" class="password-toggle" id="secretToggle" aria-label="Show password">👁</button>
+  </div>
   <button class="primary" id="loginBtn" style="width:100%;">Enter</button>
   <div id="loginError" style="color:#C0392B;font-size:13px;margin-top:8px;"></div>
 </div>
@@ -85,7 +96,10 @@
   <h2>🧪 Testing tools</h2>
   <p class="hint">Manually run the same jobs your daily cron and 5-hour scheduler trigger automatically — useful for testing without waiting. Needs your CRON_SECRET (different from your admin secret), remembered only for this browser tab.</p>
   <div class="announce-box">
-    <input type="password" id="cronSecretInput" placeholder="CRON_SECRET">
+    <div class="password-field">
+      <input type="password" id="cronSecretInput" placeholder="CRON_SECRET">
+      <button type="button" class="password-toggle" id="cronSecretToggle" aria-label="Show password">👁</button>
+    </div>
     <button class="secondary" id="runOverdueBtn">Run daily check (overdue + Sunday digest)</button>
     <button class="secondary" id="runTipBtn">Send a random check-in tip</button>
   </div>
@@ -677,6 +691,20 @@ document.getElementById('loginBtn').onclick = async () => {
 document.getElementById('secretInput').addEventListener('keydown', (e) => {
   if (e.key === 'Enter') document.getElementById('loginBtn').click();
 });
+
+function wirePasswordToggle(inputId, toggleId) {
+  const input = document.getElementById(inputId);
+  const toggle = document.getElementById(toggleId);
+  if (!input || !toggle) return;
+  toggle.addEventListener('click', () => {
+    const showing = input.type === 'text';
+    input.type = showing ? 'password' : 'text';
+    toggle.textContent = showing ? '👁' : '🙈';
+    toggle.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
+  });
+}
+wirePasswordToggle('secretInput', 'secretToggle');
+wirePasswordToggle('cronSecretInput', 'cronSecretToggle');
 
 if (secret) showPanel();
 </script>
