@@ -298,9 +298,9 @@ function getVisiblePlants() {
 
 function moodEmoji(plant) {
   const pct = ringPercent(plant);
-  if (pct >= 1) return ' ';
-  if (pct >= 0.7) return ' ';
-  return ' ';
+  if (pct >= 1) return icon('wilt', 18);
+  if (pct >= 0.7) return icon('neutral', 18);
+  return icon('leaf', 18);
 }
 
 function recordGameScore(score) {
@@ -494,7 +494,7 @@ function renderHome() {
   div.className = 'settings-page';
   div.innerHTML = `
     <div class="guide-hero">
-      <div class="guide-hero-title"> Plant Parent</div>
+      <div class="guide-hero-title">Plant Parent</div>
       <div class="guide-hero-sub">
         Plant Parent helps you keep every plant on a real watering schedule, with reminders
         that reach your phone even when the app is closed. Track care streaks, identify a
@@ -522,9 +522,9 @@ function renderHub() {
       <div class="guide-hero-title">Where to?</div>
       <div class="guide-hero-sub">Pick a section to get started</div>
     </div>
-    <button class="primary welcome-btn" id="hubLearningBtn" style="width:100%;margin-top:8px;"> Learning section</button>
-    <button class="primary welcome-btn" id="hubCommunityBtn" style="width:100%;margin-top:12px;"> Community section</button>
-    <button class="primary welcome-btn" id="hubPlantParentBtn" style="width:100%;margin-top:12px;"> Plant Parent section</button>
+    <button class="primary welcome-btn hub-nav-btn" id="hubLearningBtn" style="width:100%;margin-top:8px;">${icon('guide', 20)} Learning section</button>
+    <button class="primary welcome-btn hub-nav-btn" id="hubCommunityBtn" style="width:100%;margin-top:12px;">${icon('journal', 20)} Community section</button>
+    <button class="primary welcome-btn hub-nav-btn" id="hubPlantParentBtn" style="width:100%;margin-top:12px;">${icon('plants', 20)} Plant Parent section</button>
     <button class="secondary" id="hubBackBtn" style="width:100%;margin-top:20px;">← Back</button>
   `;
   div.querySelector('#hubLearningBtn').onclick = () => { state.learningReturnTo = 'hub'; state.currentView = 'learning'; render(); };
@@ -551,7 +551,7 @@ function renderPermissions() {
   div.className = 'settings-page';
   div.innerHTML = `
     <div class="guide-hero">
-      <div class="guide-hero-title"> A couple of quick permissions</div>
+      <div class="guide-hero-title">A couple of quick permissions</div>
       <div class="guide-hero-sub">Both are optional, you can always turn them on later in Settings.</div>
     </div>
     <div class="settings-section">
@@ -584,15 +584,15 @@ function renderLearning() {
   div.className = 'settings-page';
   div.innerHTML = `
     <div class="guide-hero">
-      <div class="guide-hero-title"> Caring for your plants</div>
+      <div class="guide-hero-title">Caring for your plants</div>
       <div class="guide-hero-sub">A few habits that make the biggest difference</div>
     </div>
     <div class="settings-section">
-      <div class="welcome-feature"><span> </span> Water less often than you think, most houseplants prefer to dry out partway between waterings rather than staying constantly damp.</div>
-      <div class="welcome-feature"><span> </span> Match light to the plant, not the room. A spot that looks bright to you may still be too dim for a sun-loving plant a few feet from the window.</div>
-      <div class="welcome-feature"><span> </span> Sudden temperature swings (drafty windows, heating vents) stress plants more than a slightly imperfect but stable spot.</div>
-      <div class="welcome-feature"><span> </span> Repot only when roots are crowding the pot, going too big too soon can hold excess water and cause root rot.</div>
-      <div class="welcome-feature"><span> </span> Check the undersides of leaves occasionally, that's where early pest problems usually show up first.</div>
+      <div class="welcome-feature">${icon('drop', 20)} Water less often than you think, most houseplants prefer to dry out partway between waterings rather than staying constantly damp.</div>
+      <div class="welcome-feature">${icon('sun', 20)} Match light to the plant, not the room. A spot that looks bright to you may still be too dim for a sun-loving plant a few feet from the window.</div>
+      <div class="welcome-feature">${icon('cloud', 20)} Sudden temperature swings (drafty windows, heating vents) stress plants more than a slightly imperfect but stable spot.</div>
+      <div class="welcome-feature">${icon('plants', 20)} Repot only when roots are crowding the pot, going too big too soon can hold excess water and cause root rot.</div>
+      <div class="welcome-feature">${icon('leaf', 20)} Check the undersides of leaves occasionally, that's where early pest problems usually show up first.</div>
     </div>
     <button class="secondary" id="learningBackBtn" style="width:100%;margin-top:16px;">← Back</button>
   `;
@@ -606,7 +606,7 @@ function renderTutorial() {
   div.className = 'settings-page';
   div.innerHTML = `
     <div class="guide-hero">
-      <div class="guide-hero-title"> How Plant Parent works</div>
+      <div class="guide-hero-title">How Plant Parent works</div>
       <div class="guide-hero-sub">A quick walkthrough, takes about a minute</div>
     </div>
 
@@ -647,15 +647,15 @@ function renderCommunity() {
   const postsHtml = state.communityPosts.length ? state.communityPosts.map(p => `
     <div class="settings-row" style="align-items:flex-start;">
       <div class="settings-row-label">
-        <div class="settings-row-name">${p.plantEmoji || ' '} ${escapeHtml(p.nickname)}</div>
+        <div class="settings-row-name">${icon('sprout', 16)} ${escapeHtml(p.nickname)}</div>
         <div class="settings-row-desc">${escapeHtml(p.tip)}</div>
       </div>
     </div>
-  `).join('') : `<div class="settings-row-desc" style="padding:12px 0;">No tips shared yet, be the first </div>`;
+  `).join('') : `<div class="settings-row-desc" style="padding:12px 0;">No tips shared yet, be the first!</div>`;
 
   div.innerHTML = `
     <div class="guide-hero">
-      <div class="guide-hero-title"> Community</div>
+      <div class="guide-hero-title">Community</div>
       <div class="guide-hero-sub">Plant-care tips and experiences from other plant parents</div>
     </div>
 
@@ -733,7 +733,7 @@ function renderPlantId() {
 
   div.innerHTML = `
     <div class="guide-hero">
-      <div class="guide-hero-title"> What plant is this?</div>
+      <div class="guide-hero-title">What plant is this?</div>
       <div class="guide-hero-sub">Snap a photo of any plant to find out what it is, no need to add it to your shelf.</div>
     </div>
     <div class="settings-section">
@@ -901,6 +901,7 @@ const ICONS = {
   lock: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>`,
   check: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg>`,
   invite: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20c0-3 2-5 5-5s5 2 5 5"/><path d="M14 20c0-2.2 1.5-4 4-4s4 1.8 4 4"/></svg>`,
+  search: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.8-4.8"/></svg>`,
 };
 
 function icon(name, size) {
@@ -1280,7 +1281,7 @@ function renderSettings() {
 
   div.innerHTML = `
     <div class="guide-hero">
-      <div class="guide-hero-title"> Settings</div>
+      <div class="guide-hero-title">Settings</div>
       <div class="guide-hero-sub">Everything about how Plant Parent looks and behaves</div>
     </div>
 
@@ -1825,6 +1826,7 @@ function render() {
     ${state.showMoreMenu ? `
       <div class="more-menu-backdrop" id="moreMenuBackdrop">
         <div class="more-menu">
+          <div class="more-menu-section-title">Track</div>
           <button class="more-menu-item" id="navJournal">
             <span class="more-menu-icon">${icon('journal')}</span>
             <span>Journal</span>
@@ -1833,8 +1835,10 @@ function render() {
             <span class="more-menu-icon">${icon('cuttings')}</span>
             <span>Cuttings${state.propagations.length ? ` (${state.propagations.length})` : ''}</span>
           </button>
+
+          <div class="more-menu-section-title">Learn &amp; connect</div>
           <button class="more-menu-item" id="navCommunity">
-            <span class="more-menu-icon">${icon('journal')}</span>
+            <span class="more-menu-icon">${icon('invite')}</span>
             <span>Community</span>
           </button>
           <button class="more-menu-item" id="navLearning">
@@ -1842,10 +1846,11 @@ function render() {
             <span>Learning</span>
           </button>
           <button class="more-menu-item" id="navPlantId">
-            <span class="more-menu-icon">${icon('guide')}</span>
+            <span class="more-menu-icon">${icon('search')}</span>
             <span>What's this plant?</span>
           </button>
-          <div class="more-menu-divider"></div>
+
+          <div class="more-menu-section-title">Play &amp; compete</div>
           <button class="more-menu-item" id="navBadges">
             <span class="more-menu-icon">${icon('badges')}</span>
             <span>Badges <strong>${state.unlockedAchievements.length}/${ACHIEVEMENTS.length}</strong></span>
@@ -1862,7 +1867,8 @@ function render() {
             <span class="more-menu-icon">${icon('trophy')}</span>
             <span>Leaderboard</span>
           </button>
-          <div class="more-menu-divider"></div>
+
+          <div class="more-menu-section-title">App</div>
           <button class="more-menu-item" id="navSettings">
             <span class="more-menu-icon">${icon('settings')}</span>
             <span>Settings</span>
@@ -2304,7 +2310,7 @@ function renderDictionary() {
 
   wrapper.innerHTML = `
     <div class="guide-hero">
-      <div class="guide-hero-title"> Species Guide</div>
+      <div class="guide-hero-title">Species Guide</div>
       <div class="guide-hero-sub">${species.length} plants, with care basics for each</div>
     </div>
     <div class="guide-controls">
@@ -2364,15 +2370,32 @@ function renderDictionary() {
   return wrapper;
 }
 
+function gardenTierIllustration(label) {
+  const pot = potBase(false);
+  let plant = '';
+  if (label === 'wilting') {
+    plant = `${leafPair(50, 74, 13, 245, 'var(--clay-light)')}${leafPair(50, 74, 10, 285, 'var(--soil)')}`;
+  } else if (label === 'sprouting') {
+    plant = `<path d="M50 74 L50 60" stroke="var(--sage)" stroke-width="3" fill="none" stroke-linecap="round"/>${leafPair(50, 62, 10, 60, 'var(--sage-light)')}${leafPair(50, 62, 10, 120, 'var(--sage-light)')}`;
+  } else if (label === 'growing') {
+    plant = `<path d="M50 74 L50 50" stroke="var(--sage)" stroke-width="3.5" fill="none" stroke-linecap="round"/>${leafPair(50, 62, 16, 50, 'var(--sage-light)')}${leafPair(50, 62, 16, 130, 'var(--sage)')}${leafPair(50, 50, 12, 90, 'var(--sage-light)')}`;
+  } else if (label === 'thriving') {
+    plant = `<path d="M50 74 L50 40" stroke="var(--sage)" stroke-width="4" fill="none" stroke-linecap="round"/>${leafPair(50, 58, 20, 45, 'var(--sage-light)')}${leafPair(50, 58, 20, 135, 'var(--sage)')}${leafPair(50, 44, 16, 70, 'var(--sage)')}${leafPair(50, 44, 16, 110, 'var(--sage-light)')}`;
+  } else {
+    plant = `<path d="M50 74 L50 34" stroke="var(--sage)" stroke-width="4" fill="none" stroke-linecap="round"/>${leafPair(50, 55, 22, 40, 'var(--sage-light)')}${leafPair(50, 55, 22, 140, 'var(--sage)')}${leafPair(50, 42, 16, 75, 'var(--sage)')}${leafPair(50, 42, 16, 105, 'var(--sage-light)')}<circle cx="50" cy="30" r="6" fill="var(--mustard)"/><circle cx="42" cy="34" r="5" fill="var(--clay-light)"/><circle cx="58" cy="34" r="5" fill="var(--clay-light)"/>`;
+  }
+  return `<svg viewBox="0 0 100 100" width="100%" height="100%">${plant}${pot}</svg>`;
+}
+
 function gardenTier(plant) {
   const pct = ringPercent(plant);
   const streak = calcStreak(plant);
   const score = (1 - pct) * 0.65 + Math.min(streak / 10, 1) * 0.35;
-  if (score < 0.25) return { emoji: 'wilt', size: 30, label: 'wilting' };
-  if (score < 0.5) return { emoji: 'sprout', size: 38, label: 'sprouting' };
-  if (score < 0.75) return { emoji: 'leaf', size: 48, label: 'growing' };
-  if (score < 0.92) return { emoji: 'plants', size: 58, label: 'thriving' };
-  return { emoji: 'flower', size: 64, label: 'blooming' };
+  if (score < 0.25) return { size: 30, label: 'wilting' };
+  if (score < 0.5) return { size: 38, label: 'sprouting' };
+  if (score < 0.75) return { size: 48, label: 'growing' };
+  if (score < 0.92) return { size: 58, label: 'thriving' };
+  return { size: 64, label: 'blooming' };
 }
 
 function renderGarden() {
@@ -2412,7 +2435,7 @@ function renderGarden() {
     const left = 8 + Math.random() * 84;
     const duration = 8 + Math.random() * 6;
     const delay = Math.random() * 8;
-    const emoji = [' ', ' ', ' '][i % 3];
+    const emoji = icon('leaf', 16);
     return `<span class="garden-leaf" style="left:${left}%; animation-duration:${duration}s; animation-delay:-${delay}s;">${emoji}</span>`;
   }).join('');
 
@@ -2432,7 +2455,7 @@ function renderGarden() {
           const tier = gardenTier(p);
           return `
             <div class="garden-plant" data-id="${p.id}" title="${p.name}, ${tier.label}" role="button" tabindex="0" aria-label="${p.name}, ${tier.label}">
-              <div class="garden-plant-emoji">${icon(tier.emoji, tier.size)}</div>
+              <div class="garden-plant-emoji" style="width:${tier.size}px;height:${tier.size}px;">${gardenTierIllustration(tier.label)}</div>
               <div class="garden-pot"></div>
               <div class="garden-plant-shadow"></div>
               <div class="garden-plant-name">${p.name}</div>
@@ -2507,7 +2530,7 @@ function renderGardenCuttings() {
   const count = state.propagations.length;
   div.innerHTML = `
     <div class="garden-cuttings-header">
-      <span class="garden-cuttings-title"> Cuttings rooting</span>
+      <span class="garden-cuttings-title">Cuttings rooting</span>
       ${count ? `<span class="garden-cuttings-count">${count}</span>` : ''}
     </div>
     ${count === 0 ? `
@@ -3574,10 +3597,10 @@ function renderLeaderboardModal() {
         </div>
       ` : `
         <div class="leaderboard-tabs">
-          <button class="leaderboard-tab ${state.leaderboardTab === 'streak' ? 'leaderboard-tab-active' : ''}" id="leaderboardTabStreak"> Streak</button>
-          <button class="leaderboard-tab ${state.leaderboardTab === 'plants' ? 'leaderboard-tab-active' : ''}" id="leaderboardTabPlants"> Plants</button>
-          <button class="leaderboard-tab ${state.leaderboardTab === 'raindrop' ? 'leaderboard-tab-active' : ''}" id="leaderboardTabRaindrop"> Raindrop</button>
-          <button class="leaderboard-tab ${state.leaderboardTab === 'memory' ? 'leaderboard-tab-active' : ''}" id="leaderboardTabMemory"> Memory</button>
+          <button class="leaderboard-tab ${state.leaderboardTab === 'streak' ? 'leaderboard-tab-active' : ''}" id="leaderboardTabStreak">${icon('flame', 18)} Streak</button>
+          <button class="leaderboard-tab ${state.leaderboardTab === 'plants' ? 'leaderboard-tab-active' : ''}" id="leaderboardTabPlants">${icon('plants', 18)} Plants</button>
+          <button class="leaderboard-tab ${state.leaderboardTab === 'raindrop' ? 'leaderboard-tab-active' : ''}" id="leaderboardTabRaindrop">${icon('drop', 18)} Raindrop</button>
+          <button class="leaderboard-tab ${state.leaderboardTab === 'memory' ? 'leaderboard-tab-active' : ''}" id="leaderboardTabMemory">${icon('brain', 18)} Memory</button>
         </div>
         ${state.leaderboardLoading ? `<div class="sync-status">Loading…</div>` : ''}
         ${state.leaderboardError ? `<div class="sync-status">${state.leaderboardError}</div>` : ''}
@@ -3586,7 +3609,7 @@ function renderLeaderboardModal() {
           <ol class="leaderboard-list">
             ${list.map((entry, i) => `
               <li class="leaderboard-row ${entry.deviceId === myId ? 'leaderboard-row-me' : ''}">
-                <span class="leaderboard-rank">${i + 1}</span>
+                <span class="leaderboard-rank ${i < 3 ? 'leaderboard-rank-medal leaderboard-rank-' + (i + 1) : ''}">${i + 1}</span>
                 <span class="leaderboard-name">${escapeHtml(entry.nickname)}${entry.deviceId === myId ? ' (you)' : ''}</span>
                 <span class="leaderboard-value">${entry.value} ${unit}${entry.value === 1 ? '' : 's'}</span>
               </li>

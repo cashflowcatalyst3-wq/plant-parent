@@ -33,24 +33,29 @@
   }
 
   body[data-mode="dark"] {
-    --bg: #141915;
-    --ink: #EDEAE1;
-    --card: #1E2620;
-    --line: #303B32;
-    --soil: #B7AF9F;
+    --bg: #1C1B16;
+    --ink: #F2EEE4;
+    --card: #26251E;
+    --sage: #A3B489;
+    --sage-light: #7C8A65;
+    --clay: #D89679;
+    --clay-light: #9C6B57;
+    --mustard: #E8B84B;
+    --line: #3A3830;
+    --soil: #B8B2A2;
     --shadow: 0 2px 14px rgba(0,0,0,0.45);
-    --panel2: #202A22;
-    --panel3: #283529;
-    --panel4: #23302A;
-    --panel5: #1E2B22;
-    --info-tint: #1E2A30;
+    --panel2: #26251E;
+    --panel3: #302E25;
+    --panel4: #2B2A22;
+    --panel5: #292920;
+    --info-tint: #33301F;
   }
   body[data-mode="dark"] .guide-search,
   body[data-mode="dark"] .notes-input,
   body[data-mode="dark"] .room-input,
   body[data-mode="dark"] input,
   body[data-mode="dark"] select {
-    background: #263029;
+    background: #302E25;
     color: var(--ink);
   }
   body[data-mode="dark"] .modal,
@@ -58,14 +63,14 @@
     background: var(--card);
   }
   body[data-mode="dark"] .garden-scene {
-    background: linear-gradient(180deg, #223126 0%, #1A2119 55%, var(--bg) 100%);
+    background: linear-gradient(180deg, #3A3320 0%, #2A2A1E 55%, var(--bg) 100%);
   }
-  body[data-mode="dark"] .garden-hill-back { background: #2B3A2E; }
-  body[data-mode="dark"] .garden-hill-front { background: linear-gradient(180deg, #24352A 0%, #1F2E24 100%); }
+  body[data-mode="dark"] .garden-hill-back { background: #3A4A32; }
+  body[data-mode="dark"] .garden-hill-front { background: linear-gradient(180deg, #4A5C3E 0%, #3A4A32 100%); }
   body[data-mode="dark"] .garden-sun { opacity: 0.7; }
-  body[data-mode="dark"] .garden-summary-banner { background: rgba(20,25,21,0.75); }
-  body[data-mode="dark"] .garden-plant-name { background: rgba(20,25,21,0.6); }
-  body[data-mode="dark"] .game-area { background: linear-gradient(180deg, #1E2B22 0%, var(--bg) 100%); }
+  body[data-mode="dark"] .garden-summary-banner { background: rgba(28,27,22,0.75); }
+  body[data-mode="dark"] .garden-plant-name { background: rgba(28,27,22,0.6); }
+  body[data-mode="dark"] .game-area { background: linear-gradient(180deg, #302E22 0%, var(--bg) 100%); }
 
   * { box-sizing: border-box; }
 
@@ -231,6 +236,16 @@
     text-align: left;
   }
   .more-menu-item:hover { background: var(--panel3); }
+  .more-menu-section-title {
+    font-family: 'Roboto', sans-serif;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--ink);
+    padding: 14px 14px 6px;
+  }
+  .more-menu-section-title:first-child { padding-top: 6px; }
   .more-menu-divider {
     height: 1px;
     background: var(--line);
@@ -1772,6 +1787,19 @@
     font-weight: 700;
     text-align: center;
   }
+  .leaderboard-rank-medal {
+    width: 24px;
+    height: 24px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 13px;
+  }
+  .leaderboard-rank-1 { background: var(--mustard); }
+  .leaderboard-rank-2 { background: var(--soil); }
+  .leaderboard-rank-3 { background: var(--clay); }
   .leaderboard-name {
     flex: 1;
     color: var(--ink);
@@ -1941,3 +1969,4 @@
   }
   .welcome-feature span { font-size: 20px; flex-shrink: 0; }
   .welcome-btn { width: 100%; padding: 14px; font-size: 15px; }
+  .hub-nav-btn { display: flex; align-items: center; justify-content: center; gap: 10px; }
