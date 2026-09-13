@@ -474,15 +474,15 @@ function renderWelcome() {
   return `
   <div class="welcome-backdrop" id="welcomeBackdrop">
     <div class="welcome-card">
-      <div class="welcome-flourish"> </div>
+      <div class="welcome-flourish">${icon('plants', 32)}</div>
       <h2 class="welcome-title">Plant Parent</h2>
       <p class="welcome-subtitle">a shelf that keeps time for you</p>
       <div class="welcome-features">
-        <div class="welcome-feature"><span> </span> Watering rings that never let a plant slip your mind</div>
-        <div class="welcome-feature"><span> </span> A garden that visibly grows the better you care for it</div>
-        <div class="welcome-feature"><span> </span> A species guide with care tips for 27 common houseplants</div>
-        <div class="welcome-feature"><span> </span> Achievements, streaks, and a couple of mini-games</div>
-        <div class="welcome-feature"><span> </span> Real reminders, even when the app is closed</div>
+        <div class="welcome-feature">${icon('drop', 18)} Watering rings that never let a plant slip your mind</div>
+        <div class="welcome-feature">${icon('garden', 18)} A garden that visibly grows the better you care for it</div>
+        <div class="welcome-feature">${icon('guide', 18)} A species guide with care tips for 27 common houseplants</div>
+        <div class="welcome-feature">${icon('trophy', 18)} Achievements, streaks, and a couple of mini-games</div>
+        <div class="welcome-feature">${icon('bell', 18)} Real reminders, even when the app is closed</div>
       </div>
       <button class="primary welcome-btn" id="dismissWelcome">Start</button>
     </div>
@@ -519,13 +519,13 @@ function renderHub() {
   div.className = 'settings-page';
   div.innerHTML = `
     <div class="guide-hero">
+      <button class="guide-hero-back" id="hubBackBtn" aria-label="Back">${icon('back', 18)}</button>
       <div class="guide-hero-title">Where to?</div>
       <div class="guide-hero-sub">Pick a section to get started</div>
     </div>
     <button class="primary welcome-btn hub-nav-btn" id="hubLearningBtn" style="width:100%;margin-top:8px;">${icon('guide', 20)} Learning section</button>
     <button class="primary welcome-btn hub-nav-btn" id="hubCommunityBtn" style="width:100%;margin-top:12px;">${icon('journal', 20)} Community section</button>
     <button class="primary welcome-btn hub-nav-btn" id="hubPlantParentBtn" style="width:100%;margin-top:12px;">${icon('plants', 20)} Plant Parent section</button>
-    <button class="secondary" id="hubBackBtn" style="width:100%;margin-top:20px;">← Back</button>
   `;
   div.querySelector('#hubLearningBtn').onclick = () => { state.learningReturnTo = 'hub'; state.currentView = 'learning'; render(); };
   div.querySelector('#hubCommunityBtn').onclick = () => { state.hubReturnTo = 'hub'; state.currentView = 'community'; state.communityLoaded = false; render(); };
@@ -584,6 +584,7 @@ function renderLearning() {
   div.className = 'settings-page';
   div.innerHTML = `
     <div class="guide-hero">
+      <button class="guide-hero-back" id="learningBackBtn" aria-label="Back">${icon('back', 18)}</button>
       <div class="guide-hero-title">Caring for your plants</div>
       <div class="guide-hero-sub">A few habits that make the biggest difference</div>
     </div>
@@ -594,7 +595,6 @@ function renderLearning() {
       <div class="welcome-feature">${icon('plants', 20)} Repot only when roots are crowding the pot, going too big too soon can hold excess water and cause root rot.</div>
       <div class="welcome-feature">${icon('leaf', 20)} Check the undersides of leaves occasionally, that's where early pest problems usually show up first.</div>
     </div>
-    <button class="secondary" id="learningBackBtn" style="width:100%;margin-top:16px;">← Back</button>
   `;
   div.querySelector('#learningBackBtn').onclick = () => { state.currentView = state.learningReturnTo || 'hub'; render(); };
   return div;
@@ -612,29 +612,29 @@ function renderTutorial() {
 
     <div class="settings-section">
       <div class="settings-section-title">1. Add your first plant</div>
-      <div class="welcome-feature"><span> </span> Tap "+ Add a plant" on the Plants tab. Give it a name, or snap a photo and tap "Identify from a photo" to auto-fill its species and care needs.</div>
-      <div class="welcome-feature"><span> </span> Pick where it lives, Indoor, Outdoor, or Balcony, so your shelf can be sorted and filtered by room later.</div>
+      <div class="welcome-feature">${icon('plants', 20)} Tap "+ Add a plant" on the Plants tab. Give it a name, or snap a photo and tap "Identify from a photo" to auto-fill its species and care needs.</div>
+      <div class="welcome-feature">${icon('pin', 20)} Pick where it lives, Indoor, Outdoor, or Balcony, so your shelf can be sorted and filtered by room later.</div>
     </div>
 
     <div class="settings-section">
       <div class="settings-section-title">2. Keep it watered</div>
-      <div class="welcome-feature"><span> </span> Tap the water drop on a plant's card whenever you water it. That resets its countdown and builds your care streak.</div>
-      <div class="welcome-feature"><span> </span> Water on schedule and you'll unlock streak badges, check "Badges" in the More menu anytime.</div>
+      <div class="welcome-feature">${icon('drop', 20)} Tap the water drop on a plant's card whenever you water it. That resets its countdown and builds your care streak.</div>
+      <div class="welcome-feature">${icon('flame', 20)} Water on schedule and you'll unlock streak badges, check "Badges" in the More menu anytime.</div>
     </div>
 
     <div class="settings-section">
       <div class="settings-section-title">3. Turn on real reminders</div>
-      <div class="welcome-feature"><span> </span> In Settings, switch on "Push reminders" so your phone notifies you when a plant is overdue, even with the app closed.</div>
+      <div class="welcome-feature">${icon('bell', 20)} In Settings, switch on "Push reminders" so your phone notifies you when a plant is overdue, even with the app closed.</div>
     </div>
 
     <div class="settings-section">
       <div class="settings-section-title">4. Explore the rest</div>
-      <div class="welcome-feature"><span> </span> The Guide tab has care info for dozens of common houseplants.</div>
-      <div class="welcome-feature"><span> </span> The Garden tab visually grows the better you keep up with care.</div>
-      <div class="welcome-feature"><span> </span> Journal (in the More menu) is for notes and photos over time; Cuttings tracks anything you're propagating.</div>
+      <div class="welcome-feature">${icon('guide', 20)} The Guide tab has care info for dozens of common houseplants.</div>
+      <div class="welcome-feature">${icon('garden', 20)} The Garden tab visually grows the better you keep up with care.</div>
+      <div class="welcome-feature">${icon('journal', 20)} Journal (in the More menu) is for notes and photos over time; Cuttings tracks anything you're propagating.</div>
     </div>
 
-    <button class="primary welcome-btn" id="finishTutorial" style="width:100%;margin-top:8px;">Let's go </button>
+    <button class="primary welcome-btn" id="finishTutorial" style="width:100%;margin-top:8px;">Let's go</button>
   `;
   return div;
 }
@@ -655,6 +655,7 @@ function renderCommunity() {
 
   div.innerHTML = `
     <div class="guide-hero">
+      <button class="guide-hero-back" id="communityBackBtn" aria-label="Back">${icon('back', 18)}</button>
       <div class="guide-hero-title">Community</div>
       <div class="guide-hero-sub">Plant-care tips and experiences from other plant parents</div>
     </div>
@@ -675,8 +676,6 @@ function renderCommunity() {
       <div class="settings-section-title">${state.communityLoading ? 'Loading…' : 'Recent tips'}</div>
       ${postsHtml}
     </div>
-
-    <button class="secondary" id="communityBackBtn" style="width:100%;margin-top:16px;">← Back</button>
   `;
 
   div.querySelector('#communityBackBtn').onclick = () => { state.currentView = state.hubReturnTo || 'hub'; render(); };
@@ -733,6 +732,7 @@ function renderPlantId() {
 
   div.innerHTML = `
     <div class="guide-hero">
+      <button class="guide-hero-back" id="plantIdBackBtn" aria-label="Back">${icon('back', 18)}</button>
       <div class="guide-hero-title">What plant is this?</div>
       <div class="guide-hero-sub">Snap a photo of any plant to find out what it is, no need to add it to your shelf.</div>
     </div>
@@ -740,12 +740,12 @@ function renderPlantId() {
       ${usedToday ? `
         <div class="identify-hint" style="padding:16px 0;">You've already used this today, come back tomorrow for another free check.</div>
       ` : `
-        <button class="id-photo-btn" id="plantIdPhotoBtn" type="button"> ${state.plantIdPhoto ? 'Change photo' : 'Take or choose a photo'}</button>
+        <button class="id-photo-btn" id="plantIdPhotoBtn" type="button">${icon('camera', 16)} ${state.plantIdPhoto ? 'Change photo' : 'Take or choose a photo'}</button>
         <input type="file" id="plantIdPhotoInput" accept="image/*" capture="environment" style="display:none;">
         ${state.plantIdPhoto ? `<img src="${state.plantIdPhoto}" alt="Selected plant photo preview" class="modal-photo-preview">` : ''}
         ${state.plantIdPhoto ? `
           <button class="identify-cta-btn" id="plantIdGoBtn" type="button">
-            <span class="identify-cta-emoji"> </span>
+            <span class="identify-cta-emoji">${icon('search', 20)}</span>
             <span class="identify-cta-text">
               <span class="identify-cta-title">Identify this plant</span>
               <span class="identify-cta-sub">Uses today's one free check</span>
@@ -757,7 +757,6 @@ function renderPlantId() {
       ${state.plantIdError ? `<div class="identify-status identify-error">${escapeHtml(state.plantIdError)}</div>` : ''}
       ${resultsHtml}
     </div>
-    <button class="secondary" id="plantIdBackBtn" style="width:100%;margin-top:16px;">← Back</button>
   `;
 
   div.querySelector('#plantIdBackBtn').onclick = () => { state.currentView = state.plantIdReturnTo || 'shelf'; render(); };
@@ -844,10 +843,10 @@ function renderAboutModal() {
       ${state.plants.length ? `
         <div class="about-journey">
           <div class="about-journey-title">Your journey so far</div>
-          <div class="about-journey-row"><span> </span> ${state.plants.length} plant${state.plants.length === 1 ? '' : 's'} in your care</div>
-          <div class="about-journey-row"><span> </span> ${totalWaterings} watering${totalWaterings === 1 ? '' : 's'} logged</div>
-          <div class="about-journey-row"><span> </span> Best streak: ${longestStreak} in a row</div>
-          ${daysSinceStart > 0 ? `<div class="about-journey-row"><span> </span> ${daysSinceStart} day${daysSinceStart === 1 ? '' : 's'} since your first plant</div>` : ''}
+          <div class="about-journey-row">${icon('plants', 16)} ${state.plants.length} plant${state.plants.length === 1 ? '' : 's'} in your care</div>
+          <div class="about-journey-row">${icon('drop', 16)} ${totalWaterings} watering${totalWaterings === 1 ? '' : 's'} logged</div>
+          <div class="about-journey-row">${icon('flame', 16)} Best streak: ${longestStreak} in a row</div>
+          ${daysSinceStart > 0 ? `<div class="about-journey-row">${icon('sprout', 16)} ${daysSinceStart} day${daysSinceStart === 1 ? '' : 's'} since your first plant</div>` : ''}
         </div>
       ` : ''}
       <div class="modal-actions">
@@ -902,6 +901,8 @@ const ICONS = {
   check: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7"/></svg>`,
   invite: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="3"/><circle cx="17" cy="9" r="2.5"/><path d="M3 20c0-3 2-5 5-5s5 2 5 5"/><path d="M14 20c0-2.2 1.5-4 4-4s4 1.8 4 4"/></svg>`,
   search: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M20 20l-4.8-4.8"/></svg>`,
+  back: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M15 19l-7-7 7-7"/></svg>`,
+  pin: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.5-7-11.5A7 7 0 0 1 19 9.5C19 14.5 12 21 12 21Z"/><circle cx="12" cy="9.5" r="2.3"/></svg>`,
 };
 
 function icon(name, size) {
@@ -1281,6 +1282,7 @@ function renderSettings() {
 
   div.innerHTML = `
     <div class="guide-hero">
+      <button class="guide-hero-back" id="settingsBackBtn" aria-label="Back">${icon('back', 18)}</button>
       <div class="guide-hero-title">Settings</div>
       <div class="guide-hero-sub">Everything about how Plant Parent looks and behaves</div>
     </div>
@@ -1425,8 +1427,6 @@ function renderSettings() {
         <button class="secondary" id="settingsAboutBtn">View</button>
       </div>
     </div>
-
-    <button class="secondary" id="settingsBackBtn" style="width:100%;margin-top:4px;">← Back</button>
   `;
 
   div.querySelector('#settingsBackBtn').onclick = () => { state.currentView = 'shelf'; render(); };
@@ -2299,8 +2299,8 @@ function buildDictionaryCardsHtml(list, search) {
         <div class="dictionary-name">${s.name}</div>
         ${s.latin ? `<div class="dictionary-latin">${s.latin}</div>` : ''}
         <div class="dictionary-meta-row">
-          <span class="dictionary-meta-pill"> ${s.light}</span>
-          <span class="dictionary-meta-pill"> every ${s.freq}d</span>
+          <span class="dictionary-meta-pill">${icon('sun', 12)} ${s.light}</span>
+          <span class="dictionary-meta-pill">${icon('drop', 12)} every ${s.freq}d</span>
         </div>
         <div class="dictionary-desc">${s.desc}</div>
         <button class="secondary dictionary-add-btn" data-id="${s.id}">+ Add one like this</button>
@@ -2789,7 +2789,7 @@ function renderDetail(p) {
 
     <div class="section-label">notes</div>
     <textarea class="notes-input" id="notesInput" aria-label="Notes" placeholder="e.g. repot in spring, keep away from cold drafts…">${p.notes || ''}</textarea>
-    ${p.speciesDesc ? `<div class="species-desc"> <strong>${p.species}:</strong> ${p.speciesDesc}</div>` : ''}
+    ${p.speciesDesc ? `<div class="species-desc">${icon('leaf', 14)} <strong>${p.species}:</strong> ${p.speciesDesc}</div>` : ''}
 
     <div class="section-label">streak</div>
     <div class="streak-row">
@@ -2979,12 +2979,12 @@ function renderModal() {
       <h3>${isEditing ? 'Edit plant' : 'Add a plant'}</h3>
       <div class="field">
         <label>Photo (optional)</label>
-        <button class="id-photo-btn" id="modalPhotoBtn" type="button"> ${state.pendingModalPhoto ? 'Change photo' : 'Add a photo'}</button>
+        <button class="id-photo-btn" id="modalPhotoBtn" type="button">${icon('camera', 16)} ${state.pendingModalPhoto ? 'Change photo' : 'Add a photo'}</button>
         <input type="file" id="modalPhotoInput" accept="image/*" capture="environment" style="display:none;">
         ${preview}
         ${state.pendingModalPhoto ? `
           <button class="identify-cta-btn" id="identifyBtn" type="button">
-            <span class="identify-cta-emoji"> </span>
+            <span class="identify-cta-emoji">${icon('search', 20)}</span>
             <span class="identify-cta-text">
               <span class="identify-cta-title">Identify this plant</span>
               <span class="identify-cta-sub">Auto-fill species &amp; care from your photo</span>
