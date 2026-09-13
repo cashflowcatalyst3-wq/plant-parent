@@ -1288,86 +1288,116 @@ function renderSettings() {
     <div class="settings-section">
       <div class="settings-section-title">Help</div>
       <div class="settings-row">
-        <div class="settings-row-label">
-          <div class="settings-row-name">How to use this app</div>
-          <div class="settings-row-desc">A quick walkthrough of the basics</div>
+        <div class="settings-row-left">
+          <div class="settings-row-icon">${icon('guide', 18)}</div>
+          <div class="settings-row-label">
+            <div class="settings-row-name">How to use this app</div>
+            <div class="settings-row-desc">A quick walkthrough of the basics</div>
+          </div>
         </div>
-        <button class="secondary" id="settingsTutorialBtn">${icon('guide', 16)} View</button>
+        <button class="secondary" id="settingsTutorialBtn">View</button>
       </div>
     </div>
 
     <div class="settings-section">
       <div class="settings-section-title">Appearance</div>
       <div class="settings-row">
-        <div class="settings-row-label">
-          <div class="settings-row-name">Theme</div>
-          <div class="settings-row-desc">Current: ${THEMES.find(t => t.id === state.theme)?.name || 'Sage'}</div>
+        <div class="settings-row-left">
+          <div class="settings-row-icon">${icon('palette', 18)}</div>
+          <div class="settings-row-label">
+            <div class="settings-row-name">Theme</div>
+            <div class="settings-row-desc">Current: ${THEMES.find(t => t.id === state.theme)?.name || 'Sage'}</div>
+          </div>
         </div>
-        <button class="secondary" id="settingsThemeBtn">${icon('palette', 16)} Change</button>
+        <button class="secondary" id="settingsThemeBtn">Change</button>
       </div>
       <div class="settings-row">
-        <div class="settings-row-label">
-          <div class="settings-row-name">Dark mode</div>
-          <div class="settings-row-desc">Easier on the eyes at night</div>
+        <div class="settings-row-left">
+          <div class="settings-row-icon">${icon(state.darkMode ? 'moon' : 'sun', 18)}</div>
+          <div class="settings-row-label">
+            <div class="settings-row-name">Dark mode</div>
+            <div class="settings-row-desc">Easier on the eyes at night</div>
+          </div>
         </div>
-        <button class="secondary ${state.darkMode ? 'settings-toggle-on' : ''}" id="settingsDarkModeBtn">${icon(state.darkMode ? 'moon' : 'sun', 16)} ${state.darkMode ? 'On' : 'Off'}</button>
+        <button class="toggle-switch ${state.darkMode ? 'toggle-switch-on' : ''}" id="settingsDarkModeBtn" role="switch" aria-checked="${state.darkMode}" aria-label="Dark mode"><span class="toggle-knob"></span></button>
       </div>
       <div class="settings-row">
-        <div class="settings-row-label">
-          <div class="settings-row-name">Sound effects</div>
-          <div class="settings-row-desc">Taps, watering chimes, and game sounds</div>
+        <div class="settings-row-left">
+          <div class="settings-row-icon">${icon(state.soundEnabled ? 'bell' : 'bell-off', 18)}</div>
+          <div class="settings-row-label">
+            <div class="settings-row-name">Sound effects</div>
+            <div class="settings-row-desc">Taps, watering chimes, and game sounds</div>
+          </div>
         </div>
-        <button class="secondary ${state.soundEnabled ? 'settings-toggle-on' : ''}" id="settingsSoundBtn">${icon(state.soundEnabled ? 'bell' : 'bell-off', 16)} ${state.soundEnabled ? 'On' : 'Off'}</button>
+        <button class="toggle-switch ${state.soundEnabled ? 'toggle-switch-on' : ''}" id="settingsSoundBtn" role="switch" aria-checked="${state.soundEnabled}" aria-label="Sound effects"><span class="toggle-knob"></span></button>
       </div>
     </div>
 
     <div class="settings-section">
       <div class="settings-section-title">Reminders</div>
       <div class="settings-row">
-        <div class="settings-row-label">
-          <div class="settings-row-name">Push reminders</div>
-          <div class="settings-row-desc">Real phone notifications for overdue plants</div>
+        <div class="settings-row-left">
+          <div class="settings-row-icon">${icon('bell', 18)}</div>
+          <div class="settings-row-label">
+            <div class="settings-row-name">Push reminders</div>
+            <div class="settings-row-desc">Real phone notifications for overdue plants</div>
+          </div>
         </div>
-        <button class="secondary ${state.notificationsEnabled ? 'settings-toggle-on' : ''}" id="settingsNotifBtn">${icon('bell', 16)} ${state.notificationsEnabled ? 'On' : 'Off'}</button>
+        <button class="toggle-switch ${state.notificationsEnabled ? 'toggle-switch-on' : ''}" id="settingsNotifBtn" role="switch" aria-checked="${state.notificationsEnabled}" aria-label="Push reminders"><span class="toggle-knob"></span></button>
       </div>
       <div class="settings-row">
-        <div class="settings-row-label">
-          <div class="settings-row-name">Weather tips</div>
-          <div class="settings-row-desc">Watering nudges based on local weather</div>
+        <div class="settings-row-left">
+          <div class="settings-row-icon">${icon('cloud', 18)}</div>
+          <div class="settings-row-label">
+            <div class="settings-row-name">Weather tips</div>
+            <div class="settings-row-desc">Watering nudges based on local weather</div>
+          </div>
         </div>
-        <button class="secondary ${state.weatherEnabled ? 'settings-toggle-on' : ''}" id="settingsWeatherBtn">${icon('cloud', 16)} ${state.weatherEnabled ? 'On' : 'Off'}</button>
+        <button class="toggle-switch ${state.weatherEnabled ? 'toggle-switch-on' : ''}" id="settingsWeatherBtn" role="switch" aria-checked="${state.weatherEnabled}" aria-label="Weather tips"><span class="toggle-knob"></span></button>
       </div>
       <div class="settings-row">
-        <div class="settings-row-label">
-          <div class="settings-row-name">Seasonal tips</div>
-          <div class="settings-row-desc">A care nudge based on the time of year</div>
+        <div class="settings-row-left">
+          <div class="settings-row-icon">${icon('sun', 18)}</div>
+          <div class="settings-row-label">
+            <div class="settings-row-name">Seasonal tips</div>
+            <div class="settings-row-desc">A care nudge based on the time of year</div>
+          </div>
         </div>
-        <button class="secondary ${state.seasonalTipsEnabled ? 'settings-toggle-on' : ''}" id="settingsSeasonalBtn">${icon('sun', 16)} ${state.seasonalTipsEnabled ? 'On' : 'Off'}</button>
+        <button class="toggle-switch ${state.seasonalTipsEnabled ? 'toggle-switch-on' : ''}" id="settingsSeasonalBtn" role="switch" aria-checked="${state.seasonalTipsEnabled}" aria-label="Seasonal tips"><span class="toggle-knob"></span></button>
       </div>
     </div>
 
     <div class="settings-section">
       <div class="settings-section-title">Sync &amp; backup</div>
       <div class="settings-row">
-        <div class="settings-row-label">
-          <div class="settings-row-name">Sync across devices</div>
-          <div class="settings-row-desc">${state.syncCode ? `Linked · code ${state.syncCode}` : 'Not linked to another device'}</div>
+        <div class="settings-row-left">
+          <div class="settings-row-icon">${icon('sync', 18)}</div>
+          <div class="settings-row-label">
+            <div class="settings-row-name">Sync across devices</div>
+            <div class="settings-row-desc">${state.syncCode ? `Linked · code ${state.syncCode}` : 'Not linked to another device'}</div>
+          </div>
         </div>
-        <button class="secondary" id="settingsSyncBtn">${icon('sync', 16)} ${state.syncCode ? 'Manage' : 'Set up'}</button>
+        <button class="secondary" id="settingsSyncBtn">${state.syncCode ? 'Manage' : 'Set up'}</button>
       </div>
       <div class="settings-row">
-        <div class="settings-row-label">
-          <div class="settings-row-name">Back up my plants</div>
-          <div class="settings-row-desc">Download everything as a file</div>
+        <div class="settings-row-left">
+          <div class="settings-row-icon">${icon('download', 18)}</div>
+          <div class="settings-row-label">
+            <div class="settings-row-name">Back up my plants</div>
+            <div class="settings-row-desc">Download everything as a file</div>
+          </div>
         </div>
-        <button class="secondary" id="settingsExportBtn">${icon('download', 16)} Back up</button>
+        <button class="secondary" id="settingsExportBtn">Back up</button>
       </div>
       <div class="settings-row">
-        <div class="settings-row-label">
-          <div class="settings-row-name">Restore from backup</div>
-          <div class="settings-row-desc">Replace current plants with a backup file</div>
+        <div class="settings-row-left">
+          <div class="settings-row-icon">${icon('upload', 18)}</div>
+          <div class="settings-row-label">
+            <div class="settings-row-name">Restore from backup</div>
+            <div class="settings-row-desc">Replace current plants with a backup file</div>
+          </div>
         </div>
-        <button class="secondary" id="settingsImportBtn">${icon('upload', 16)} Restore</button>
+        <button class="secondary" id="settingsImportBtn">Restore</button>
         <input type="file" id="settingsImportFileInput" accept="application/json" style="display:none;">
       </div>
     </div>
@@ -1375,22 +1405,31 @@ function renderSettings() {
     <div class="settings-section">
       <div class="settings-section-title">Community</div>
       <div class="settings-row">
-        <div class="settings-row-label">
-          <div class="settings-row-name">Invite a friend</div>
-          <div class="settings-row-desc">Share a QR code or link to the app</div>
+        <div class="settings-row-left">
+          <div class="settings-row-icon">${icon('mail', 18)}</div>
+          <div class="settings-row-label">
+            <div class="settings-row-name">Invite a friend</div>
+            <div class="settings-row-desc">Share a QR code or link to the app</div>
+          </div>
         </div>
-        <button class="secondary" id="settingsInviteBtn">${icon('mail', 16)} Invite</button>
+        <button class="secondary" id="settingsInviteBtn">Invite</button>
       </div>
       <div class="settings-row">
-        <div class="settings-row-label">
-          <div class="settings-row-name">About Plant Parent</div>
-          <div class="settings-row-desc">The story behind the app, and your stats</div>
+        <div class="settings-row-left">
+          <div class="settings-row-icon">${icon('plants', 18)}</div>
+          <div class="settings-row-label">
+            <div class="settings-row-name">About Plant Parent</div>
+            <div class="settings-row-desc">The story behind the app, and your stats</div>
+          </div>
         </div>
-        <button class="secondary" id="settingsAboutBtn">${icon('plants', 16)} View</button>
+        <button class="secondary" id="settingsAboutBtn">View</button>
       </div>
     </div>
+
+    <button class="secondary" id="settingsBackBtn" style="width:100%;margin-top:4px;">← Back</button>
   `;
 
+  div.querySelector('#settingsBackBtn').onclick = () => { state.currentView = 'shelf'; render(); };
   div.querySelector('#settingsTutorialBtn').onclick = () => { state.tutorialReturnView = 'settings'; state.currentView = 'tutorial'; render(); };
   div.querySelector('#settingsThemeBtn').onclick = () => { state.showThemeModal = true; render(); };
   div.querySelector('#settingsDarkModeBtn').onclick = () => toggleDarkMode();

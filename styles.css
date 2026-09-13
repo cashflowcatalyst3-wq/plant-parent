@@ -1774,11 +1774,11 @@
     display: flex;
     align-items: center;
     gap: 10px;
-    padding: 8px 6px;
-    border-bottom: 1px solid var(--line);
+    padding: 10px 8px;
+    border-radius: 10px;
     font-size: 13px;
   }
-  .leaderboard-row:last-child { border-bottom: none; }
+  .leaderboard-row:nth-child(even) { background: var(--panel5); }
   .leaderboard-row-me {
     background: var(--panel5);
     border-radius: 8px;
@@ -1822,18 +1822,17 @@
   .settings-page { max-width: 640px; margin: 0 auto; }
   .settings-section {
     background: var(--card);
-    border-radius: 16px;
+    border-radius: 22px;
     padding: 8px 20px;
     box-shadow: var(--shadow);
     margin-bottom: 20px;
   }
   .settings-section-title {
-    font-family: 'Nunito', sans-serif; font-weight: 700;
-    font-style: italic;
+    font-family: 'Roboto', sans-serif; font-weight: 700;
     font-size: 12px;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: var(--soil);
+    color: var(--ink);
     padding: 14px 0 6px;
   }
   .settings-row {
@@ -1842,7 +1841,23 @@
     justify-content: space-between;
     gap: 12px;
     padding: 14px 0;
-    border-top: 1px solid var(--line);
+  }
+  .settings-row-icon {
+    width: 34px;
+    height: 34px;
+    flex-shrink: 0;
+    border-radius: 10px;
+    background: var(--panel4);
+    color: var(--sage);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .settings-row-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 0;
   }
   .settings-row-name {
     font-family: 'Roboto', sans-serif;
@@ -1867,6 +1882,31 @@
     color: #fff !important;
     border-color: var(--sage) !important;
   }
+  .toggle-switch {
+    position: relative;
+    width: 44px;
+    height: 26px;
+    flex-shrink: 0;
+    border-radius: 14px;
+    border: none;
+    background: var(--panel4);
+    cursor: pointer;
+    padding: 0;
+    transition: background 0.15s ease;
+  }
+  .toggle-switch-on { background: var(--sage); }
+  .toggle-knob {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+    transition: left 0.15s ease;
+  }
+  .toggle-switch-on .toggle-knob { left: 21px; }
 
   /* Accessibility: visible keyboard focus */
   button:focus-visible,
