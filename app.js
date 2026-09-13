@@ -1744,8 +1744,7 @@ function render() {
           <h1 class="app-topbar-title"><span class="brand-plant">Plant</span> <span class="brand-parent">Parent</span></h1>
         </header>
 
-        ${!state.mobileDetailOpen ? `
-          <div class="daily-card ${taskDone ? 'daily-card-done' : ''}">
+        <div class="daily-card ${taskDone ? 'daily-card-done' : ''}">
             <div class="daily-emoji">${icon(taskDone ? 'check' : task.emoji, 22)}</div>
             <div class="daily-text">
               <div class="daily-label">Today's little thing</div>
@@ -1766,7 +1765,6 @@ function render() {
               <div class="weather-text">${tip.text}</div>
             </div>
           `; })() : ''}
-        ` : ''}
       ` : ''}
 
       ${state.currentView === 'garden' ? `<div id="gardenView"></div>` : ''}
@@ -2597,7 +2595,7 @@ function ringPortrait(p, size, strokeWidth) {
   const photoSize = size - strokeWidth * 2.6;
   const inner = p.photo
     ? `<img src="${p.photo}" alt="Photo of ${p.name}" class="ring-photo" style="width:${photoSize}px;height:${photoSize}px;">`
-    : `<div class="ring-photo ring-photo-placeholder" style="width:${photoSize}px;height:${photoSize}px;font-size:${photoSize*0.4}px;" role="img" aria-label="No photo yet"> </div>`;
+    : `<div class="ring-photo ring-photo-placeholder" style="width:${photoSize}px;height:${photoSize}px;" role="img" aria-label="No photo yet">${icon('leaf', Math.round(photoSize * 0.45))}</div>`;
   return `
     <div class="ring-wrap" style="width:${size}px;height:${size}px;">
       <svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">

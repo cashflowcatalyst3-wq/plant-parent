@@ -9,13 +9,13 @@
     --clay-light: #DBA08D;
     --mustard: #E8B84B;
     --soil: #6B6B62;
-    --card: #FBF8F2;
+    --card: #F1EBDD;
     --line: #EAE2D6;
-    --shadow: 0 2px 12px rgba(43,43,38,0.08);
-    --panel2: #FBF8F2;
+    --shadow: 0 2px 12px rgba(43,43,38,0.10);
+    --panel2: #F1EBDD;
     --panel3: #EAE2D6;
     --panel4: #EEEEEE;
-    --panel5: #F3EFE4;
+    --panel5: #ECE5D5;
     --info-tint: #F5EBD3;
   }
 
@@ -638,6 +638,10 @@
     /* Once a plant is selected: show only the detail panel, hide the list */
     .layout.mobile-detail-open .shelf-column { display: none; }
     .layout.mobile-detail-open .panel { display: block; }
+    body:has(.layout.mobile-detail-open) .daily-card,
+    body:has(.layout.mobile-detail-open) .weather-card {
+      display: none;
+    }
     .detail-topbar { justify-content: space-between; }
     .back-to-plants-btn { display: inline-block; }
   }
