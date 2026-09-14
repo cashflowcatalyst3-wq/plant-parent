@@ -117,7 +117,9 @@ This page isn't linked from anywhere in the app itself — only people with the 
 - **Photos**: tap the ring in a plant's detail view (or add one when creating a plant) to give it a portrait — it shows right inside the watering ring
 - **Streaks & history**: every "Water now" is logged, with a streak counter for consecutive on-time waterings and a short history list
 - **Push notifications**: a daily automated check sends a real phone notification for anything overdue
-
+## What's new in this version
+- **Full visual redesign**: sage green and cream palette, rounded tile cards, circular progress rings, and a cleaner grouped settings layout. Every emoji in the UI has been replaced with a consistent line-icon set, and the home screen is now a tile grid showing your plants, garden health, due-today count, and species guide at a glance.
+- **Two game visuals updated**: Raindrop Catch and Memory Match now use SVG plant icons instead of emoji, keeping the whole app visually consistent.
 ## Notes
 - The VAPID keys above are safe to use — they're specific to this app and don't cost anything or require any account beyond what's already set up.
 - Push notification support on iPhone requires iOS 16.4 or later and only works after the app is added to your home screen (not from a regular Safari tab).
