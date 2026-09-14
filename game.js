@@ -6,25 +6,23 @@
   let bestCombo = 0;
   let spawnTimer = null;
   let countdownTimer = null;
-  let elapsed = 0; // seconds since game start, drives difficulty ramp
+  let elapsed = 0;
 
   const GAME_LENGTH = 30;
-  const HAZARD_TYPES = ['🥀', '🐛'];
 
-  function comboMultiplier() {
-    // +1x every 5-catch combo streak, capped at 4x so skilled play meaningfully
-    // outscores casual tapping without becoming unbounded.
-    return Math.min(4, 1 + Math.floor(combo / 5));
-  }
+  // SVG icons for game items — no emoji
+  const DROP_SVG = '<svg viewBox="0 0 24 24" fill="#8B9A6E" stroke="none"><path d="M12 3c4 5 7 8.5 7 12a7 7 0 1 1-14 0c0-3.5 3-7 7-12Z"/></svg>';
+  const HAZARD_SVGS = [
+    '<svg viewBox="0 0 24 24" fill="#C97B63" stroke="none"><circle cx="12" cy="12" r="8"/><circle cx="9" cy="10" r="1.5" fill="#fff"/><circle cx="15" cy="10" r="1.5" fill="#fff"/></svg>',
+    '<svg viewBox="0 0 24 24" fill="#6B6B62" stroke="none"><ellipse cx="12" cy="13" rx="6" ry="8"/><circle cx="9.5" cy="11" r="1.5" fill="#fff"/><circle cx="14.5" cy="11" r="1.5" fill="#fff"/><path d="M9 5 Q10 2 12 3 Q14 2 15 5" stroke="#6B6B62" stroke-width="1.5" fill="none"/></svg>'
+  ];
 
+  function comboMultiplier() { return Math.min(4, 1 + Math.floor(combo / 5)); }
   function currentSpawnInterval() {
-    // Starts at 700ms, ramps down to 320ms by the end of the round.
     const progress = Math.min(1, elapsed / GAME_LENGTH);
     return Math.round(700 - progress * 380);
   }
-
   function currentFallDuration() {
-    // Starts slow (2.4-3.6s), ramps down to fast (1.1-1.7s) by the end.
     const progress = Math.min(1, elapsed / GAME_LENGTH);
     const minD = 2.4 - progress * 1.3;
     const maxD = 3.6 - progress * 1.9;
@@ -39,11 +37,7 @@
 
   function openMiniGame() {
     if (document.getElementById('gameBackdrop')) return;
-    score = 0;
-    timeLeft = GAME_LENGTH;
-    combo = 0;
-    bestCombo = 0;
-    elapsed = 0;
+    score = 0; timeLeft = GAME_LENGTH; combo = 0; bestCombo = 0; elapsed = 0;
     gameActive = true;
 
     const highScore = (typeof state !== 'undefined' && state.gameHighScore) || 0;
@@ -60,7 +54,7 @@
         </div>
         <div class="game-combo" id="gameCombo"></div>
         <div class="game-area" id="gameArea"></div>
-        <div class="game-hint">Tap 💧 drops, avoid 🥀 and 🐛. Chain catches for a combo multiplier!</div>
+        <div class="game-hint">Catch the green drops, avoid the terracotta and gray ones. Chain catches for a multiplier.</div>
         <div class="modal-actions">
           <button class="secondary" id="closeGame">Close</button>
         </div>
@@ -69,15 +63,12 @@
     document.body.appendChild(backdrop);
 
     backdrop.addEventListener('click', (e) => {
-      if (e.target.id === 'gameBackdrop' || e.target.id === 'closeGame') {
-        endGame(true);
-      }
+      if (e.target.id === 'gameBackdrop' || e.target.id === 'closeGame') endGame(true);
     });
 
     scheduleNextSpawn();
     countdownTimer = setInterval(() => {
-      timeLeft--;
-      elapsed++;
+      timeLeft--; elapsed++;
       const timeEl = document.getElementById('gameTime');
       if (timeEl) timeEl.textContent = timeLeft;
       if (timeLeft <= 0) endGame(false);
@@ -90,11 +81,13 @@
     if (!area) return;
 
     const drop = document.createElement('div');
-    const isHazard = Math.random() < 0.22; // roughly 1 in 5 drops is something to avoid
-    const symbol = isHazard ? HAZARD_TYPES[Math.floor(Math.random() * HAZARD_TYPES.length)] : '💧';
+    const isHazard = Math.random() < 0.22;
+    const svg = isHazard
+      ? HAZARD_SVGS[Math.floor(Math.random() * HAZARD_SVGS.length)]
+      : DROP_SVG;
     drop.className = 'raindrop' + (isHazard ? ' raindrop-hazard' : '');
     drop.dataset.hazard = isHazard ? '1' : '0';
-    drop.textContent = symbol;
+    drop.innerHTML = svg;
     const left = 5 + Math.random() * 85;
     const duration = currentFallDuration();
     drop.style.left = left + '%';
@@ -112,7 +105,7 @@
     if (!el) return;
     const mult = comboMultiplier();
     if (combo >= 3) {
-      el.textContent = `🔥 ${combo}-combo · ${mult}x`;
+      el.textContent = `${combo}-combo, ${mult}x`;
       el.classList.add('game-combo-active');
     } else {
       el.textContent = '';
@@ -151,22 +144,19 @@
     const backdrop = document.getElementById('gameBackdrop');
     if (!backdrop) return;
 
-    if (skipResult) {
-      backdrop.remove();
-      return;
-    }
+    if (skipResult) { backdrop.remove(); return; }
 
     const isNewHigh = typeof state !== 'undefined' && score > (state.gameHighScore || 0);
     if (window.recordGameScore) window.recordGameScore(score);
 
     const modal = backdrop.querySelector('.modal');
     modal.innerHTML = `
-      <h3>Time's up! 🌦️</h3>
+      <h3>Time's up</h3>
       <div class="game-result">
         <div class="game-result-score">${score}</div>
         <div class="game-result-label">points scored</div>
         <div class="game-result-sub">Best combo: ${bestCombo} in a row</div>
-        ${isNewHigh ? '<div class="game-new-high">✨ New high score!</div>' : ''}
+        ${isNewHigh ? '<div class="game-new-high">New high score</div>' : ''}
       </div>
       <div class="modal-actions">
         <button class="secondary" id="closeGameResult">Close</button>
