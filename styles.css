@@ -1082,13 +1082,26 @@ button.secondary:hover { background: var(--panel3); }
   100% { transform: translateY(-320px) translateX(-10px) rotate(360deg); opacity: 0; }
 }
 .garden-summary-banner {
-  position: relative; z-index: 2;
-  font-family: 'Nunito', sans-serif; font-weight: 700;
-  font-size: 17px; text-align: center; color: var(--ink);
-  background: rgba(251,248,242,0.85);
-  backdrop-filter: blur(2px);
-  padding: 12px 22px; margin: 20px auto 0;
-  border-radius: 16px; width: fit-content;
+  position: relative;
+  z-index: 2;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 700;
+  font-size: 17px;
+  text-align: center;
+  color: #2B2B26;
+  background: rgba(255, 255, 255, 0.92);
+  padding: 12px 22px;
+  margin: 20px auto 0;
+  border-radius: 16px;
+  width: fit-content;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(8px);
+}
+
+body[data-mode="dark"] .garden-summary-banner {
+  background: rgba(28, 27, 22, 0.92);
+  color: #F2EEE4;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.5);
 }
 .garden-empty {
   position: relative; z-index: 2; text-align: center;
@@ -1132,12 +1145,24 @@ button.secondary:hover { background: var(--panel3); }
   margin-top: -8px;
 }
 .garden-plant-name {
-  font-family: 'Roboto', sans-serif; font-size: 11px;
-  font-weight: 600; color: var(--soil); margin-top: 8px;
-  max-width: 76px; text-align: center;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  background: rgba(251,248,242,0.75);
-  border-radius: 10px; padding: 3px 10px;
+  font-family: 'Roboto', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: #2B2B26;
+  margin-top: 8px;
+  max-width: 76px;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background: rgba(255, 255, 255, 0.92);
+  border-radius: 10px;
+  padding: 3px 10px;
+}
+
+body[data-mode="dark"] .garden-plant-name {
+  background: rgba(28, 27, 22, 0.92);
+  color: #F2EEE4;
 }
 @media (prefers-reduced-motion: reduce) {
   .garden-cloud, .garden-leaf, .garden-plant-emoji { animation: none !important; }
@@ -1327,4 +1352,11 @@ select:focus-visible, .memory-card:focus-visible,
   .tile-grid { grid-template-columns: 1fr; }
   .tile-card-wide { grid-column: span 1; }
   .bottom-nav { border-radius: 20px 20px 0 0; }
+}
+
+.freq-hint {
+  font-size: 12px;
+  color: var(--soil);
+  margin-top: 8px;
+  line-height: 1.6;
 }
