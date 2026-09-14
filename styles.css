@@ -3089,3 +3089,9 @@ body[data-mode="dark"] .guide-hero-banner {
   background: var(--sage);
   color: #fff;
 }
+.memory-card-back svg { width: 65%; height: 65%; }
+.memory-card-front svg { width: 78%; height: 78%; }
+
+.memory-card-front {
+  background: var(--tile-sage);
+}
