@@ -24,39 +24,48 @@
   let gameEnded = false;
   let completionRecorded = false;
 
-  // SVG map for each species (matches SPECIES_DICTIONARY ids)
+  // 12 distinct, filled, chunky icons — each visually different so they
+  // can never be confused with each other on a small card.
   const SPECIES_SVGS = {
-    pothos: '<svg viewBox="0 0 24 24" fill="#8B9A6E"><path d="M5 19c0-8 4-13 14-14-1 10-6 14-14 14Z"/></svg>',
-    'fiddle-leaf-fig': '<svg viewBox="0 0 24 24" fill="#8B9A6E"><path d="M12 21V11"/><path d="M12 11C12 11 6 11 6 5C12 5 12 11 12 11Z"/><path d="M12 13C12 13 18 13 18 7C12 7 12 13 12 13Z"/></svg>',
-    'snake-plant': '<svg viewBox="0 0 24 24" fill="#8B9A6E"><path d="M8 20 Q6 12 10 4 Q12 12 12 20 Z"/><path d="M12 20 Q12 12 16 4 Q18 12 16 20 Z"/></svg>',
-    monstera: '<svg viewBox="0 0 24 24" fill="#8B9A6E"><path d="M12 21V11"/><path d="M12 11C12 11 6 11 6 5C12 5 12 11 12 11Z"/><path d="M12 13C12 13 18 13 18 7C12 7 12 13 12 13Z"/></svg>',
-    succulent: '<svg viewBox="0 0 24 24" fill="#8B9A6E"><circle cx="12" cy="12" r="4"/><circle cx="6" cy="15" r="3"/><circle cx="18" cy="15" r="3"/><circle cx="9" cy="7" r="3"/><circle cx="15" cy="7" r="3"/></svg>',
-    'zz-plant': '<svg viewBox="0 0 24 24" fill="#8B9A6E"><rect x="10" y="6" width="4" height="14" rx="2"/><rect x="6" y="10" width="4" height="6" rx="2"/><rect x="14" y="8" width="4" height="7" rx="2"/></svg>',
-    'peace-lily': '<svg viewBox="0 0 24 24" fill="#8B9A6E"><path d="M12 20V11"/><path d="M12 11 C 8 11 6 8 6 4 C 10 4 12 7 12 11 Z"/><path d="M12 11 C 16 11 18 8 18 4 C 14 4 12 7 12 11 Z"/><circle cx="12" cy="8" r="2" fill="#E8B84B"/></svg>',
-    'spider-plant': '<svg viewBox="0 0 24 24" fill="#8B9A6E"><path d="M12 20V4"/><path d="M8 20 Q6 12 4 6"/><path d="M16 20 Q18 12 20 6"/><path d="M10 20 Q8 14 6 10"/><path d="M14 20 Q16 14 18 10"/></svg>',
-    orchid: '<svg viewBox="0 0 24 24" fill="#C97B63"><circle cx="12" cy="10" r="4"/><circle cx="7" cy="12" r="3"/><circle cx="17" cy="12" r="3"/><circle cx="12" cy="15" r="3"/><circle cx="12" cy="10" r="1.5" fill="#E8B84B"/></svg>',
-    aloe: '<svg viewBox="0 0 24 24" fill="#8B9A6E"><path d="M12 22 Q10 12 12 4 Q14 12 12 22 Z"/><path d="M12 22 Q6 14 6 8 Q10 12 12 22 Z"/><path d="M12 22 Q18 14 18 8 Q14 12 12 22 Z"/></svg>',
-    'rubber-plant': '<svg viewBox="0 0 24 24" fill="#8B9A6E"><ellipse cx="12" cy="12" rx="6" ry="9"/><path d="M12 3 V 21" stroke="#F7F2EB" stroke-width="1"/></svg>',
-    philodendron: '<svg viewBox="0 0 24 24" fill="#8B9A6E"><path d="M5 19c0-8 4-13 14-14-1 10-6 14-14 14Z"/><path d="M6 18c3-3 5-6 6-10"/></svg>',
-    cactus: '<svg viewBox="0 0 24 24" fill="#8B9A6E"><rect x="10" y="6" width="4" height="14" rx="2"/><rect x="6" y="10" width="4" height="6" rx="2"/><rect x="14" y="8" width="4" height="7" rx="2"/></svg>',
-    fern: '<svg viewBox="0 0 24 24" fill="#8B9A6E"><path d="M12 22V4"/><path d="M12 8 L8 5"/><path d="M12 8 L16 5"/><path d="M12 12 L7 9"/><path d="M12 12 L17 9"/><path d="M12 16 L8 13"/><path d="M12 16 L16 13"/></svg>',
-    basil: '<svg viewBox="0 0 24 24" fill="#8B9A6E"><ellipse cx="9" cy="10" rx="4" ry="6" transform="rotate(-20 9 10)"/><ellipse cx="15" cy="10" rx="4" ry="6" transform="rotate(20 15 10)"/><path d="M12 22 V 14"/></svg>',
-    'bird-of-paradise': '<svg viewBox="0 0 24 24" fill="#8B9A6E"><path d="M12 22 V 8"/><path d="M12 8 L6 4"/><path d="M12 8 L18 4"/><path d="M12 12 L7 8"/><path d="M12 12 L17 8"/></svg>',
-    calathea: '<svg viewBox="0 0 24 24" fill="#8B9A6E"><ellipse cx="12" cy="12" rx="6" ry="9"/><path d="M12 3 V 21" stroke="#F7F2EB" stroke-width="1"/></svg>',
-    'jade-plant': '<svg viewBox="0 0 24 24" fill="#8B9A6E"><circle cx="8" cy="8" r="3"/><circle cx="16" cy="8" r="3"/><circle cx="12" cy="12" r="3"/><circle cx="8" cy="16" r="3"/><circle cx="16" cy="16" r="3"/></svg>',
-    dracaena: '<svg viewBox="0 0 24 24" fill="#8B9A6E"><path d="M8 20 Q6 12 10 4 Q12 12 12 20 Z"/><path d="M12 20 Q12 12 16 4 Q18 12 16 20 Z"/></svg>',
-    croton: '<svg viewBox="0 0 24 24" fill="#C9622E"><ellipse cx="12" cy="10" rx="4" ry="6"/><ellipse cx="6" cy="14" rx="3" ry="4" transform="rotate(-30 6 14)"/><ellipse cx="18" cy="14" rx="3" ry="4" transform="rotate(30 18 14)"/></svg>',
-    anthurium: '<svg viewBox="0 0 24 24" fill="#D94F4F"><path d="M12 20 L12 10"/><path d="M12 12 C 8 12 6 9 6 5 C 10 5 12 8 12 12 Z"/><path d="M12 12 C 16 12 18 9 18 5 C 14 5 12 8 12 12 Z"/></svg>',
-    'chinese-money-plant': '<svg viewBox="0 0 24 24" fill="#8B9A6E"><circle cx="8" cy="8" r="3"/><circle cx="16" cy="8" r="3"/><circle cx="12" cy="14" r="3"/><circle cx="8" cy="18" r="2.5"/><circle cx="16" cy="18" r="2.5"/></svg>',
-    'air-plant': '<svg viewBox="0 0 24 24" fill="#8B9A6E"><path d="M12 22 Q8 16 8 10 Q12 14 12 22 Z"/><path d="M12 22 Q16 16 16 10 Q12 14 12 22 Z"/></svg>',
-    'christmas-cactus': '<svg viewBox="0 0 24 24" fill="#8B9A6E"><rect x="10" y="6" width="4" height="14" rx="2"/><rect x="6" y="10" width="4" height="6" rx="2"/><rect x="14" y="8" width="4" height="7" rx="2"/></svg>',
-    'english-ivy': '<svg viewBox="0 0 24 24" fill="#8B9A6E"><path d="M5 19c0-8 4-13 14-14-1 10-6 14-14 14Z"/></svg>',
-    'prayer-plant': '<svg viewBox="0 0 24 24" fill="#8B9A6E"><ellipse cx="12" cy="12" rx="6" ry="9"/><path d="M12 3 V 21" stroke="#F7F2EB" stroke-width="1"/></svg>',
-    hoya: '<svg viewBox="0 0 24 24" fill="#8B9A6E"><path d="M5 19c0-8 4-13 14-14-1 10-6 14-14 14Z"/></svg>'
+    // Monstera — big split leaf
+    monstera: '<svg viewBox="0 0 24 24"><path d="M12 22 V 14 M12 14 C 6 14 3 10 3 4 C 9 4 12 8 12 14 Z M12 14 C 18 14 21 10 21 4 C 15 4 12 8 12 14 Z" fill="#4A5D3A" stroke="#4A5D3A" stroke-width="0.5" stroke-linejoin="round"/></svg>',
+
+    // Sunflower — flower with petals
+    sunflower: '<svg viewBox="0 0 24 24"><circle cx="12" cy="6" r="2.2" fill="#E8B84B"/><circle cx="12" cy="18" r="2.2" fill="#E8B84B"/><circle cx="6" cy="12" r="2.2" fill="#E8B84B"/><circle cx="18" cy="12" r="2.2" fill="#E8B84B"/><circle cx="7.5" cy="7.5" r="2.2" fill="#E8B84B"/><circle cx="16.5" cy="7.5" r="2.2" fill="#E8B84B"/><circle cx="7.5" cy="16.5" r="2.2" fill="#E8B84B"/><circle cx="16.5" cy="16.5" r="2.2" fill="#E8B84B"/><circle cx="12" cy="12" r="3.2" fill="#8B6F1E"/></svg>',
+
+    // Cactus — tall with arms
+    cactus: '<svg viewBox="0 0 24 24"><rect x="10" y="4" width="4" height="18" rx="2" fill="#5B7A52"/><rect x="5" y="9" width="4" height="8" rx="2" fill="#5B7A52"/><rect x="5" y="13" width="6" height="4" fill="#5B7A52"/><rect x="15" y="7" width="4" height="9" rx="2" fill="#5B7A52"/><rect x="13" y="12" width="6" height="4" fill="#5B7A52"/></svg>',
+
+    // Rose — pink bloom with spiral
+    rose: '<svg viewBox="0 0 24 24"><circle cx="12" cy="11" r="7" fill="#D17BA8"/><path d="M12 5 A 6 6 0 0 1 18 11 A 4.5 4.5 0 0 1 13.5 15.5 A 3 3 0 0 1 10.5 12.5 A 2 2 0 0 1 12.5 10.5" fill="none" stroke="#8E4D6E" stroke-width="1.6" stroke-linecap="round"/><path d="M12 18 V 22" stroke="#4A5D3A" stroke-width="1.6"/></svg>',
+
+    // Pothos — two heart leaves
+    pothos: '<svg viewBox="0 0 24 24"><path d="M12 20 C 5 17 3 10 5 4 C 10 6 12 12 12 17 Z" fill="#8B9A6E"/><path d="M12 20 C 19 17 21 10 19 4 C 14 6 12 12 12 17 Z" fill="#A9B78C"/><path d="M12 20 V 22" stroke="#4A5D3A" stroke-width="1.6"/></svg>',
+
+    // Tulip — terracotta cup shape
+    tulip: '<svg viewBox="0 0 24 24"><path d="M12 4 C 8 4 6 8 6 12 L 6 14 C 6 18 9 20 12 20 C 15 20 18 18 18 14 L 18 12 C 18 8 16 4 12 4 Z" fill="#C97B63"/><path d="M12 4 V 20" stroke="#8C4A2E" stroke-width="1.3"/><path d="M12 20 V 23" stroke="#4A5D3A" stroke-width="1.6"/></svg>',
+
+    // Bonsai — round canopy on trunk
+    bonsai: '<svg viewBox="0 0 24 24"><path d="M10 22 V 14 Q 8 12 8 10 Q 8 6 12 6 Q 16 6 16 10 Q 16 12 14 14 V 22 Z" fill="#6E7F52"/><rect x="6" y="21" width="12" height="2" rx="1" fill="#8B6F4E"/></svg>',
+
+    // Succulent — teal rosette
+    succulent: '<svg viewBox="0 0 24 24"><ellipse cx="12" cy="8" rx="3" ry="4" fill="#5B8C7A"/><ellipse cx="12" cy="16" rx="3" ry="4" fill="#7BA99A"/><ellipse cx="6" cy="12" rx="3" ry="4" fill="#7BA99A"/><ellipse cx="18" cy="12" rx="3" ry="4" fill="#7BA99A"/><ellipse cx="8" cy="8" rx="2.5" ry="3.5" fill="#9BC4B5"/><ellipse cx="16" cy="8" rx="2.5" ry="3.5" fill="#9BC4B5"/><ellipse cx="8" cy="16" rx="2.5" ry="3.5" fill="#9BC4B5"/><ellipse cx="16" cy="16" rx="2.5" ry="3.5" fill="#9BC4B5"/></svg>',
+
+    // Fern — feathered fronds
+    fern: '<svg viewBox="0 0 24 24"><path d="M12 22 V 3" stroke="#4A5D3A" stroke-width="1.5"/><ellipse cx="8" cy="6" rx="3" ry="2" fill="#5B7A52" transform="rotate(-30 8 6)"/><ellipse cx="16" cy="6" rx="3" ry="2" fill="#5B7A52" transform="rotate(30 16 6)"/><ellipse cx="7" cy="11" rx="3.5" ry="2" fill="#6E8A62" transform="rotate(-30 7 11)"/><ellipse cx="17" cy="11" rx="3.5" ry="2" fill="#6E8A62" transform="rotate(30 17 11)"/><ellipse cx="6" cy="16" rx="4" ry="2" fill="#8B9A6E" transform="rotate(-30 6 16)"/><ellipse cx="18" cy="16" rx="4" ry="2" fill="#8B9A6E" transform="rotate(30 18 16)"/></svg>',
+
+    // Lavender — purple sprig
+    lavender: '<svg viewBox="0 0 24 24"><circle cx="12" cy="4" r="2.2" fill="#9B7BB8"/><circle cx="10" cy="7" r="2" fill="#9B7BB8"/><circle cx="14" cy="7" r="2" fill="#9B7BB8"/><circle cx="12" cy="10" r="2.2" fill="#B596CC"/><circle cx="10" cy="13" r="2" fill="#B596CC"/><circle cx="14" cy="13" r="2" fill="#B596CC"/><circle cx="12" cy="16" r="2.2" fill="#9B7BB8"/><path d="M12 18 V 23" stroke="#4A5D3A" stroke-width="1.5"/></svg>',
+
+    // Bamboo — two segmented stalks
+    bamboo: '<svg viewBox="0 0 24 24"><rect x="9" y="2" width="2.5" height="20" fill="#A9B78C"/><rect x="14" y="4" width="2.5" height="18" fill="#8B9A6E"/><line x1="9" y1="7" x2="11.5" y2="7" stroke="#4A5D3A" stroke-width="1"/><line x1="9" y1="13" x2="11.5" y2="13" stroke="#4A5D3A" stroke-width="1"/><line x1="9" y1="19" x2="11.5" y2="19" stroke="#4A5D3A" stroke-width="1"/><line x1="14" y1="9" x2="16.5" y2="9" stroke="#4A5D3A" stroke-width="1"/><line x1="14" y1="15" x2="16.5" y2="15" stroke="#4A5D3A" stroke-width="1"/></svg>',
+
+    // Palm — trunk and fronds
+    palm: '<svg viewBox="0 0 24 24"><path d="M12 22 V 10" stroke="#8B6F4E" stroke-width="2.5" stroke-linecap="round"/><path d="M12 10 Q 6 8 4 4 Q 8 6 12 8 Z" fill="#4A5D3A"/><path d="M12 10 Q 18 8 20 4 Q 16 6 12 8 Z" fill="#4A5D3A"/><path d="M12 10 Q 8 4 10 2 Q 11 6 12 8 Z" fill="#5B7A52"/><path d="M12 10 Q 16 4 14 2 Q 13 6 12 8 Z" fill="#5B7A52"/></svg>'
   };
 
   function svgForSpecies(speciesId) {
-    return SPECIES_SVGS[speciesId] || SPECIES_SVGS.pothos;
+    return SPECIES_SVGS[speciesId] || SPECIES_SVGS.monstera;
   }
 
   function computePairs(lvl) {
