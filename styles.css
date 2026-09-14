@@ -54,6 +54,7 @@
   body[data-mode="dark"] .notes-input,
   body[data-mode="dark"] .room-input,
   body[data-mode="dark"] input,
+  body[data-mode="dark"] textarea,
   body[data-mode="dark"] select {
     background: #302E25;
     color: var(--ink);
@@ -694,7 +695,7 @@
   }
   .ring-photo-placeholder {
     position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-    border-radius: 50%; background: var(--panel4);
+    border-radius: 50%; background: var(--panel4); color: var(--soil);
     display: flex; align-items: center; justify-content: center;
   }
 
@@ -1798,6 +1799,10 @@
   }
   .leaderboard-tab {
     flex: 1 1 calc(50% - 4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
     background: var(--panel2);
     border: 1.5px solid var(--line);
     border-radius: 10px;
