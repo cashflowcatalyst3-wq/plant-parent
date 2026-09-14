@@ -2577,3 +2577,30 @@ a:focus-visible {
   background: var(--sage);
   color: #fff;
 }
+/* Guide banner hero */
+.guide-hero-banner {
+  background: linear-gradient(135deg, var(--tile-sage), var(--tile-mint));
+  border-radius: 24px;
+  padding: 28px 24px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+body[data-mode="dark"] .guide-hero-banner {
+  background: linear-gradient(135deg, var(--tile-sage), var(--card));
+}
+.guide-hero-banner .guide-hero-title {
+  font-size: 26px;
+  margin-bottom: 4px;
+}
+.guide-hero-banner .guide-hero-sub {
+  margin-top: 0;
+}
+.sort-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg viewBox='0 0 24 24' fill='none' stroke='%236B6B62' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+  padding-right: 36px;
+}
