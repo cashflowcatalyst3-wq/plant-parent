@@ -914,90 +914,141 @@ button.secondary:hover { background: var(--panel3); }
   color: var(--soil);
 }
 
-/* ---------- Dictionary cards ---------- */
+/* ---------- Dictionary cards (compact grid) ---------- */
 .dictionary-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 14px;
 }
+
 .dictionary-card {
   background: var(--card);
-  border-radius: 24px;
-  padding: 18px;
+  border-radius: 20px;
+  padding: 14px;
   box-shadow: var(--shadow);
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 4px;
   transition: transform 0.15s ease;
+  position: relative;
 }
 .dictionary-card:hover { transform: translateY(-2px); }
+
+/* Small illustration thumbnail at top of card */
 .dictionary-illustration {
   width: 100%;
-  aspect-ratio: 1.4;
-  background: var(--panel4);
-  border-radius: 18px;
-  margin-bottom: 4px;
+  aspect-ratio: 1.5;
+  background: linear-gradient(180deg, var(--tile-sage), var(--tile-mint));
+  border-radius: 14px;
+  margin-bottom: 8px;
   overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
 }
-.dictionary-illustration svg { display: block; }
-.dictionary-card-top { display: flex; justify-content: flex-end; }
+body[data-mode="dark"] .dictionary-illustration {
+  background: linear-gradient(180deg, var(--tile-sage), var(--card));
+}
+.dictionary-illustration svg {
+  display: block;
+  width: 70%;
+  height: 70%;
+}
+
+.dictionary-card-top {
+  display: flex;
+  justify-content: flex-end;
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
+
 .dictionary-difficulty-badge {
-  font-size: 10px;
+  font-size: 9.5px;
   font-weight: 700;
-  color: var(--soil);
-  background: var(--panel4);
-  border-radius: 10px;
-  padding: 5px 10px;
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 8px;
+  padding: 4px 8px;
   white-space: nowrap;
-  align-self: flex-start;
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
 }
+body[data-mode="dark"] .dictionary-difficulty-badge {
+  background: rgba(28, 27, 22, 0.85);
+  color: var(--ink);
+}
+
 .difficulty-dot {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
 }
+
 .dictionary-name {
   font-family: 'Nunito', sans-serif;
   font-weight: 700;
-  font-size: 17px;
-  margin-top: 4px;
+  font-size: 15px;
+  margin-top: 2px;
+  line-height: 1.2;
 }
+
 .dictionary-latin {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--soil);
-  margin-top: -2px;
+  margin-top: 0;
   font-style: italic;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
+
 .dictionary-meta-row {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
-  margin: 6px 0 4px;
+  gap: 4px;
+  margin: 6px 0 2px;
 }
+
 .dictionary-meta-pill {
-  font-size: 11px;
+  font-size: 10px;
   font-weight: 600;
   color: var(--soil);
   background: var(--panel4);
-  border-radius: 8px;
-  padding: 5px 10px;
+  border-radius: 7px;
+  padding: 4px 8px;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
 }
+
+.dictionary-meta-pill svg {
+  width: 10px;
+  height: 10px;
+}
+
 .dictionary-desc {
-  font-size: 13px;
-  line-height: 1.5;
+  font-size: 12px;
+  line-height: 1.45;
   color: var(--soil);
-  margin: 6px 0 12px;
+  margin: 4px 0 10px;
   flex: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
+
 .dictionary-add-btn {
-  align-self: flex-start;
-  font-size: 13px;
+  align-self: stretch;
+  font-size: 12px;
+  padding: 9px 12px;
+  border-radius: 12px;
+  text-align: center;
 }
 
 /* ---------- Room chips ---------- */
@@ -2519,4 +2570,10 @@ a:focus-visible {
   .tile-grid { grid-template-columns: 1fr; }
   .tile-card-wide { grid-column: span 1; }
   .bottom-nav { border-radius: 20px 20px 0 0; }
+}
+
+/* Force the guide's light filter chips to use sage green, not the theme clay */
+.guide-light-chips .room-chip-active {
+  background: var(--sage);
+  color: #fff;
 }
