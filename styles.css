@@ -669,4 +669,662 @@ button.secondary:hover { background: var(--panel3); }
 /* ---------- Modals ---------- */
 .modal-backdrop {
   position: fixed; inset: 0;
- 
+  background: rgba(43,43,38,0.4);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 30; padding: 20px;
+}
+.modal {
+  background: var(--card); border-radius: 28px;
+  padding: 28px; width: 380px;
+  max-width: 100%; max-height: 85vh;
+  overflow-y: auto; box-shadow: var(--shadow-lg);
+}
+.modal h3 {
+  font-family: 'Nunito', sans-serif; font-weight: 800;
+  margin: 0 0 20px; font-size: 20px; color: var(--ink);
+}
+.field { margin-bottom: 16px; }
+.field label {
+  display: block; font-size: 12px; color: var(--soil);
+  margin-bottom: 6px; font-weight: 600;
+}
+.field input, .field select {
+  width: 100%; padding: 12px 14px;
+  border-radius: 14px; border: 1.5px solid var(--line);
+  font-family: 'Roboto', sans-serif; font-size: 14px;
+  background: var(--panel4); color: var(--ink);
+}
+.field input:focus, .field select:focus { outline: 2px solid var(--sage); border-color: transparent; }
+.modal-actions { display: flex; gap: 10px; margin-top: 24px; justify-content: flex-end; }
+
+/* ---------- Location tiles ---------- */
+.location-tile-group { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.location-tile {
+  display: flex; flex-direction: column;
+  align-items: center; gap: 6px;
+  padding: 14px 6px; border: 1.5px solid var(--line);
+  border-radius: 18px; background: var(--panel4);
+  color: var(--soil); font-family: 'Roboto', sans-serif;
+  font-size: 12px; font-weight: 600; cursor: pointer;
+}
+.location-tile-indoor { background: var(--tile-mint); border-color: #D3DEC2; }
+.location-tile-outdoor { background: var(--tile-sage); border-color: #C4D6B2; }
+.location-tile-balcony { background: var(--tile-mustard); border-color: #E7D4A8; }
+.location-tile-active {
+  border-color: var(--sage);
+  box-shadow: 0 0 0 2px var(--sage) inset;
+  color: var(--ink);
+}
+
+/* ---------- Species picker ---------- */
+.species-picker-btn {
+  width: 100%; text-align: left;
+  padding: 12px 14px; border-radius: 14px;
+  border: 1.5px solid var(--line);
+  background: var(--panel4); color: var(--ink);
+  cursor: pointer; font-family: 'Roboto', sans-serif;
+  font-size: 14px;
+}
+.species-picker-btn:hover { border-color: var(--sage); }
+.species-picker-emoji {
+  display: inline-flex; width: 22px; height: 22px;
+  vertical-align: middle; margin-right: 6px;
+}
+.species-picker-modal { width: 400px; }
+.species-picker-list {
+  max-height: 380px; overflow-y: auto;
+  display: flex; flex-direction: column;
+  gap: 4px; margin-bottom: 8px;
+}
+.species-picker-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 12px; border-radius: 14px; cursor: pointer;
+}
+.species-picker-row:hover { background: var(--panel4); }
+.species-picker-row-emoji {
+  width: 44px; height: 44px; display: flex;
+  align-items: center; justify-content: center;
+  background: var(--panel4); border-radius: 14px;
+  flex-shrink: 0;
+}
+.species-picker-row-name { font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 14px; }
+.species-picker-row-latin { font-size: 11px; color: var(--soil); font-style: italic; }
+
+/* ---------- Identify ---------- */
+.id-photo-btn {
+  width: 100%; border: 1.5px dashed var(--line);
+  border-radius: 14px; padding: 14px;
+  background: transparent; font-family: 'Roboto', sans-serif;
+  font-size: 13px; font-weight: 500; color: var(--soil);
+  cursor: pointer; text-align: center;
+  display: flex; align-items: center;
+  justify-content: center; gap: 8px;
+}
+.id-photo-btn:hover { border-color: var(--sage); color: var(--sage); }
+.identify-cta-btn {
+  width: 100%; margin-top: 10px;
+  display: flex; align-items: center; gap: 12px;
+  border: none; border-radius: 16px;
+  padding: 14px 16px;
+  background: var(--sage); color: #fff;
+  cursor: pointer; text-align: left;
+}
+.identify-cta-btn:hover { background: #7A9066; }
+.identify-cta-btn:active { transform: scale(0.99); }
+.identify-cta-emoji { display: flex; flex-shrink: 0; }
+.identify-cta-text { display: flex; flex-direction: column; gap: 2px; }
+.identify-cta-title { font-size: 14px; font-weight: 700; font-family: 'Roboto', sans-serif; }
+.identify-cta-sub { font-size: 11.5px; opacity: 0.9; }
+.identify-hint { margin-top: 8px; font-size: 12px; color: var(--soil); text-align: center; }
+.identify-status { font-size: 12px; color: var(--soil); margin-top: 8px; text-align: center; }
+.identify-error { color: var(--clay); }
+.identify-results { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+.identify-result {
+  display: flex; align-items: center; gap: 10px;
+  background: var(--panel4); border: 1.5px solid transparent;
+  border-radius: 14px; padding: 10px 12px;
+  cursor: pointer; font-family: 'Roboto', sans-serif;
+  text-align: left;
+}
+.identify-result:hover { border-color: var(--sage); background: var(--sage-pale); }
+.identify-result-name { font-size: 13px; font-weight: 700; color: var(--ink); }
+.identify-result-latin { font-size: 11px; font-style: italic; color: var(--soil); flex: 1; }
+.identify-result-score { font-size: 11px; font-weight: 700; color: var(--sage); flex-shrink: 0; }
+.modal-photo-preview {
+  display: block; width: 80px; height: 80px;
+  border-radius: 20px; object-fit: cover; margin-top: 10px;
+}
+
+/* ---------- Badges ---------- */
+.badges-modal { width: 440px; }
+.badges-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin-bottom: 8px; }
+.badge-item {
+  background: var(--panel4); border-radius: 18px;
+  padding: 16px; text-align: center;
+}
+.badge-item.badge-locked { opacity: 0.4; }
+.badge-emoji { margin-bottom: 8px; display: flex; justify-content: center; color: var(--sage); }
+.badge-name { font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 13px; margin-bottom: 3px; }
+.badge-desc { font-size: 11px; color: var(--soil); line-height: 1.3; }
+
+/* ---------- Celebration toast ---------- */
+@keyframes celebration-in {
+  from { transform: translate(-50%, -20px); opacity: 0; }
+  to { transform: translate(-50%, 0); opacity: 1; }
+}
+.celebration-toast {
+  position: fixed; top: 24px; left: 50%;
+  transform: translate(-50%, 0);
+  background: var(--card); border-radius: 18px;
+  box-shadow: var(--shadow-lg); padding: 14px 20px;
+  display: flex; align-items: center; gap: 12px;
+  z-index: 101; animation: celebration-in 0.35s ease-out;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+.celebration-toast-out { opacity: 0; transform: translate(-50%, -20px); }
+.celebration-emoji { display: flex; color: var(--sage); }
+.celebration-title {
+  font-family: 'Roboto', sans-serif; font-size: 11px;
+  font-weight: 700; color: var(--soil);
+  text-transform: uppercase; letter-spacing: 0.06em;
+}
+.celebration-name { font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 16px; }
+
+/* ---------- Undo toast ---------- */
+@keyframes undo-toast-in {
+  from { transform: translate(-50%, 20px); opacity: 0; }
+  to { transform: translate(-50%, 0); opacity: 1; }
+}
+.undo-toast {
+  position: fixed; bottom: 88px; left: 50%;
+  transform: translate(-50%, 0);
+  background: var(--ink); color: var(--bg);
+  border-radius: 16px; padding: 14px 18px;
+  display: flex; align-items: center; gap: 16px;
+  font-family: 'Roboto', sans-serif; font-size: 13px;
+  font-weight: 600; box-shadow: var(--shadow-lg);
+  z-index: 60; animation: undo-toast-in 0.25s ease-out;
+}
+.undo-toast button {
+  background: transparent; border: none;
+  color: var(--sage-light); font-weight: 700;
+  font-size: 13px; cursor: pointer; padding: 0;
+}
+.undo-toast button:hover { color: #fff; }
+
+/* ---------- Confetti ---------- */
+@keyframes confetti-burst {
+  0% { transform: translate(0, 0) rotate(0deg); opacity: 1; }
+  100% { transform: translate(var(--dx), calc(var(--dy) + 160px)) rotate(var(--rot)); opacity: 0; }
+}
+.confetti-piece {
+  position: fixed; width: 8px; height: 8px;
+  border-radius: 2px; pointer-events: none;
+  z-index: 100; animation: confetti-burst 0.9s ease-out forwards;
+}
+
+/* ---------- Games ---------- */
+.game-modal { width: 400px; }
+.game-hud {
+  display: flex; justify-content: space-between;
+  font-size: 13px; color: var(--soil); margin-bottom: 12px;
+  font-family: 'Roboto', sans-serif;
+}
+.game-area {
+  position: relative; height: 320px;
+  background: var(--panel4); border-radius: 20px;
+  overflow: hidden; margin-bottom: 12px;
+}
+.game-hint { font-size: 12px; color: var(--soil); text-align: center; margin-bottom: 8px; }
+.game-combo {
+  text-align: center; font-family: 'Nunito', sans-serif;
+  font-weight: 700; font-size: 13px; color: var(--clay);
+  height: 18px; margin-bottom: 4px;
+  opacity: 0; transition: opacity 0.15s ease;
+}
+.game-combo-active { opacity: 1; }
+@keyframes drop-fall { from { top: -30px; } to { top: 100%; } }
+.raindrop {
+  position: absolute; top: -30px;
+  cursor: pointer; user-select: none;
+  animation-name: drop-fall;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+  width: 32px; height: 32px;
+}
+.raindrop-caught { transform: scale(1.6); opacity: 0; transition: all 0.15s ease; }
+.raindrop-hazard-hit { transform: scale(1.4) rotate(15deg); opacity: 0; transition: all 0.15s ease; }
+.game-result { text-align: center; padding: 24px 0; }
+.game-result-score {
+  font-family: 'Nunito', sans-serif; font-weight: 800;
+  font-size: 52px; color: var(--sage);
+}
+.game-result-label { font-size: 13px; color: var(--soil); margin-top: 4px; }
+.game-result-sub { font-size: 12px; color: var(--soil); margin-top: 8px; }
+.game-new-high {
+  margin-top: 12px; font-family: 'Nunito', sans-serif;
+  font-weight: 700; color: var(--clay); font-size: 14px;
+}
+
+/* ---------- Memory game ---------- */
+.memory-modal { width: 420px; }
+.memory-hud {
+  display: flex; flex-wrap: wrap;
+  justify-content: space-between; gap: 4px 12px;
+  font-size: 13px; color: var(--soil); margin-bottom: 12px;
+  font-family: 'Roboto', sans-serif;
+}
+.memory-grid {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  gap: 8px; margin-bottom: 12px;
+}
+.memory-card { aspect-ratio: 1; perspective: 600px; cursor: pointer; }
+.memory-card-inner {
+  position: relative; width: 100%; height: 100%;
+  transform-style: preserve-3d; transition: transform 0.3s ease;
+}
+.memory-card-flipped .memory-card-inner { transform: rotateY(180deg); }
+.memory-card-back, .memory-card-front {
+  position: absolute; inset: 0;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 14px; backface-visibility: hidden;
+  font-size: 24px;
+}
+.memory-card-back { background: var(--sage); color: #fff; }
+.memory-card-front {
+  background: var(--panel4); transform: rotateY(180deg);
+  overflow: hidden;
+}
+.memory-card-matched .memory-card-front {
+  background: var(--sage-pale);
+  box-shadow: 0 0 0 2px var(--sage) inset;
+}
+.memory-time-low { color: var(--clay); }
+.memory-card-wrong { animation: memory-shake 0.4s ease; }
+@keyframes memory-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+
+/* ---------- Leaderboard ---------- */
+.leaderboard-modal { width: 440px; }
+.leaderboard-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.leaderboard-tab {
+  flex: 1 1 calc(50% - 4px);
+  display: flex; align-items: center; justify-content: center;
+  gap: 6px; background: var(--panel4);
+  border: 1.5px solid transparent; border-radius: 14px;
+  padding: 10px; font-family: 'Roboto', sans-serif;
+  font-weight: 600; font-size: 13px; color: var(--soil);
+  cursor: pointer;
+}
+.leaderboard-tab-active {
+  background: var(--sage-pale);
+  border-color: var(--sage); color: var(--sage);
+}
+.leaderboard-list {
+  list-style: none; margin: 0 0 4px; padding: 0;
+  max-height: 320px; overflow-y: auto;
+}
+.leaderboard-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 10px; border-radius: 12px; font-size: 13px;
+}
+.leaderboard-row-me { background: var(--sage-pale); font-weight: 700; }
+.leaderboard-rank {
+  width: 24px; flex-shrink: 0; color: var(--soil);
+  font-weight: 700; text-align: center;
+  font-family: 'Nunito', sans-serif;
+}
+.leaderboard-rank-medal {
+  width: 26px; height: 26px; border-radius: 9px;
+  display: inline-flex; align-items: center;
+  justify-content: center; color: #fff; font-size: 13px;
+}
+.leaderboard-rank-1 { background: var(--mustard); color: var(--ink); }
+.leaderboard-rank-2 { background: var(--soil); }
+.leaderboard-rank-3 { background: var(--clay); }
+.leaderboard-name {
+  flex: 1; color: var(--ink);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.leaderboard-value { flex-shrink: 0; color: var(--sage); font-weight: 700; font-size: 12px; }
+
+/* ---------- Theme picker ---------- */
+.theme-modal { width: 360px; }
+.theme-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 8px; }
+.theme-option {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px; border-radius: 16px;
+  border: 1.5px solid var(--line); background: var(--panel4);
+  cursor: pointer; font-family: 'Roboto', sans-serif;
+  font-size: 13px; font-weight: 600; color: var(--ink);
+}
+.theme-option-active { border-color: var(--sage); background: var(--sage-pale); }
+.theme-swatch {
+  width: 28px; height: 28px; border-radius: 50%;
+  flex-shrink: 0; box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+}
+
+/* ---------- Propagation ---------- */
+.prop-list { display: flex; flex-direction: column; gap: 12px; }
+.prop-card {
+  background: var(--card); border-radius: 20px;
+  padding: 16px; box-shadow: var(--shadow);
+  display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+}
+.prop-emoji { color: var(--sage); flex-shrink: 0; }
+.prop-info { flex: 1; min-width: 140px; }
+.prop-name { font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 15px; }
+.prop-days { font-size: 12px; color: var(--soil); margin-top: 2px; }
+.prop-notes { font-size: 12px; color: var(--ink); margin-top: 4px; font-style: italic; }
+.prop-actions { display: flex; gap: 8px; }
+.prop-actions button { font-size: 12px; padding: 9px 14px; }
+.prop-add-btn { margin-top: 4px; align-self: flex-start; }
+
+/* ---------- Journal ---------- */
+.journal-group { margin-bottom: 24px; }
+.journal-group-label {
+  font-family: 'Roboto', sans-serif; font-size: 12px;
+  font-weight: 700; color: var(--soil);
+  text-transform: uppercase; letter-spacing: 0.05em;
+  margin-bottom: 10px;
+}
+.journal-event {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--card); border-radius: 14px;
+  padding: 12px 14px; margin-bottom: 6px;
+  box-shadow: var(--shadow);
+}
+.journal-event-emoji { color: var(--sage); flex-shrink: 0; display: flex; }
+.journal-event-text { flex: 1; font-size: 13px; color: var(--ink); }
+.journal-event-time { font-size: 11px; color: var(--soil); flex-shrink: 0; }
+
+/* ---------- Garden scene ---------- */
+.garden-scene {
+  position: relative; border-radius: 24px;
+  box-shadow: var(--shadow); overflow: hidden;
+  min-height: 380px;
+  background: linear-gradient(180deg, #F5DFA0 0%, #E8F0DC 55%, var(--bg) 100%);
+}
+.garden-sky { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.garden-sun {
+  position: absolute; top: 24px; right: 40px;
+  width: 60px; height: 60px; border-radius: 50%;
+  background: radial-gradient(circle, #FFE9A8, #FFD873 70%);
+  box-shadow: 0 0 40px 12px rgba(255, 216, 115, 0.5);
+}
+.garden-cloud {
+  position: absolute; width: 70px; height: 22px;
+  background: #FBF8F2; border-radius: 14px;
+  opacity: 0.85;
+  box-shadow: 18px -8px 0 -2px #FBF8F2, -18px 4px 0 -4px #FBF8F2, 34px 2px 0 -6px #FBF8F2;
+  animation: garden-drift linear infinite;
+}
+.garden-cloud-1 { top: 30px; left: -80px; width: 60px; animation-duration: 38s; }
+.garden-cloud-2 { top: 70px; left: -140px; width: 46px; animation-duration: 52s; animation-delay: -10s; }
+.garden-cloud-3 { top: 16px; left: -200px; width: 38px; animation-duration: 46s; animation-delay: -25s; }
+@keyframes garden-drift { from { transform: translateX(0); } to { transform: translateX(calc(100vw + 200px)); } }
+.garden-particles { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+.garden-leaf {
+  position: absolute; bottom: -30px;
+  color: var(--sage); opacity: 0;
+  animation: garden-leaf-float ease-in infinite;
+}
+@keyframes garden-leaf-float {
+  0% { transform: translateY(0) translateX(0) rotate(0deg); opacity: 0; }
+  10% { opacity: 0.8; }
+  50% { transform: translateY(-160px) translateX(14px) rotate(180deg); }
+  90% { opacity: 0.6; }
+  100% { transform: translateY(-320px) translateX(-10px) rotate(360deg); opacity: 0; }
+}
+.garden-summary-banner {
+  position: relative; z-index: 2;
+  font-family: 'Nunito', sans-serif; font-weight: 700;
+  font-size: 17px; text-align: center; color: var(--ink);
+  background: rgba(251,248,242,0.85);
+  backdrop-filter: blur(2px);
+  padding: 12px 22px; margin: 20px auto 0;
+  border-radius: 16px; width: fit-content;
+}
+.garden-empty {
+  position: relative; z-index: 2; text-align: center;
+  padding: 140px 20px 60px; color: var(--soil);
+  font-family: 'Nunito', sans-serif; font-weight: 700;
+}
+.garden-hill { position: absolute; left: -10%; width: 120%; border-radius: 50% 50% 0 0; }
+.garden-hill-back { bottom: -20px; height: 140px; background: #C9DEB8; z-index: 1; }
+.garden-hill-front {
+  position: relative; z-index: 2; margin-top: 30px;
+  border-radius: 45% 45% 0 0;
+  background: linear-gradient(180deg, #AFCB98 0%, #9BB984 100%);
+  padding: 40px 24px 36px;
+}
+.garden-bed {
+  display: flex; flex-wrap: wrap; justify-content: center;
+  align-items: flex-end; gap: 20px;
+  max-width: 640px; margin: 0 auto;
+}
+.garden-plant {
+  position: relative; display: flex; flex-direction: column;
+  align-items: center; cursor: pointer;
+  transition: transform 0.15s ease; padding-bottom: 6px;
+}
+.garden-plant:hover { transform: translateY(-4px); }
+.garden-plant-emoji {
+  animation: garden-sway 3.2s ease-in-out infinite;
+  transform-origin: bottom center; position: relative; z-index: 2;
+}
+.garden-plant:nth-child(even) .garden-plant-emoji { animation-duration: 3.8s; animation-delay: 0.3s; }
+.garden-plant:nth-child(3n) .garden-plant-emoji { animation-duration: 4.4s; animation-delay: 0.6s; }
+@keyframes garden-sway { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
+.garden-plant-shadow {
+  width: 40px; height: 10px; background: rgba(43,43,38,0.18);
+  border-radius: 50%; margin-top: -4px; filter: blur(1px);
+}
+.garden-pot {
+  width: 34px; height: 16px;
+  background: linear-gradient(180deg, var(--clay), #8C4A2E);
+  clip-path: polygon(15% 0%, 85% 0%, 100% 100%, 0% 100%);
+  margin-top: -8px;
+}
+.garden-plant-name {
+  font-family: 'Roboto', sans-serif; font-size: 11px;
+  font-weight: 600; color: var(--soil); margin-top: 8px;
+  max-width: 76px; text-align: center;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  background: rgba(251,248,242,0.75);
+  border-radius: 10px; padding: 3px 10px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .garden-cloud, .garden-leaf, .garden-plant-emoji { animation: none !important; }
+}
+
+/* ---------- Garden stats ---------- */
+.garden-stats {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px; margin-top: 16px;
+}
+.garden-stat-card {
+  background: var(--card); border-radius: 20px;
+  padding: 18px; box-shadow: var(--shadow); text-align: center;
+}
+.garden-stat-num {
+  font-family: 'Nunito', sans-serif; font-weight: 800;
+  font-size: 28px; color: var(--sage);
+}
+.garden-stat-label { font-size: 11px; color: var(--soil); margin-top: 2px; }
+.garden-stat-highlight { background: var(--sage-pale); }
+.garden-stat-icon { color: var(--sage); margin-bottom: 4px; display: flex; justify-content: center; }
+.garden-stat-title {
+  font-family: 'Roboto', sans-serif; font-size: 11px;
+  font-weight: 700; color: var(--soil);
+  text-transform: uppercase; letter-spacing: 0.04em;
+}
+.garden-stat-name {
+  font-family: 'Nunito', sans-serif; font-weight: 700;
+  font-size: 15px; color: var(--ink); margin-top: 2px;
+}
+
+/* ---------- Garden cuttings ---------- */
+.garden-cuttings {
+  background: var(--card); border-radius: 20px;
+  padding: 16px; box-shadow: var(--shadow); margin-top: 12px;
+}
+.garden-cuttings-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.garden-cuttings-title { font-family: 'Nunito', sans-serif; font-weight: 700; font-size: 14px; color: var(--ink); }
+.garden-cuttings-count {
+  background: var(--sage-pale); color: var(--sage);
+  font-size: 11px; font-weight: 700;
+  padding: 2px 8px; border-radius: 10px;
+}
+.garden-cuttings-empty { font-size: 12px; color: var(--soil); margin-bottom: 10px; }
+.garden-cuttings-row { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+.garden-cutting-chip {
+  display: flex; align-items: center; gap: 6px;
+  background: var(--panel4); border: none;
+  border-radius: 12px; padding: 8px 12px; cursor: pointer;
+}
+.garden-cutting-chip:hover { background: var(--sage-pale); }
+.garden-cutting-name { font-size: 12px; font-weight: 600; color: var(--ink); }
+.garden-cutting-days { font-size: 11px; color: var(--soil); }
+.garden-cuttings-btn { font-size: 12px; padding: 9px 14px; }
+
+/* ---------- Sync modal ---------- */
+.sync-modal { width: 400px; }
+.sync-code-display {
+  font-family: 'Nunito', sans-serif; font-weight: 800;
+  font-size: 32px; letter-spacing: 0.12em;
+  text-align: center; color: var(--sage);
+  background: var(--sage-pale); border-radius: 18px;
+  padding: 18px; margin-bottom: 16px;
+}
+.sync-choice-row { display: flex; justify-content: center; margin-bottom: 4px; }
+.sync-choice-row button { width: 100%; padding: 14px; }
+.sync-divider {
+  text-align: center; font-family: 'Roboto', sans-serif;
+  font-size: 12px; font-weight: 600; color: var(--soil);
+  margin: 14px 0; position: relative;
+}
+.sync-divider::before, .sync-divider::after {
+  content: ''; position: absolute; top: 50%;
+  width: 40%; height: 1px; background: var(--line);
+}
+.sync-divider::before { left: 0; }
+.sync-divider::after { right: 0; }
+.sync-stop-btn {
+  display: block; width: 100%; background: transparent;
+  border: none; color: var(--clay);
+  font-family: 'Roboto', sans-serif; font-size: 12px;
+  font-weight: 600; text-align: center;
+  padding: 10px 0 0; cursor: pointer;
+}
+.sync-stop-btn:hover { text-decoration: underline; }
+.sync-status {
+  text-align: center; font-size: 12px;
+  color: var(--soil); margin-top: 10px; font-style: italic;
+}
+
+/* ---------- Invite modal ---------- */
+.invite-modal { text-align: center; }
+.invite-text { font-size: 13px; color: var(--soil); line-height: 1.5; margin: 0 0 16px; }
+.invite-qr { width: 180px; height: 180px; border-radius: 16px; margin-bottom: 16px; }
+.invite-link-row { display: flex; gap: 8px; }
+.invite-link-input {
+  flex: 1; padding: 12px 14px; border-radius: 14px;
+  border: 1.5px solid var(--line);
+  font-family: 'Roboto', sans-serif; font-size: 12px;
+  color: var(--soil); background: var(--panel4);
+}
+
+/* ---------- About modal ---------- */
+.about-modal { text-align: center; width: 420px; }
+.about-hero { display: flex; justify-content: center; color: var(--sage); margin-bottom: 12px; }
+.about-story { font-size: 13px; line-height: 1.6; color: var(--ink); text-align: left; margin: 0 0 18px; }
+.about-stats { display: flex; justify-content: space-around; margin-bottom: 20px; }
+.about-stat-num { font-family: 'Nunito', sans-serif; font-weight: 800; font-size: 26px; color: var(--sage); }
+.about-stat-label { font-size: 11px; color: var(--soil); margin-top: 2px; }
+.about-journey {
+  background: var(--panel4); border-radius: 18px;
+  padding: 16px; margin-bottom: 18px; text-align: left;
+}
+.about-journey-title {
+  font-family: 'Roboto', sans-serif; font-size: 11px;
+  font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.05em; color: var(--soil); margin-bottom: 8px;
+}
+.about-journey-row {
+  font-size: 13px; color: var(--ink); padding: 4px 0;
+  display: flex; align-items: center; gap: 8px;
+}
+
+/* ---------- Welcome ---------- */
+.welcome-backdrop {
+  position: fixed; inset: 0;
+  background: linear-gradient(135deg, var(--sage), var(--clay));
+  display: flex; align-items: center; justify-content: center;
+  z-index: 50; padding: 20px;
+}
+.welcome-card {
+  background: var(--card); border-radius: 28px;
+  padding: 40px 28px; max-width: 380px;
+  width: 100%; text-align: center;
+  box-shadow: 0 24px 60px rgba(0,0,0,0.2);
+}
+.welcome-flourish { color: var(--sage); display: flex; justify-content: center; margin-bottom: 12px; }
+.welcome-title {
+  font-family: 'Nunito', sans-serif; font-weight: 800;
+  font-size: 30px; margin: 0; color: var(--ink);
+}
+.welcome-subtitle { font-size: 14px; color: var(--soil); margin: 6px 0 28px; }
+.welcome-features { display: flex; flex-direction: column; gap: 14px; text-align: left; margin-bottom: 28px; }
+.welcome-feature {
+  display: flex; align-items: center; gap: 12px;
+  font-size: 14px; color: var(--ink);
+}
+.welcome-feature .icon-wrap { color: var(--sage); flex-shrink: 0; }
+.welcome-btn { width: 100%; padding: 16px; font-size: 15px; }
+.hub-nav-btn { display: flex; align-items: center; justify-content: center; gap: 10px; }
+
+/* ---------- Accessibility ---------- */
+button:focus-visible, input:focus-visible, textarea:focus-visible,
+select:focus-visible, .memory-card:focus-visible,
+.plant-card:focus-visible, a:focus-visible {
+  outline: 3px solid var(--sage);
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 800px) {
+  .layout { grid-template-columns: 1fr; }
+  .layout .panel { display: none; }
+  .layout.mobile-detail-open .shelf-column { display: none; }
+  .layout.mobile-detail-open .panel { display: block; }
+  body:has(.layout.mobile-detail-open) .daily-card,
+  body:has(.layout.mobile-detail-open) .weather-card { display: none; }
+  .detail-topbar { justify-content: space-between; }
+  .back-to-plants-btn { display: inline-block; }
+  .panel { padding: 20px; border-radius: 20px; }
+  .detail-title h2 { font-size: 24px; }
+  .garden-hill-front { padding: 28px 16px 24px; }
+}
+@media (max-width: 480px) {
+  .main-content { padding: 16px 16px 96px; }
+  .panel { padding: 18px; }
+  .detail-title h2 { font-size: 22px; }
+  .app-topbar-title { font-size: 22px; }
+  .tile-grid { grid-template-columns: 1fr; }
+  .tile-card-wide { grid-column: span 1; }
+  .bottom-nav { border-radius: 20px 20px 0 0; }
+}
