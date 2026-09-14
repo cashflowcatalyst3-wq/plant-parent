@@ -2604,3 +2604,83 @@ body[data-mode="dark"] .guide-hero-banner {
   background-size: 16px;
   padding-right: 36px;
 }
+/* Greeting header with avatar */
+.greeting-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 0 20px;
+}
+.greeting-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.greeting-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: var(--sage-pale);
+  color: var(--sage);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 18px;
+}
+.greeting-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.greeting-hi {
+  font-family: 'Roboto', sans-serif;
+  font-weight: 500;
+  font-size: 12px;
+  color: var(--soil);
+}
+.greeting-name {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 20px;
+  color: var(--ink);
+  line-height: 1.1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.greeting-actions {
+  display: flex;
+  gap: 8px;
+}
+.greeting-icon-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 14px;
+  border: none;
+  background: var(--card);
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  position: relative;
+  transition: transform 0.1s ease;
+}
+.greeting-icon-btn:active { transform: scale(0.94); }
+.greeting-icon-btn .badge-dot {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--clay);
+  border: 2px solid var(--card);
+}
