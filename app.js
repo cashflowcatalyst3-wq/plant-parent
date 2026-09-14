@@ -33,23 +33,15 @@ const SPECIES_DICTIONARY = [
   { id: 'other', name: 'Other / not sure', latin: '', emoji: '❓', shape: null, light: 'Varies', freq: 7, desc: '' },
 ];
 
-// Structured location picker: where a plant lives, then (for Indoor/Outdoor)
-// a specific room/area. Balcony has no sub-choice. "Other" reveals a free-text
-// field so nothing is lost if a user's exact space isn't listed.
 const INDOOR_ROOMS = ['Living Room', 'Bedroom', 'Kitchen', 'Dining Room', 'Bathroom', 'Study / Office', 'Hallway', 'Other'];
 const OUTDOOR_AREAS = ['Garden', 'Patio / Terrace', 'Yard', 'Other'];
 
-// Older saved plants (or ones edited via the quick panel field) may have a
-// plain free-text room string instead of the structured picker's value.
-// This maps that string back to {locationType, roomDetail, roomCustom} so
-// the modal can preselect the right options instead of defaulting blank.
 function deriveLocationFromRoom(roomStr) {
   const r = (roomStr || '').trim();
   if (!r) return { locationType: '', roomDetail: '', roomCustom: '' };
   if (r.toLowerCase() === 'balcony') return { locationType: 'Balcony', roomDetail: '', roomCustom: '' };
   if (INDOOR_ROOMS.includes(r)) return { locationType: 'Indoor', roomDetail: r, roomCustom: '' };
   if (OUTDOOR_AREAS.includes(r) && r !== 'Other') return { locationType: 'Outdoor', roomDetail: r, roomCustom: '' };
-  // Unrecognized text (e.g. typed before this picker existed) — keep it via "Other".
   return { locationType: 'Indoor', roomDetail: 'Other', roomCustom: r };
 }
 
@@ -111,8 +103,8 @@ const state = {
   showSpeciesPicker: false,
   showMoreMenu: false,
   notificationsEnabled: false,
-  pendingModalPhoto: null, // dataURL waiting to be attached on save
-  pendingSpecies: null, // selected SPECIES_DICTIONARY entry for the plant being added
+  pendingModalPhoto: null,
+  pendingSpecies: null,
   identifyLoading: false,
   identifyResults: null,
   identifyError: null,
@@ -123,21 +115,21 @@ const state = {
   plantIdPhoto: null,
   plantIdPhotoFile: null,
   plantIdReturnTo: 'shelf',
-  editingPlantId: null, // if set, the Add Plant modal is in edit mode for this plant
-  modalDraft: null, // preserves typed name/room/freq across re-renders (e.g. opening the species picker)
+  editingPlantId: null,
+  modalDraft: null,
   unlockedAchievements: [],
   gameHighScore: 0,
   celebrationQueue: [],
-  currentView: 'home', // 'home' | 'hub' | 'learning' | 'shelf' | 'garden' | 'dictionary' | ...
+  currentView: 'home',
   hubReturnTo: 'hub',
   learningReturnTo: 'hub',
-  sortBy: 'urgent', // 'urgent' | 'az' | 'room'
-  filterRoom: null, // null = all rooms
+  sortBy: 'urgent',
+  filterRoom: null,
   weatherEnabled: false,
   soundEnabled: true,
-  weatherNudge: null, // { text, emoji } once fetched
+  weatherNudge: null,
   seasonalTipsEnabled: true,
-  latitude: null, // reused from weather geolocation, if granted, to guess hemisphere
+  latitude: null,
   mobileDetailOpen: false,
   dictionarySearch: '',
   dictionaryLightFilter: null,
@@ -151,7 +143,7 @@ const state = {
   checkinPlantId: null,
   checkinDraftMood: null,
   showLeaderboardModal: false,
-  leaderboardTab: 'streak', // 'streak' | 'plants'
+  leaderboardTab: 'streak',
   leaderboardJoined: false,
   leaderboardNickname: '',
   leaderboardData: { streaks: [], plants: [], raindrop: [], memory: [] },
@@ -173,12 +165,10 @@ const state = {
   lastDeletedIndex: null,
   syncCode: null,
   showSyncModal: false,
-  syncStatus: null, // transient status message shown in the sync modal
+  syncStatus: null,
 };
 
 let nextId = 1;
-
-// ---------- date / ring math ----------
 
 function daysSince(dateStr) {
   const then = new Date(dateStr);
@@ -192,8 +182,7 @@ function daysBetween(aIso, bIso) {
 
 function ringPercent(plant) {
   const elapsed = daysSince(plant.lastWatered);
-  const pct = Math.min(1, elapsed / plant.frequency);
-  return pct;
+  return Math.min(1, elapsed / plant.frequency);
 }
 
 function daysLeft(plant) {
@@ -232,10 +221,10 @@ function rotateDaysLeft(p) {
 }
 
 const MOOD_LABELS = {
-  thriving: ' Thriving',
-  okay: ' Okay',
-  struggling: ' Struggling',
-  recovering: ' Recovering',
+  thriving: 'Thriving',
+  okay: 'Okay',
+  struggling: 'Struggling',
+  recovering: 'Recovering',
 };
 function moodLabel(mood) {
   return MOOD_LABELS[mood] || mood;
@@ -254,31 +243,6 @@ function getRoomList() {
   const rooms = new Set();
   state.plants.forEach(p => { if (p.room && p.room.trim()) rooms.add(p.room.trim()); });
   return Array.from(rooms).sort();
-}
-
-function renderShelfOverviewStrip() {
-  const dueToday = state.plants.filter(p => daysLeft(p) === 0).length;
-  const thriving = state.plants.filter(p => ringPercent(p) < 0.5).length;
-  const bestStreak = state.plants.reduce((max, p) => Math.max(max, calcStreak(p)), 0);
-
-  return `
-    <div class="shelf-overview">
-      <div class="shelf-overview-hero ${dueToday > 0 ? 'shelf-overview-hero-urgent' : ''}">
-        <div class="shelf-overview-hero-num">${dueToday}</div>
-        <div class="shelf-overview-hero-label">${dueToday === 1 ? 'plant needs' : 'plants need'} water today</div>
-      </div>
-      <div class="shelf-overview-side">
-        <div class="shelf-overview-mini">
-          <span class="shelf-overview-mini-num">${thriving}</span>
-          <span class="shelf-overview-mini-label">thriving</span>
-        </div>
-        <div class="shelf-overview-mini">
-          <span class="shelf-overview-mini-num">${bestStreak}</span>
-          <span class="shelf-overview-mini-label">best streak</span>
-        </div>
-      </div>
-    </div>
-  `;
 }
 
 function getVisiblePlants() {
@@ -333,8 +297,6 @@ function recordMemoryGameScore(score) {
   render();
 }
 
-// ---------- sound effects ----------
-
 let audioCtx = null;
 function getAudioCtx() {
   if (!audioCtx) {
@@ -361,9 +323,7 @@ function playTone(freq, duration, type, volume) {
     osc.start();
     gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
     osc.stop(ctx.currentTime + duration);
-  } catch (err) {
-    // audio not available — fail silently
-  }
+  } catch (err) {}
 }
 
 function playClickSound() { playTone(520, 0.07, 'sine', 0.07); }
@@ -379,14 +339,12 @@ function playUnlockSound() {
 }
 
 document.addEventListener('click', (e) => {
-  if (e.target.closest && e.target.closest('button.primary, button.secondary, button.pill-btn')) {
+  if (e.target.closest && e.target.closest('button.primary, button.secondary')) {
     playClickSound();
   }
 }, true);
 
 window.playCatchSound = playCatchSound;
-
-// ---------- celebrations ----------
 
 function fireConfetti(x, y) {
   const colors = ['#8DA377', '#C4D97A', '#B5613C', '#D99A7D', '#F6F3EC'];
@@ -439,7 +397,7 @@ function checkAchievements() {
 }
 
 function showNextCelebration() {
-  if (document.getElementById('celebrationToast')) return; // one at a time
+  if (document.getElementById('celebrationToast')) return;
   const id = state.celebrationQueue.shift();
   if (!id) return;
   const badge = ACHIEVEMENTS.find(a => a.id === id);
@@ -451,7 +409,7 @@ function showNextCelebration() {
   toast.innerHTML = `
     <div class="celebration-emoji">${icon(badge.emoji, 32)}</div>
     <div class="celebration-text">
-      <div class="celebration-title">Badge unlocked!</div>
+      <div class="celebration-title">Badge unlocked</div>
       <div class="celebration-name">${badge.name}</div>
     </div>
   `;
@@ -468,21 +426,19 @@ function showNextCelebration() {
   }, 2400);
 }
 
-// ---------- welcome screen ----------
-
 function renderWelcome() {
   return `
   <div class="welcome-backdrop" id="welcomeBackdrop">
     <div class="welcome-card">
-      <div class="welcome-flourish">${icon('plants', 32)}</div>
+      <div class="welcome-flourish">${icon('plants', 40)}</div>
       <h2 class="welcome-title">Plant Parent</h2>
       <p class="welcome-subtitle">a shelf that keeps time for you</p>
       <div class="welcome-features">
-        <div class="welcome-feature">${icon('drop', 18)} Watering rings that never let a plant slip your mind</div>
-        <div class="welcome-feature">${icon('garden', 18)} A garden that visibly grows the better you care for it</div>
-        <div class="welcome-feature">${icon('guide', 18)} A species guide with care tips for 27 common houseplants</div>
-        <div class="welcome-feature">${icon('trophy', 18)} Achievements, streaks, and a couple of mini-games</div>
-        <div class="welcome-feature">${icon('bell', 18)} Real reminders, even when the app is closed</div>
+        <div class="welcome-feature">${icon('drop', 20)} Watering rings that never let a plant slip your mind</div>
+        <div class="welcome-feature">${icon('garden', 20)} A garden that visibly grows the better you care for it</div>
+        <div class="welcome-feature">${icon('guide', 20)} A species guide with care tips for 27 common houseplants</div>
+        <div class="welcome-feature">${icon('trophy', 20)} Achievements, streaks, and a couple of mini-games</div>
+        <div class="welcome-feature">${icon('bell', 20)} Real reminders, even when the app is closed</div>
       </div>
       <button class="primary welcome-btn" id="dismissWelcome">Start</button>
     </div>
@@ -492,25 +448,70 @@ function renderWelcome() {
 function renderHome() {
   const div = document.createElement('div');
   div.className = 'settings-page';
+
+  const thriving = state.plants.filter(p => ringPercent(p) < 0.5).length;
+  const dueToday = state.plants.filter(p => daysLeft(p) === 0).length;
+
   div.innerHTML = `
-    <div class="guide-hero">
-      <div class="guide-hero-title">Plant Parent</div>
-      <div class="guide-hero-sub">
-        Plant Parent helps you keep every plant on a real watering schedule, with reminders
-        that reach your phone even when the app is closed. Track care streaks, identify a
-        species from a photo, and swap tips with other plant parents, all in one place.
-      </div>
-      <div class="welcome-feature" style="justify-content:center;margin-top:16px;opacity:0.75;">
-        <span>Created by Aaron Shibu</span>
+    <div class="app-topbar" style="justify-content:flex-start;gap:12px;">
+      <div class="app-topbar-greeting">
+        <span class="app-topbar-hi">Welcome</span>
+        <h1 class="app-topbar-title"><span class="brand-plant">Plant</span> <span class="brand-parent">Parent</span></h1>
       </div>
     </div>
-    <button class="primary welcome-btn" id="homeStartBtn" style="width:100%;margin-top:20px;">Start</button>
+
+    <div class="tile-grid">
+      <div class="tile-card tile-card-mint" id="homePlantsTile">
+        <div class="tile-header">${icon('plants', 20)} Plants</div>
+        <div class="tile-value">${state.plants.length}</div>
+        <div class="tile-value-label">in your care</div>
+      </div>
+      <div class="tile-card tile-card-mustard" id="homeGardenTile">
+        <div class="tile-header">${icon('garden', 20)} Garden</div>
+        <div class="tile-value">${thriving}</div>
+        <div class="tile-value-label">thriving</div>
+      </div>
+      <div class="tile-card tile-card-coral" id="homeDueTile">
+        <div class="tile-header">${icon('drop', 20)} Due today</div>
+        <div class="tile-value">${dueToday}</div>
+        <div class="tile-value-label">need water</div>
+      </div>
+      <div class="tile-card tile-card-beige" id="homeGuideTile">
+        <div class="tile-header">${icon('guide', 20)} Guide</div>
+        <div class="tile-value">${SPECIES_DICTIONARY.length - 1}</div>
+        <div class="tile-value-label">species</div>
+      </div>
+    </div>
+
+    <button class="primary welcome-btn" id="homeStartBtn" style="width:100%;margin-top:12px;">Start</button>
   `;
+
   div.querySelector('#homeStartBtn').onclick = () => {
     localStorage.setItem('plant-parent-onboarding-done', '1');
     state.currentView = 'permissions';
     render();
   };
+  div.querySelector('#homePlantsTile').onclick = () => {
+    localStorage.setItem('plant-parent-onboarding-done', '1');
+    state.currentView = 'shelf';
+    render();
+  };
+  div.querySelector('#homeGardenTile').onclick = () => {
+    localStorage.setItem('plant-parent-onboarding-done', '1');
+    state.currentView = 'garden';
+    render();
+  };
+  div.querySelector('#homeGuideTile').onclick = () => {
+    localStorage.setItem('plant-parent-onboarding-done', '1');
+    state.currentView = 'dictionary';
+    render();
+  };
+  div.querySelector('#homeDueTile').onclick = () => {
+    localStorage.setItem('plant-parent-onboarding-done', '1');
+    state.currentView = 'shelf';
+    render();
+  };
+
   return div;
 }
 
@@ -556,16 +557,22 @@ function renderPermissions() {
     </div>
     <div class="settings-section">
       <div class="settings-row">
-        <div class="settings-row-label">
-          <div class="settings-row-name"> Push reminders</div>
-          <div class="settings-row-desc">Get notified on your phone when a plant is overdue, even with the app closed.</div>
+        <div class="settings-row-left">
+          <div class="settings-row-icon">${icon('bell', 18)}</div>
+          <div class="settings-row-label">
+            <div class="settings-row-name">Push reminders</div>
+            <div class="settings-row-desc">Get notified on your phone when a plant is overdue, even with the app closed.</div>
+          </div>
         </div>
         <button class="secondary ${state.notificationsEnabled ? 'settings-toggle-on' : ''}" id="permNotifBtn">${state.notificationsEnabled ? 'On' : 'Turn on'}</button>
       </div>
       <div class="settings-row">
-        <div class="settings-row-label">
-          <div class="settings-row-name"> Weather-aware tips</div>
-          <div class="settings-row-desc">Uses your rough location to nudge you when recent rain or heat changes how often to water.</div>
+        <div class="settings-row-left">
+          <div class="settings-row-icon">${icon('cloud', 18)}</div>
+          <div class="settings-row-label">
+            <div class="settings-row-name">Weather-aware tips</div>
+            <div class="settings-row-desc">Uses your rough location to nudge you when recent rain or heat changes how often to water.</div>
+          </div>
         </div>
         <button class="secondary ${state.weatherEnabled ? 'settings-toggle-on' : ''}" id="permWeatherBtn">${state.weatherEnabled ? 'On' : 'Turn on'}</button>
       </div>
@@ -578,7 +585,6 @@ function renderPermissions() {
   return div;
 }
 
-
 function renderLearning() {
   const div = document.createElement('div');
   div.className = 'settings-page';
@@ -589,17 +595,16 @@ function renderLearning() {
       <div class="guide-hero-sub">A few habits that make the biggest difference</div>
     </div>
     <div class="settings-section">
-      <div class="welcome-feature">${icon('drop', 20)} Water less often than you think, most houseplants prefer to dry out partway between waterings rather than staying constantly damp.</div>
+      <div class="welcome-feature">${icon('drop', 20)} Water less often than you think. Most houseplants prefer to dry out partway between waterings rather than staying constantly damp.</div>
       <div class="welcome-feature">${icon('sun', 20)} Match light to the plant, not the room. A spot that looks bright to you may still be too dim for a sun-loving plant a few feet from the window.</div>
       <div class="welcome-feature">${icon('cloud', 20)} Sudden temperature swings (drafty windows, heating vents) stress plants more than a slightly imperfect but stable spot.</div>
-      <div class="welcome-feature">${icon('plants', 20)} Repot only when roots are crowding the pot, going too big too soon can hold excess water and cause root rot.</div>
-      <div class="welcome-feature">${icon('leaf', 20)} Check the undersides of leaves occasionally, that's where early pest problems usually show up first.</div>
+      <div class="welcome-feature">${icon('plants', 20)} Repot only when roots are crowding the pot. Going too big too soon can hold excess water and cause root rot.</div>
+      <div class="welcome-feature">${icon('leaf', 20)} Check the undersides of leaves occasionally. That's where early pest problems usually show up first.</div>
     </div>
   `;
   div.querySelector('#learningBackBtn').onclick = () => { state.currentView = state.learningReturnTo || 'hub'; render(); };
   return div;
 }
-
 
 function renderTutorial() {
   const div = document.createElement('div');
@@ -619,7 +624,7 @@ function renderTutorial() {
     <div class="settings-section">
       <div class="settings-section-title">2. Keep it watered</div>
       <div class="welcome-feature">${icon('drop', 20)} Tap the water drop on a plant's card whenever you water it. That resets its countdown and builds your care streak.</div>
-      <div class="welcome-feature">${icon('flame', 20)} Water on schedule and you'll unlock streak badges, check "Badges" in the More menu anytime.</div>
+      <div class="welcome-feature">${icon('flame', 20)} Water on schedule and you'll unlock streak badges. Check "Badges" in the More menu anytime.</div>
     </div>
 
     <div class="settings-section">
@@ -631,7 +636,7 @@ function renderTutorial() {
       <div class="settings-section-title">4. Explore the rest</div>
       <div class="welcome-feature">${icon('guide', 20)} The Guide tab has care info for dozens of common houseplants.</div>
       <div class="welcome-feature">${icon('garden', 20)} The Garden tab visually grows the better you keep up with care.</div>
-      <div class="welcome-feature">${icon('journal', 20)} Journal (in the More menu) is for notes and photos over time; Cuttings tracks anything you're propagating.</div>
+      <div class="welcome-feature">${icon('journal', 20)} Journal (in the More menu) is for notes and photos over time. Cuttings tracks anything you're propagating.</div>
     </div>
 
     <button class="primary welcome-btn" id="finishTutorial" style="width:100%;margin-top:8px;">Let's go</button>
@@ -666,10 +671,10 @@ function renderCommunity() {
         <input id="communityNicknameInput" placeholder="Your name" value="${escapeHtml(savedNickname)}" maxlength="20" aria-label="Your name">
       </div>
       <div class="field">
-        <textarea id="communityTipInput" placeholder="Something that's worked for your plants… (max 100 words)" maxlength="700" rows="3" aria-label="Your tip" style="width:100%;resize:vertical;font-family:inherit;"></textarea>
+        <textarea id="communityTipInput" placeholder="Something that's worked for your plants… (max 100 words)" maxlength="700" rows="3" aria-label="Your tip" style="width:100%;resize:vertical;font-family:inherit;padding:12px 14px;border-radius:14px;border:1.5px solid var(--line);background:var(--panel4);color:var(--ink);"></textarea>
       </div>
       ${state.communityError ? `<div class="identify-status identify-error">${escapeHtml(state.communityError)}</div>` : ''}
-      <button class="primary welcome-btn" id="communitySubmitBtn" style="width:100%;margin-top:4px;">Post tip</button>
+      <button class="primary welcome-btn" id="communitySubmitBtn" style="width:100%;margin-top:8px;">Post tip</button>
     </div>
 
     <div class="settings-section">
@@ -703,12 +708,6 @@ function renderCommunity() {
   return div;
 }
 
-// ---------- standalone "what plant is this?" tool ----------
-// Separate from the Add-a-Plant identify flow: this is for identifying any
-// plant you come across, with no intent to add it to your shelf. Kept to
-// once/day per device (client-side) since it's a bonus/exploration feature,
-// not core onboarding — the Add-a-Plant flow keeps its own, more generous
-// server-side allowance for actually building your collection.
 function plantIdUsedToday() {
   return localStorage.getItem('plant-parent-plantid-last-used') === todayStr();
 }
@@ -738,7 +737,7 @@ function renderPlantId() {
     </div>
     <div class="settings-section">
       ${usedToday ? `
-        <div class="identify-hint" style="padding:16px 0;">You've already used this today, come back tomorrow for another free check.</div>
+        <div class="identify-hint" style="padding:16px 0;">You've already used this today. Come back tomorrow for another free check.</div>
       ` : `
         <button class="id-photo-btn" id="plantIdPhotoBtn" type="button">${icon('camera', 16)} ${state.plantIdPhoto ? 'Change photo' : 'Take or choose a photo'}</button>
         <input type="file" id="plantIdPhotoInput" accept="image/*" capture="environment" style="display:none;">
@@ -797,8 +796,6 @@ function renderPlantId() {
         if (!state.plantIdResults.length) {
           state.plantIdError = "Couldn't find a confident match, try a clearer, closer photo of a leaf.";
         }
-        // Mark today's free check as used regardless of match quality — it
-        // still cost an API call, so it still counts against the daily cap.
         localStorage.setItem('plant-parent-plantid-last-used', todayStr());
       } catch (err) {
         state.plantIdError = err.message || 'Something went wrong, try again.';
@@ -811,10 +808,8 @@ function renderPlantId() {
   return div;
 }
 
-
-
 function renderAboutModal() {
-  const speciesCount = SPECIES_DICTIONARY.length - 1; // exclude "Other"
+  const speciesCount = SPECIES_DICTIONARY.length - 1;
   const totalWaterings = state.plants.reduce((sum, p) => sum + (p.waterLog || []).length, 0);
   const longestStreak = state.plants.reduce((max, p) => Math.max(max, calcStreak(p)), 0);
   const oldestPlant = state.plants.reduce((oldest, p) => {
@@ -827,7 +822,7 @@ function renderAboutModal() {
   return `
   <div class="modal-backdrop" id="aboutBackdrop">
     <div class="modal about-modal">
-      <div class="about-hero"> </div>
+      <div class="about-hero">${icon('plants', 40)}</div>
       <h3>About Plant Parent</h3>
       <p class="about-story">
         I built Plant Parent because I kept forgetting to water my own plants and killing them one by one.
@@ -855,14 +850,6 @@ function renderAboutModal() {
     </div>
   </div>`;
 }
-
-// ---------- invite / share app ----------
-
-// ---------- delete confirmation ----------
-
-// ---------- custom icon set ----------
-// Consistent line-icon style used in the nav bar, More menu, and Settings —
-// replacing emoji so the app's chrome looks designed rather than default.
 
 const ICONS = {
   plants: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21V11"/><path d="M12 11C12 11 6 11 6 5C12 5 12 11 12 11Z"/><path d="M12 13C12 13 18 13 18 7C12 7 12 13 12 13Z"/><path d="M7 21H17"/></svg>`,
@@ -915,7 +902,6 @@ function renderDeleteConfirmModal() {
   return `
   <div class="modal-backdrop" id="deleteConfirmBackdrop">
     <div class="modal delete-confirm-modal">
-      <div class="delete-confirm-emoji"> </div>
       <h3>Remove ${plant.name}?</h3>
       <p class="delete-confirm-text">This deletes its photo, notes, and full watering history. This can't be undone after a few seconds, but you'll get a brief chance to undo right after.</p>
       <div class="modal-actions">
@@ -994,7 +980,7 @@ function renderInviteModal() {
   <div class="modal-backdrop" id="inviteBackdrop">
     <div class="modal invite-modal">
       <h3>Invite a friend</h3>
-      <p class="invite-text">Scan this with a phone camera, or share the link below, anyone can install their own copy of Plant Parent for free.</p>
+      <p class="invite-text">Scan this with a phone camera, or share the link below. Anyone can install their own copy of Plant Parent for free.</p>
       <img src="${qrUrl}" alt="QR code linking to this Plant Parent app" class="invite-qr">
       <div class="invite-link-row">
         <input class="invite-link-input" id="inviteLinkInput" value="${url}" readonly>
@@ -1002,7 +988,7 @@ function renderInviteModal() {
       </div>
       <div class="modal-actions">
         <button class="secondary" id="closeInvite">Close</button>
-        <button class="primary" id="shareInvite"> Share</button>
+        <button class="primary" id="shareInvite">Share</button>
       </div>
     </div>
   </div>`;
@@ -1012,11 +998,9 @@ async function shareAppLink() {
   const url = window.location.origin + window.location.pathname;
   if (navigator.share) {
     try {
-      await navigator.share({ title: 'Plant Parent', text: 'Come take care of your plants with me ', url });
+      await navigator.share({ title: 'Plant Parent', text: 'Come take care of your plants with me', url });
       markInvited();
-    } catch (err) {
-      // user cancelled — no action needed
-    }
+    } catch (err) {}
   } else {
     copyInviteLink();
   }
@@ -1041,8 +1025,6 @@ function copyInviteLink() {
     }).catch(() => {});
   }
 }
-
-// ---------- themes ----------
 
 function applyTheme(id) {
   state.theme = id;
@@ -1083,8 +1065,6 @@ function renderThemeModal() {
     </div>
   </div>`;
 }
-
-// ---------- share plant card ----------
 
 function getThemeColors() {
   const styles = getComputedStyle(document.body);
@@ -1130,10 +1110,6 @@ async function generateShareCard(plant) {
   } else {
     ctx.fillStyle = '#EFEBDD';
     ctx.fillRect(photoX - photoSize/2, photoY - photoSize/2, photoSize, photoSize);
-    ctx.font = '110px serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText(' ', photoX, photoY + 10);
   }
   ctx.restore();
 
@@ -1145,26 +1121,26 @@ async function generateShareCard(plant) {
 
   ctx.fillStyle = colors.ink;
   ctx.textAlign = 'center';
-  ctx.font = '600 40px Georgia, serif';
+  ctx.font = '600 40px Nunito, serif';
   ctx.fillText(plant.name, W / 2, 400);
 
   if (plant.species) {
-    ctx.font = 'italic 20px Georgia, serif';
+    ctx.font = 'italic 20px Nunito, serif';
     ctx.fillStyle = '#666';
     ctx.fillText(plant.species, W / 2, 432);
   }
 
   const streak = calcStreak(plant);
-  ctx.font = '600 64px Georgia, serif';
+  ctx.font = '800 64px Nunito, serif';
   ctx.fillStyle = colors.clay;
   ctx.fillText(String(streak), W / 2, 540);
-  ctx.font = '16px Georgia, serif';
+  ctx.font = '16px Roboto, sans-serif';
   ctx.fillStyle = '#666';
   ctx.fillText(`on-time watering${streak === 1 ? '' : 's'} in a row`, W / 2, 566);
 
-  ctx.font = '600 18px Georgia, serif';
+  ctx.font = '700 18px Nunito, serif';
   ctx.fillStyle = colors.sage;
-  ctx.fillText(' Plant Parent', W / 2, H - 60);
+  ctx.fillText('Plant Parent', W / 2, H - 60);
 
   return canvas;
 }
@@ -1194,11 +1170,9 @@ async function shareCard(plant) {
     const file = new File([blob], `${plant.name.replace(/\s+/g, '-')}-plant-parent.png`, { type: 'image/png' });
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       try {
-        await navigator.share({ files: [file], title: plant.name, text: `${plant.name} on Plant Parent ` });
+        await navigator.share({ files: [file], title: plant.name, text: `${plant.name} on Plant Parent` });
         return;
-      } catch (err) {
-        // user cancelled or share failed — fall through to download
-      }
+      } catch (err) {}
     }
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -1210,8 +1184,6 @@ async function shareCard(plant) {
     URL.revokeObjectURL(url);
   }, 'image/png');
 }
-
-// ---------- journal ----------
 
 function buildJournalEvents() {
   const events = [];
@@ -1241,7 +1213,7 @@ function renderJournal() {
   const events = buildJournalEvents();
 
   if (events.length === 0) {
-    div.innerHTML = `<div class="garden-empty">No activity yet, water a plant or add a note to start your journal.</div>`;
+    div.innerHTML = `<div class="garden-empty">No activity yet. Water a plant or add a note to start your journal.</div>`;
     return div;
   }
 
@@ -1268,13 +1240,9 @@ function renderJournal() {
   return div;
 }
 
-// ---------- propagation tracker ----------
-
 function daysRooting(prop) {
   return daysSince(prop.startDate);
 }
-
-// ---------- settings ----------
 
 function renderSettings() {
   const div = document.createElement('div');
@@ -1370,13 +1338,13 @@ function renderSettings() {
     </div>
 
     <div class="settings-section">
-      <div class="settings-section-title">Sync &amp; backup</div>
+      <div class="settings-section-title">Sync and backup</div>
       <div class="settings-row">
         <div class="settings-row-left">
           <div class="settings-row-icon">${icon('sync', 18)}</div>
           <div class="settings-row-label">
             <div class="settings-row-name">Sync across devices</div>
-            <div class="settings-row-desc">${state.syncCode ? `Linked · code ${state.syncCode}` : 'Not linked to another device'}</div>
+            <div class="settings-row-desc">${state.syncCode ? `Linked, code ${state.syncCode}` : 'Not linked to another device'}</div>
           </div>
         </div>
         <button class="secondary" id="settingsSyncBtn">${state.syncCode ? 'Manage' : 'Set up'}</button>
@@ -1459,14 +1427,14 @@ function renderPropagation() {
   } else {
     div.innerHTML = state.propagations.map(prop => `
       <div class="prop-card" data-id="${prop.id}">
-        <div class="prop-emoji"> </div>
+        <div class="prop-emoji">${icon('sprout', 28)}</div>
         <div class="prop-info">
           <div class="prop-name">${prop.name}</div>
           <div class="prop-days">Rooting for ${daysRooting(prop)} day${daysRooting(prop) === 1 ? '' : 's'}</div>
           ${prop.notes ? `<div class="prop-notes">${prop.notes}</div>` : ''}
         </div>
         <div class="prop-actions">
-          <button class="secondary prop-graduate-btn" data-id="${prop.id}"> Graduate</button>
+          <button class="secondary prop-graduate-btn" data-id="${prop.id}">Graduate</button>
           <button class="secondary prop-remove-btn" data-id="${prop.id}">Remove</button>
         </div>
       </div>
@@ -1483,13 +1451,12 @@ function renderPropagation() {
     btn.onclick = () => {
       const prop = state.propagations.find(x => x.id === parseInt(btn.dataset.id, 10));
       if (!prop) return;
-      const freq = 7;
       const p = {
         id: nextId++,
         name: prop.name,
         species: '', speciesId: null, speciesDesc: '',
         room: '',
-        frequency: freq,
+        frequency: 7,
         lastWatered: new Date().toISOString(),
         waterLog: [],
         photo: null,
@@ -1574,9 +1541,7 @@ function renderAddPropModal() {
 function savePropagations() {
   try {
     localStorage.setItem('plant-parent-propagations', JSON.stringify(state.propagations));
-  } catch (err) {
-    console.error('Could not save propagations', err);
-  }
+  } catch (err) {}
 }
 
 function loadPropagations() {
@@ -1590,8 +1555,6 @@ function loadPropagations() {
     state.propagations = [];
   }
 }
-
-// ---------- backup / restore ----------
 
 function exportBackup() {
   const backup = {
@@ -1640,13 +1603,11 @@ function importBackup(file) {
       savePlants();
       alert('Backup restored!');
     } catch (err) {
-      alert("Couldn't read that file, make sure it's a Plant Parent backup.");
+      alert("Couldn't read that file. Make sure it's a Plant Parent backup.");
     }
   };
   reader.readAsText(file);
 }
-
-// ---------- weather-aware watering ----------
 
 function getWeatherNudge(precipMm, tempC, humidity) {
   if (precipMm >= 8) {
@@ -1675,11 +1636,11 @@ function getHemisphere() {
   if (typeof state !== 'undefined' && typeof state.latitude === 'number') {
     return state.latitude < 0 ? 'south' : 'north';
   }
-  return 'north'; // default assumption when location isn't known
+  return 'north';
 }
 
 function getSeason() {
-  const month = new Date().getMonth(); // 0 = Jan
+  const month = new Date().getMonth();
   const northSeasonByMonth = ['winter','winter','spring','spring','spring','summer','summer','summer','fall','fall','fall','winter'];
   let season = northSeasonByMonth[month];
   if (getHemisphere() === 'south') {
@@ -1748,20 +1709,43 @@ function maybeRefreshWeather() {
   }
 }
 
-// ---------- rendering ----------
-
 let __previousView = null;
 
 function hideLoadingScreen() {
   const el = document.getElementById('loadingScreen');
   if (!el) return;
   const elapsed = Date.now() - (typeof APP_LOAD_START === 'number' ? APP_LOAD_START : 0);
-  const minDisplay = 450; // keep it visible at least this long so it reads as intentional, not a glitch
+  const minDisplay = 450;
   const wait = Math.max(0, minDisplay - elapsed);
   setTimeout(() => {
     el.classList.add('loading-hidden');
-    setTimeout(() => el.remove(), 400); // matches the CSS opacity transition duration
+    setTimeout(() => el.remove(), 400);
   }, wait);
+}
+
+function renderShelfOverviewStrip() {
+  const dueToday = state.plants.filter(p => daysLeft(p) === 0).length;
+  const thriving = state.plants.filter(p => ringPercent(p) < 0.5).length;
+  const bestStreak = state.plants.reduce((max, p) => Math.max(max, calcStreak(p)), 0);
+
+  return `
+    <div class="shelf-overview">
+      <div class="shelf-overview-hero ${dueToday > 0 ? 'shelf-overview-hero-urgent' : ''}">
+        <div class="shelf-overview-hero-num">${dueToday}</div>
+        <div class="shelf-overview-hero-label">${dueToday === 1 ? 'plant needs' : 'plants need'} water today</div>
+      </div>
+      <div class="shelf-overview-side">
+        <div class="shelf-overview-mini">
+          <span class="shelf-overview-mini-num">${thriving}</span>
+          <span class="shelf-overview-mini-label">thriving</span>
+        </div>
+        <div class="shelf-overview-mini">
+          <span class="shelf-overview-mini-num">${bestStreak}</span>
+          <span class="shelf-overview-mini-label">best streak</span>
+        </div>
+      </div>
+    </div>
+  `;
 }
 
 function render() {
@@ -1779,31 +1763,35 @@ function render() {
     <div class="main-content ${viewChanged ? 'view-enter' : ''}">
       ${state.currentView !== 'garden' && state.currentView !== 'dictionary' && state.currentView !== 'settings' && state.currentView !== 'tutorial' && state.currentView !== 'community' && state.currentView !== 'home' && state.currentView !== 'hub' && state.currentView !== 'learning' && state.currentView !== 'plantid' && state.currentView !== 'permissions' ? `
         <header class="app-topbar">
-          <span class="app-topbar-mark">${icon('plants', 28)}</span>
-          <h1 class="app-topbar-title"><span class="brand-plant">Plant</span> <span class="brand-parent">Parent</span></h1>
+          <div class="app-topbar-greeting">
+            <span class="app-topbar-hi">Hello there</span>
+            <h1 class="app-topbar-title"><span class="brand-plant">Plant</span> <span class="brand-parent">Parent</span></h1>
+          </div>
+          <div class="app-topbar-actions">
+            <button class="topbar-icon-btn" id="topbarSettingsBtn" aria-label="Settings">${icon('settings', 20)}</button>
+          </div>
         </header>
 
-        <div class="daily-card ${taskDone ? 'daily-card-done' : ''}">
-            <div class="daily-emoji">${icon(taskDone ? 'check' : task.emoji, 22)}</div>
-            <div class="daily-text">
-              <div class="daily-label">Today's little thing</div>
-              <div class="daily-task">${task.label}</div>
-            </div>
+        <div class="notice-card ${taskDone ? 'notice-card-done' : ''}">
+          <div class="notice-icon">${icon(taskDone ? 'check' : task.emoji, 20)}</div>
+          <div class="notice-body">
+            <div class="notice-title">${taskDone ? 'Done for today' : "Today's little thing"}</div>
+            <div class="notice-text">${taskDone ? "You've already done this one" : task.label}</div>
           </div>
+        </div>
 
-          ${state.weatherEnabled && state.weatherNudge ? `
-            <div class="weather-card">
-              <div class="weather-emoji">${icon(state.weatherNudge.emoji, 26)}</div>
-              <div class="weather-text">${state.weatherNudge.text}</div>
+        ${(state.weatherEnabled && state.weatherNudge) || state.seasonalTipsEnabled ? (() => {
+          const tip = state.weatherEnabled && state.weatherNudge ? state.weatherNudge : getSeasonalTip();
+          return `
+            <div class="notice-card notice-card-tinted">
+              <div class="notice-icon">${icon(tip.emoji, 20)}</div>
+              <div class="notice-body">
+                <div class="notice-title">Care nudge</div>
+                <div class="notice-text">${tip.text}</div>
+              </div>
             </div>
-          ` : ''}
-
-          ${state.seasonalTipsEnabled ? (() => { const tip = getSeasonalTip(); return `
-            <div class="weather-card">
-              <div class="weather-emoji">${icon(tip.emoji, 26)}</div>
-              <div class="weather-text">${tip.text}</div>
-            </div>
-          `; })() : ''}
+          `;
+        })() : ''}
       ` : ''}
 
       ${state.currentView === 'garden' ? `<div id="gardenView"></div>` : ''}
@@ -1821,12 +1809,11 @@ function render() {
       ${state.currentView === 'shelf' ? `
         <div class="layout ${state.mobileDetailOpen ? 'mobile-detail-open' : ''}">
           <div class="shelf-column">
-            ${state.plants.length ? renderShelfOverviewStrip() : ''}
             <div class="shelf-controls">
-              ${state.plants.length ? `<button class="primary water-all-btn" id="waterAllBtn"> Water all plants</button>` : ''}
+              ${state.plants.length ? `<button class="primary water-all-btn" id="waterAllBtn">Water all plants</button>` : ''}
               <select class="sort-select" id="sortSelect" aria-label="Sort plants by">
                 <option value="urgent" ${state.sortBy === 'urgent' ? 'selected' : ''}>Most urgent first</option>
-                <option value="az" ${state.sortBy === 'az' ? 'selected' : ''}>Plant name (A–Z)</option>
+                <option value="az" ${state.sortBy === 'az' ? 'selected' : ''}>Plant name (A to Z)</option>
                 <option value="room" ${state.sortBy === 'room' ? 'selected' : ''}>By room</option>
               </select>
               ${getRoomList().length ? `
@@ -1865,49 +1852,49 @@ function render() {
         <div class="more-menu">
           <div class="more-menu-section-title">Track</div>
           <button class="more-menu-item" id="navJournal">
-            <span class="more-menu-icon">${icon('journal')}</span>
+            <span class="more-menu-icon">${icon('journal', 18)}</span>
             <span>Journal</span>
           </button>
           <button class="more-menu-item" id="navPropagation">
-            <span class="more-menu-icon">${icon('cuttings')}</span>
+            <span class="more-menu-icon">${icon('cuttings', 18)}</span>
             <span>Cuttings${state.propagations.length ? ` (${state.propagations.length})` : ''}</span>
           </button>
 
-          <div class="more-menu-section-title">Learn &amp; connect</div>
+          <div class="more-menu-section-title">Learn and connect</div>
           <button class="more-menu-item" id="navCommunity">
-            <span class="more-menu-icon">${icon('invite')}</span>
+            <span class="more-menu-icon">${icon('invite', 18)}</span>
             <span>Community</span>
           </button>
           <button class="more-menu-item" id="navLearning">
-            <span class="more-menu-icon">${icon('guide')}</span>
+            <span class="more-menu-icon">${icon('guide', 18)}</span>
             <span>Learning</span>
           </button>
           <button class="more-menu-item" id="navPlantId">
-            <span class="more-menu-icon">${icon('search')}</span>
+            <span class="more-menu-icon">${icon('search', 18)}</span>
             <span>What's this plant?</span>
           </button>
 
-          <div class="more-menu-section-title">Play &amp; compete</div>
+          <div class="more-menu-section-title">Play and compete</div>
           <button class="more-menu-item" id="navBadges">
-            <span class="more-menu-icon">${icon('badges')}</span>
+            <span class="more-menu-icon">${icon('badges', 18)}</span>
             <span>Badges <strong>${state.unlockedAchievements.length}/${ACHIEVEMENTS.length}</strong></span>
           </button>
           <button class="more-menu-item" id="navGame">
-            <span class="more-menu-icon">${icon('game')}</span>
+            <span class="more-menu-icon">${icon('game', 18)}</span>
             <span>Raindrop Catch${state.gameHighScore ? ` · best ${state.gameHighScore}` : ''}</span>
           </button>
           <button class="more-menu-item" id="navMemoryGame">
-            <span class="more-menu-icon">${icon('brain')}</span>
+            <span class="more-menu-icon">${icon('brain', 18)}</span>
             <span>Memory Match${state.memoryHighScore ? ` · best ${state.memoryHighScore}` : ''}</span>
           </button>
           <button class="more-menu-item" id="navLeaderboard">
-            <span class="more-menu-icon">${icon('trophy')}</span>
+            <span class="more-menu-icon">${icon('trophy', 18)}</span>
             <span>Leaderboard</span>
           </button>
 
           <div class="more-menu-section-title">App</div>
           <button class="more-menu-item" id="navSettings">
-            <span class="more-menu-icon">${icon('settings')}</span>
+            <span class="more-menu-icon">${icon('settings', 18)}</span>
             <span>Settings</span>
           </button>
         </div>
@@ -1977,52 +1964,53 @@ function render() {
       if (count > 0) {
         fireConfetti(rect.left + rect.width / 2, rect.top);
         playWaterSound();
-        showMessageToast(` Watered ${count} plant${count === 1 ? '' : 's'}!`);
+        showMessageToast(`Watered ${count} plant${count === 1 ? '' : 's'}!`);
         savePlants();
       } else {
-        showMessageToast(`Everything's already watered today `);
+        showMessageToast(`Everything's already watered today`);
       }
       render();
     };
   }
 
+  const topbarSettingsBtn = document.getElementById('topbarSettingsBtn');
+  if (topbarSettingsBtn) topbarSettingsBtn.onclick = () => { state.currentView = 'settings'; state.showMoreMenu = false; render(); };
 
   if (document.getElementById('navShelf')) {
-  document.getElementById('navShelf').onclick = () => { state.currentView = 'shelf'; state.showMoreMenu = false; render(); };
-  document.getElementById('navGarden').onclick = () => {
-    state.currentView = 'garden';
-    state.showMoreMenu = false;
-    localStorage.setItem('plant-parent-last-garden-date', todayStr());
-    checkAchievements();
-    render();
-  };
-  document.getElementById('navDictionary').onclick = () => { state.currentView = 'dictionary'; state.showMoreMenu = false; render(); };
-  document.getElementById('navMore').onclick = () => { state.showMoreMenu = !state.showMoreMenu; render(); };
-
-  if (state.showMoreMenu) {
-    document.getElementById('navBadges').onclick = () => { state.showMoreMenu = false; state.showBadgesModal = true; render(); };
-    document.getElementById('navGame').onclick = () => { state.showMoreMenu = false; render(); if (window.openMiniGame) window.openMiniGame(); };
-    document.getElementById('navMemoryGame').onclick = () => { state.showMoreMenu = false; render(); if (window.openMemoryGame) window.openMemoryGame(); };
-    document.getElementById('navLeaderboard').onclick = () => {
+    document.getElementById('navShelf').onclick = () => { state.currentView = 'shelf'; state.showMoreMenu = false; render(); };
+    document.getElementById('navGarden').onclick = () => {
+      state.currentView = 'garden';
       state.showMoreMenu = false;
-      state.showLeaderboardModal = true;
-      state.leaderboardError = null;
+      localStorage.setItem('plant-parent-last-garden-date', todayStr());
+      checkAchievements();
       render();
-      if (state.leaderboardJoined) refreshMyLeaderboardStats();
-      fetchLeaderboard();
     };
-    document.getElementById('navJournal').onclick = () => { state.currentView = 'journal'; state.showMoreMenu = false; render(); };
-    document.getElementById('navPropagation').onclick = () => { state.currentView = 'propagation'; state.showMoreMenu = false; render(); };
-    document.getElementById('navCommunity').onclick = () => { state.hubReturnTo = 'shelf'; state.currentView = 'community'; state.showMoreMenu = false; render(); };
-    document.getElementById('navLearning').onclick = () => { state.learningReturnTo = 'shelf'; state.currentView = 'learning'; state.showMoreMenu = false; render(); };
-    document.getElementById('navPlantId').onclick = () => { state.plantIdReturnTo = 'shelf'; state.currentView = 'plantid'; state.showMoreMenu = false; render(); };
-    document.getElementById('navSettings').onclick = () => { state.currentView = 'settings'; state.showMoreMenu = false; render(); };
-    document.getElementById('moreMenuBackdrop').addEventListener('click', (e) => {
-      if (e.target.id === 'moreMenuBackdrop') { state.showMoreMenu = false; render(); }
-    });
-  }
-  }
+    document.getElementById('navDictionary').onclick = () => { state.currentView = 'dictionary'; state.showMoreMenu = false; render(); };
+    document.getElementById('navMore').onclick = () => { state.showMoreMenu = !state.showMoreMenu; render(); };
 
+    if (state.showMoreMenu) {
+      document.getElementById('navBadges').onclick = () => { state.showMoreMenu = false; state.showBadgesModal = true; render(); };
+      document.getElementById('navGame').onclick = () => { state.showMoreMenu = false; render(); if (window.openMiniGame) window.openMiniGame(); };
+      document.getElementById('navMemoryGame').onclick = () => { state.showMoreMenu = false; render(); if (window.openMemoryGame) window.openMemoryGame(); };
+      document.getElementById('navLeaderboard').onclick = () => {
+        state.showMoreMenu = false;
+        state.showLeaderboardModal = true;
+        state.leaderboardError = null;
+        render();
+        if (state.leaderboardJoined) refreshMyLeaderboardStats();
+        fetchLeaderboard();
+      };
+      document.getElementById('navJournal').onclick = () => { state.currentView = 'journal'; state.showMoreMenu = false; render(); };
+      document.getElementById('navPropagation').onclick = () => { state.currentView = 'propagation'; state.showMoreMenu = false; render(); };
+      document.getElementById('navCommunity').onclick = () => { state.hubReturnTo = 'shelf'; state.currentView = 'community'; state.showMoreMenu = false; render(); };
+      document.getElementById('navLearning').onclick = () => { state.learningReturnTo = 'shelf'; state.currentView = 'learning'; state.showMoreMenu = false; render(); };
+      document.getElementById('navPlantId').onclick = () => { state.plantIdReturnTo = 'shelf'; state.currentView = 'plantid'; state.showMoreMenu = false; render(); };
+      document.getElementById('navSettings').onclick = () => { state.currentView = 'settings'; state.showMoreMenu = false; render(); };
+      document.getElementById('moreMenuBackdrop').addEventListener('click', (e) => {
+        if (e.target.id === 'moreMenuBackdrop') { state.showMoreMenu = false; render(); }
+      });
+    }
+  }
 
   if (state.showAddModal) {
     if (state.modalJustOpened) {
@@ -2083,10 +2071,6 @@ function render() {
   }
   __previousView = state.currentView;
 }
-
-// ---------- species illustrations ----------
-// Original vector illustrations (no external images/photos) that automatically
-// adopt whichever color theme is active, since they use CSS variables for fills.
 
 function potBase(wide) {
   const w = wide ? 34 : 26;
@@ -2194,8 +2178,6 @@ function speciesIllustrationSVG(species) {
         ${[-40,-24,-8,8,24,40].map((offset, i) => `
           <path d="M50 76 Q${50+offset*0.5} 46 ${50+offset} 22" stroke="${i % 2 === 0 ? 'var(--sage)' : 'var(--sage-light)'}" stroke-width="4" fill="none"/>
         `).join('')}
-        <circle cx="26" cy="60" r="2.5" fill="var(--sage-light)"/>
-        <circle cx="74" cy="64" r="2.5" fill="var(--sage-light)"/>
       `;
       break;
     case 'cactus':
@@ -2204,8 +2186,6 @@ function speciesIllustrationSVG(species) {
         <rect x="40" y="30" width="20" height="48" rx="10" fill="var(--sage)"/>
         <rect x="22" y="42" width="14" height="26" rx="7" fill="var(--sage-light)"/>
         <rect x="64" y="36" width="14" height="30" rx="7" fill="var(--sage-light)"/>
-        <line x1="44" y1="36" x2="44" y2="72" stroke="var(--sage-light)" stroke-width="1" opacity="0.5"/>
-        <line x1="56" y1="36" x2="56" y2="72" stroke="var(--sage-light)" stroke-width="1" opacity="0.5"/>
         ${accent ? `<ellipse cx="50" cy="26" rx="7" ry="8" fill="${accent}"/>` : ''}
       `;
       break;
@@ -2289,7 +2269,7 @@ function lightCategory(lightText) {
 
 function buildDictionaryCardsHtml(list, search) {
   if (list.length === 0) {
-    return `<div class="guide-no-results">No plants match "${search}", try a different search or filter.</div>`;
+    return `<div class="guide-no-results">No plants match "${search}". Try a different search or filter.</div>`;
   }
   return list.map(s => {
     const diff = speciesDifficulty(s);
@@ -2354,7 +2334,7 @@ function renderDictionary() {
       <div class="guide-hero-sub">${species.length} plants, with care basics for each</div>
     </div>
     <div class="guide-controls">
-      <input type="text" id="guideSearchInput" class="guide-search" placeholder=" Search by name…" value="${search}">
+      <input type="text" id="guideSearchInput" class="guide-search" placeholder="Search by name" value="${search}">
       <div class="guide-light-chips">
         <button class="room-chip ${!lightFilter ? 'room-chip-active' : ''}" data-light="">All light</button>
         <button class="room-chip ${lightFilter === 'low' ? 'room-chip-active' : ''}" data-light="low">Low light</button>
@@ -2374,16 +2354,15 @@ function renderDictionary() {
     const pageItems = filtered.slice(start, start + GUIDE_PAGE_SIZE);
     grid.innerHTML = buildDictionaryCardsHtml(pageItems, search);
     wireDictionaryAddButtons(grid);
-    grid.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
     if (filtered.length <= GUIDE_PAGE_SIZE) {
       paginationEl.innerHTML = '';
       return;
     }
     paginationEl.innerHTML = `
-      <button class="secondary" id="guidePrevPage" ${state.dictionaryPage === 1 ? 'disabled' : ''}>← Prev</button>
+      <button class="secondary" id="guidePrevPage" ${state.dictionaryPage === 1 ? 'disabled' : ''}>Prev</button>
       <span class="guide-page-label">Page ${state.dictionaryPage} of ${totalPages}</span>
-      <button class="secondary" id="guideNextPage" ${state.dictionaryPage === totalPages ? 'disabled' : ''}>Next →</button>
+      <button class="secondary" id="guideNextPage" ${state.dictionaryPage === totalPages ? 'disabled' : ''}>Next</button>
     `;
     const prevBtn = paginationEl.querySelector('#guidePrevPage');
     const nextBtn = paginationEl.querySelector('#guideNextPage');
@@ -2452,7 +2431,7 @@ function renderGarden() {
       </div>
       <div class="garden-hill garden-hill-back"></div>
       <div class="garden-hill garden-hill-front"></div>
-      <div class="garden-empty">Your garden is empty, add a plant to watch it grow here.</div>
+      <div class="garden-empty">Your garden is empty. Add a plant to watch it grow here.</div>
     `;
     wrapper.appendChild(scene);
     wrapper.appendChild(renderGardenCuttings());
@@ -2466,17 +2445,17 @@ function renderGarden() {
   }, 0) / state.plants.length;
 
   let summary;
-  if (avgScore >= 0.75) summary = ' Your garden is flourishing!';
-  else if (avgScore >= 0.45) summary = ' Your garden is doing alright.';
-  else summary = ' A few plants could use some water.';
+  if (avgScore >= 0.75) summary = 'Your garden is flourishing';
+  else if (avgScore >= 0.45) summary = 'Your garden is doing alright';
+  else summary = 'A few plants could use some water';
 
   const leafCount = Math.min(6, 2 + Math.floor(state.plants.length / 2));
   const leaves = Array.from({ length: leafCount }, (_, i) => {
     const left = 8 + Math.random() * 84;
     const duration = 8 + Math.random() * 6;
     const delay = Math.random() * 8;
-    const emoji = icon('leaf', 16);
-    return `<span class="garden-leaf" style="left:${left}%; animation-duration:${duration}s; animation-delay:-${delay}s;">${emoji}</span>`;
+    const leafIcon = icon('leaf', 16);
+    return `<span class="garden-leaf" style="left:${left}%; animation-duration:${duration}s; animation-delay:-${delay}s;">${leafIcon}</span>`;
   }).join('');
 
   scene.innerHTML = `
@@ -2549,12 +2528,12 @@ function renderGardenStats() {
       <div class="garden-stat-label">combined streak days</div>
     </div>
     <div class="garden-stat-card garden-stat-highlight">
-      <div class="garden-stat-icon"> </div>
+      <div class="garden-stat-icon">${icon('trophy', 22)}</div>
       <div class="garden-stat-title">Star of the garden</div>
       <div class="garden-stat-name">${star.name}</div>
     </div>
     <div class="garden-stat-card garden-stat-highlight">
-      <div class="garden-stat-icon"> </div>
+      <div class="garden-stat-icon">${icon('drop', 22)}</div>
       <div class="garden-stat-title">Needs attention</div>
       <div class="garden-stat-name">${needsAttention.name}</div>
     </div>
@@ -2574,12 +2553,12 @@ function renderGardenCuttings() {
       ${count ? `<span class="garden-cuttings-count">${count}</span>` : ''}
     </div>
     ${count === 0 ? `
-      <div class="garden-cuttings-empty">No cuttings rooting yet, start one from the Cuttings screen.</div>
+      <div class="garden-cuttings-empty">No cuttings rooting yet. Start one from the Cuttings screen.</div>
     ` : `
       <div class="garden-cuttings-row">
         ${state.propagations.map(prop => `
           <div class="garden-cutting-chip" data-id="${prop.id}" role="button" tabindex="0" aria-label="${prop.name}, rooting ${daysRooting(prop)} day${daysRooting(prop) === 1 ? '' : 's'}">
-            <span class="garden-cutting-emoji"> </span>
+            <span class="garden-cutting-emoji">${icon('sprout', 16)}</span>
             <span class="garden-cutting-name">${prop.name}</span>
             <span class="garden-cutting-days">${daysRooting(prop)}d</span>
           </div>
@@ -2664,7 +2643,7 @@ function renderCard(p) {
       <p class="name">${p.name} <span class="mood">${moodEmoji(p)}</span></p>
       <div class="species">${p.species || 'unlabeled'}${p.room ? ` · ${p.room}` : ''}</div>
     </div>
-    <div class="days-badge">${left === 0 ? 'today!' : left + 'd'}</div>
+    <div class="days-badge">${left === 0 ? 'today' : left + 'd'}</div>
   `;
   const selectCard = () => { state.activeId = p.id; state.mobileDetailOpen = true; render(); };
   div.onclick = selectCard;
@@ -2680,13 +2659,13 @@ function renderEmpty() {
   if (state.plants.length === 0) {
     div.innerHTML = `
       <svg class="big-ring" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="none" stroke="var(--sage)" stroke-width="6" stroke-dasharray="8 10"/></svg>
-      <div style="font-family:'Fraunces',serif;font-size:18px;">Your shelf is empty</div>
-      <div style="font-size:13px;">Add your first plant to get started </div>
+      <div style="font-family:'Nunito',serif;font-size:18px;font-weight:700;">Your shelf is empty</div>
+      <div style="font-size:13px;">Add your first plant to get started</div>
     `;
   } else {
     div.innerHTML = `
       <svg class="big-ring" viewBox="0 0 100 100"><circle cx="50" cy="50" r="40" fill="none" stroke="var(--sage)" stroke-width="6" stroke-dasharray="8 10"/></svg>
-      <div style="font-family:'Fraunces',serif;font-size:18px;">No plant selected</div>
+      <div style="font-family:'Nunito',serif;font-size:18px;font-weight:700;">No plant selected</div>
       <div style="font-size:13px;">Tap a plant on the shelf to see its details.</div>
     `;
   }
@@ -2738,8 +2717,8 @@ function renderDetail(p) {
 
   div.innerHTML = `
     <div class="detail-topbar">
-      <button class="back-to-plants-btn" id="backToPlants">← Back to plants</button>
-      ${state.plants.length > 1 ? `<button class="next-plant-btn" id="nextPlantBtn">Next plant →</button>` : ''}
+      <button class="back-to-plants-btn" id="backToPlants">Back to plants</button>
+      ${state.plants.length > 1 ? `<button class="next-plant-btn" id="nextPlantBtn">Next plant</button>` : ''}
     </div>
     <div class="detail-header">
       <div class="detail-ring-click" id="detailRingClick">
@@ -2751,29 +2730,29 @@ function renderDetail(p) {
         <div class="species">${p.species || 'species unlabeled'}</div>
         <div class="row-actions">
           ${p.twiceDaily ? `
-            <button class="primary ${wateredSlotToday(p, 'morning') ? 'water-done' : ''}" id="waterMorningBtn"> Morning${wateredSlotToday(p, 'morning') ? ' ' : ''}</button>
-            <button class="primary ${wateredSlotToday(p, 'night') ? 'water-done' : ''}" id="waterNightBtn"> Night${wateredSlotToday(p, 'night') ? ' ' : ''}</button>
+            <button class="primary ${wateredSlotToday(p, 'morning') ? 'water-done' : ''}" id="waterMorningBtn">Morning${wateredSlotToday(p, 'morning') ? ' (done)' : ''}</button>
+            <button class="primary ${wateredSlotToday(p, 'night') ? 'water-done' : ''}" id="waterNightBtn">Night${wateredSlotToday(p, 'night') ? ' (done)' : ''}</button>
           ` : `
             <button class="primary" id="waterBtn">Water now</button>
           `}
-          <button class="secondary" id="editBtn"> Edit</button>
-          <button class="secondary" id="shareBtn"> Share</button>
+          <button class="secondary" id="editBtn">Edit</button>
+          <button class="secondary" id="shareBtn">Share</button>
           <button class="secondary" id="removeBtn">Remove plant</button>
         </div>
       </div>
     </div>
 
-    <div class="section-label">care rhythm</div>
+    <div class="section-label">Care rhythm</div>
     <div style="font-size:14px;color:var(--soil);">
       Watered every <strong style="color:var(--ink)">${p.frequency} days</strong> ·
       last watered ${daysSince(p.lastWatered)} day${daysSince(p.lastWatered)===1?'':'s'} ago ·
       ${left} day${left===1?'':'s'} left
     </div>
-    <input class="room-input" id="roomInput" placeholder=" Add a room (e.g. Kitchen)" value="${p.room || ''}" aria-label="Room">
+    <input class="room-input" id="roomInput" placeholder="Add a room (e.g. Kitchen)" value="${p.room || ''}" aria-label="Room">
 
     <div class="settings-row">
       <div class="settings-row-label">
-        <div class="settings-row-name"> Feeding</div>
+        <div class="settings-row-name">Feeding</div>
         <div class="settings-row-desc">${p.lastFertilized
           ? `Every ${p.fertilizeFrequency || 21} days · fed ${daysSince(p.lastFertilized)} day${daysSince(p.lastFertilized) === 1 ? '' : 's'} ago · ${(() => { const d = fertilizeDaysLeft(p); return d <= 0 ? 'due now' : `${d} day${d === 1 ? '' : 's'} left`; })()}`
           : 'Not tracked yet'}</div>
@@ -2782,7 +2761,7 @@ function renderDetail(p) {
     </div>
     <div class="settings-row">
       <div class="settings-row-label">
-        <div class="settings-row-name"> Rotation</div>
+        <div class="settings-row-name">Rotation</div>
         <div class="settings-row-desc">${p.lastRotated
           ? `Every ${p.rotateFrequency || 7} days · rotated ${daysSince(p.lastRotated)} day${daysSince(p.lastRotated) === 1 ? '' : 's'} ago · ${(() => { const d = rotateDaysLeft(p); return d <= 0 ? 'due now' : `${d} day${d === 1 ? '' : 's'} left`; })()}`
           : 'Not tracked yet'}</div>
@@ -2790,17 +2769,17 @@ function renderDetail(p) {
       <button class="secondary" id="rotateBtn">Rotate now</button>
     </div>
 
-    <div class="section-label">notes</div>
+    <div class="section-label">Notes</div>
     <textarea class="notes-input" id="notesInput" aria-label="Notes" placeholder="e.g. repot in spring, keep away from cold drafts…">${p.notes || ''}</textarea>
     ${p.speciesDesc ? `<div class="species-desc">${icon('leaf', 14)} <strong>${p.species}:</strong> ${p.speciesDesc}</div>` : ''}
 
-    <div class="section-label">streak</div>
+    <div class="section-label">Streak</div>
     <div class="streak-row">
       <span class="streak-count">${streak}</span>
       <span class="streak-label">on-time watering${streak===1?'':'s'} in a row</span>
     </div>
 
-    <div class="section-label">history</div>
+    <div class="section-label">History</div>
     ${log.length ? `
       <ul class="history-list">
         ${log.map(iso => `<li>${formatHistoryDate(iso)}</li>`).join('')}
@@ -2809,7 +2788,7 @@ function renderDetail(p) {
 
     <div class="settings-row">
       <div class="settings-row-label">
-        <div class="settings-row-name"> Health check-ins</div>
+        <div class="settings-row-name">Health check-ins</div>
         <div class="settings-row-desc">Log how ${p.name} is doing over time</div>
       </div>
       <button class="secondary" id="checkinBtn">Check in</button>
@@ -2990,7 +2969,7 @@ function renderModal() {
             <span class="identify-cta-emoji">${icon('search', 20)}</span>
             <span class="identify-cta-text">
               <span class="identify-cta-title">Identify this plant</span>
-              <span class="identify-cta-sub">Auto-fill species &amp; care from your photo</span>
+              <span class="identify-cta-sub">Auto-fill species and care from your photo</span>
             </span>
           </button>
         ` : `<div class="identify-hint">Add a photo above, then tap to identify the species automatically.</div>`}
@@ -3046,12 +3025,15 @@ function renderModal() {
       <div class="field">
         <label>Water every how many days?</label>
         <input id="modalFreqInput" type="number" min="1" value="${freqVal}" aria-label="Water every how many days">
-        <div class="freq-hint">Most houseplants: 5–10 days. Succulents: 14–21.</div>
+        <div class="freq-hint">
+          <div class="freq-hint-row">Most houseplants: every 5 to 10 days</div>
+          <div class="freq-hint-row">Succulents and cacti: every 14 to 21 days</div>
+        </div>
       </div>
       <div class="field checkbox-field" id="twiceDailyField" style="${showTwiceDaily ? '' : 'display:none;'}">
         <label class="checkbox-label">
           <input type="checkbox" id="modalTwiceDailyInput" ${twiceDailyVal ? 'checked' : ''}>
-          Water twice a day (morning &amp; night)
+          Water twice a day (morning and night)
         </label>
       </div>
       <div class="modal-actions">
@@ -3134,7 +3116,7 @@ async function identifyPhoto(file) {
     if (!res.ok) throw new Error(data.error || 'Could not identify this photo.');
     state.identifyResults = data.results || [];
     if (!state.identifyResults.length) {
-      state.identifyError = "Couldn't find a confident match, try a clearer, closer photo of a leaf.";
+      state.identifyError = "Couldn't find a confident match. Try a clearer, closer photo of a leaf.";
     }
   } catch (err) {
     state.identifyError = err.message || 'Something went wrong, try again.';
@@ -3143,9 +3125,6 @@ async function identifyPhoto(file) {
   render();
 }
 
-// If the identified species roughly matches something in our built-in
-// dictionary (by scientific name), use that richer entry — correct emoji,
-// watering frequency, and care notes — instead of a generic placeholder.
 function matchSpeciesDictionary(scientificName) {
   const normalized = scientificName.toLowerCase().trim();
   const genusSpecies = normalized.split(' ').slice(0, 2).join(' ');
@@ -3177,8 +3156,6 @@ function applyIdentifyResult(result) {
   render();
 }
 
-// ---------- image handling ----------
-
 function resizeImageToDataUrl(file, maxDim) {
   return new Promise((resolve) => {
     const reader = new FileReader();
@@ -3204,8 +3181,6 @@ function resizeImageToDataUrl(file, maxDim) {
     reader.readAsDataURL(file);
   });
 }
-
-// ---------- add / cancel plant ----------
 
 document.addEventListener('click', (e) => {
   if (e.target.id === 'modalBackdrop') { state.showAddModal = false; state.editingPlantId = null; state.modalDraft = null; state.identifyResults = null; state.identifyError = null; render(); }
@@ -3287,8 +3262,6 @@ document.addEventListener('click', (e) => {
   if (e.target.closest && e.target.closest('.mood-option')) {
     const btn = e.target.closest('.mood-option');
     state.checkinDraftMood = btn.dataset.mood;
-    // Update selection styling directly instead of a full render() —
-    // a full re-render would wipe out any note text already typed below.
     document.querySelectorAll('.mood-option').forEach(el => el.classList.remove('mood-option-selected'));
     btn.classList.add('mood-option-selected');
   }
@@ -3381,8 +3354,6 @@ document.addEventListener('click', (e) => {
   }
 });
 
-// ---------- persistence ----------
-
 function getDeviceId() {
   let id = localStorage.getItem('plant-parent-device-id');
   if (!id) {
@@ -3395,9 +3366,7 @@ function getDeviceId() {
 function savePlants() {
   try {
     localStorage.setItem('plant-parent-plants', JSON.stringify(state.plants));
-  } catch (err) {
-    console.error('Could not save plants locally', err);
-  }
+  } catch (err) {}
   checkAchievements();
   syncToServer();
 }
@@ -3405,9 +3374,7 @@ function savePlants() {
 function savePlantsLocalOnly() {
   try {
     localStorage.setItem('plant-parent-plants', JSON.stringify(state.plants));
-  } catch (err) {
-    console.error('Could not save plants locally', err);
-  }
+  } catch (err) {}
   checkAchievements();
 }
 
@@ -3422,9 +3389,7 @@ function loadPlants() {
         return true;
       }
     }
-  } catch (err) {
-    // no saved plants yet
-  }
+  } catch (err) {}
   return false;
 }
 
@@ -3435,15 +3400,11 @@ async function syncToServer() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ deviceId: getDeviceId(), plants: state.plants, syncCode: state.syncCode || undefined })
     });
-  } catch (err) {
-    // offline or backend not deployed yet — local storage still has the data
-  }
+  } catch (err) {}
 }
 
-// ---------- multi-device sync ----------
-
 function generateSyncCode() {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no ambiguous chars (0/O, 1/I)
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
   let code = '';
   for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
   return code;
@@ -3460,13 +3421,13 @@ function renderSyncModal() {
         <div class="sync-code-display">${state.syncCode}</div>
         <div class="modal-actions">
           <button class="secondary" id="copySyncCode">Copy code</button>
-          <button class="primary" id="pullSyncNow"> Sync now</button>
+          <button class="primary" id="pullSyncNow">Sync now</button>
         </div>
         <button class="sync-stop-btn" id="stopSyncing">Stop syncing this device</button>
       ` : `
         <p class="about-story">Link this device with another so you see the same plants on both. No account needed, just a short code.</p>
         <div class="sync-choice-row">
-          <button class="primary" id="createSyncCode"> Create a new sync code</button>
+          <button class="primary" id="createSyncCode">Create a new sync code</button>
         </div>
         <div class="sync-divider">or</div>
         <div class="field">
@@ -3483,8 +3444,6 @@ function renderSyncModal() {
     </div>
   </div>`;
 }
-
-// ---------- community leaderboard ----------
 
 function getBestStreak() {
   let best = 0;
@@ -3591,9 +3550,7 @@ async function refreshMyLeaderboardStats() {
         memoryHighScore: state.memoryHighScore || 0,
       }),
     });
-  } catch (err) {
-    // best-effort — the leaderboard will just show slightly stale numbers
-  }
+  } catch (err) {}
 }
 
 async function leaveLeaderboard() {
@@ -3605,9 +3562,7 @@ async function leaveLeaderboard() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ deviceId: getDeviceId() }),
     });
-  } catch (err) {
-    // best-effort — proceed to clear locally regardless
-  }
+  } catch (err) {}
   state.leaderboardJoined = false;
   state.leaderboardNickname = '';
   localStorage.setItem('plant-parent-leaderboard-joined', '0');
@@ -3629,9 +3584,9 @@ function renderLeaderboardModal() {
   return `
   <div class="modal-backdrop" id="leaderboardBackdrop">
     <div class="modal leaderboard-modal">
-      <h3> Leaderboard</h3>
+      <h3>Leaderboard</h3>
       ${!state.leaderboardJoined ? `
-        <p class="about-story">See how your garden compares with everyone else using Plant Parent. Your nickname, watering streak, plant count, and mini-game high scores are visible to anyone who opens this leaderboard, no other info about you or your plants is shared.</p>
+        <p class="about-story">See how your garden compares with everyone else using Plant Parent. Your nickname, watering streak, plant count, and mini-game high scores are visible to anyone who opens this leaderboard. No other info about you or your plants is shared.</p>
         <div class="field">
           <label>Choose a nickname</label>
           <input id="leaderboardNicknameInput" placeholder="e.g. Fern Whisperer" maxlength="20">
@@ -3650,7 +3605,7 @@ function renderLeaderboardModal() {
         </div>
         ${state.leaderboardLoading ? `<div class="sync-status">Loading…</div>` : ''}
         ${state.leaderboardError ? `<div class="sync-status">${state.leaderboardError}</div>` : ''}
-        ${!state.leaderboardLoading && list.length === 0 ? `<div class="sync-status">No one's on the board yet, be the first!</div>` : ''}
+        ${!state.leaderboardLoading && list.length === 0 ? `<div class="sync-status">No one's on the board yet. Be the first!</div>` : ''}
         ${list.length ? `
           <ol class="leaderboard-list">
             ${list.map((entry, i) => `
@@ -3678,7 +3633,7 @@ async function createAndPushSyncCode() {
   state.syncStatus = 'Setting up…';
   render();
   await syncToServer();
-  state.syncStatus = 'Ready! Enter this code on your other device.';
+  state.syncStatus = 'Ready. Enter this code on your other device.';
   render();
 }
 
@@ -3703,18 +3658,15 @@ async function joinExistingSyncCode(code) {
       render();
       return;
     }
-    // Save what this device had before joining, so "Stop syncing" can restore it later.
     try {
       localStorage.setItem('plant-parent-pre-sync-backup', JSON.stringify(state.plants));
-    } catch (err) {
-      // if this fails, stopping sync later will just keep the synced list instead of restoring
-    }
+    } catch (err) {}
     state.plants = data.plants;
     nextId = state.plants.length ? Math.max(...state.plants.map(p => p.id)) + 1 : 1;
     state.syncCode = code;
     localStorage.setItem('plant-parent-sync-code', code);
     state.activeId = null;
-    state.syncStatus = 'Linked and up to date!';
+    state.syncStatus = 'Linked and up to date.';
     render();
     savePlants();
   } catch (err) {
@@ -3742,7 +3694,7 @@ async function pullSyncNow() {
     state.plants = data.plants;
     nextId = state.plants.length ? Math.max(...state.plants.map(p => p.id)) + 1 : 1;
     state.activeId = null;
-    state.syncStatus = 'Up to date!';
+    state.syncStatus = 'Up to date.';
     render();
     savePlantsLocalOnly();
   } catch (err) {
@@ -3761,7 +3713,7 @@ function stopSyncing() {
   }
 
   if (backup && Array.isArray(backup)) {
-    const restore = confirm(`Restore the ${backup.length} plant(s) this device had before you joined the sync? Choose "Cancel" to keep the currently synced list instead.`);
+    const restore = confirm(`Restore the ${backup.length} plant(s) this device had before you joined the sync? Choose Cancel to keep the currently synced list instead.`);
     if (restore) {
       state.plants = backup;
       nextId = state.plants.length ? Math.max(...state.plants.map(p => p.id)) + 1 : 1;
@@ -3777,8 +3729,6 @@ function stopSyncing() {
   render();
   savePlantsLocalOnly();
 }
-
-// ---------- push notifications ----------
 
 function urlBase64ToUint8Array(base64String) {
   const padding = '='.repeat((4 - base64String.length % 4) % 4);
@@ -3824,8 +3774,6 @@ async function enableNotifications() {
   }
 }
 
-// ---------- startup ----------
-
 function initApp() {
   loadPlants();
   state.activeId = null;
@@ -3859,7 +3807,7 @@ function initApp() {
   state.memoryGameCompleted = localStorage.getItem('plant-parent-memory-completed') === '1';
   state.memoryHighScore = parseInt(localStorage.getItem('plant-parent-memory-highscore') || '0', 10) || 0;
   state.hasInvited = localStorage.getItem('plant-parent-has-invited') === '1';
-  state.showWelcome = false; // superseded by the Home page shown to first-time openers only
+  state.showWelcome = false;
   state.currentView = (localStorage.getItem('plant-parent-onboarding-done') === '1') ? 'shelf' : 'home';
   state.syncCode = localStorage.getItem('plant-parent-sync-code') || null;
 
@@ -3871,9 +3819,6 @@ function initApp() {
   maybeRefreshWeather();
   hideLoadingScreen();
 
-  // If this device is linked to a sync code, quietly check for updates from
-  // other linked devices right on startup (no confirmation needed here since
-  // it's a normal refresh, not a first-time link).
   if (state.syncCode) {
     (async () => {
       try {
@@ -3889,9 +3834,7 @@ function initApp() {
           render();
           savePlantsLocalOnly();
         }
-      } catch (err) {
-        // offline or nothing to sync yet — local data stays as-is
-      }
+      } catch (err) {}
     })();
   }
 }
