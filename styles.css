@@ -290,7 +290,7 @@
     gap: 14px;
     background: linear-gradient(135deg, var(--panel4), var(--bg));
     border: 1.5px solid var(--line);
-    border-radius: 14px;
+    border-radius: 20px;
     padding: 14px 18px;
     margin-bottom: 24px;
   }
@@ -311,7 +311,7 @@
     gap: 14px;
     background: linear-gradient(135deg, var(--info-tint), var(--bg));
     border: 1.5px solid var(--line);
-    border-radius: 14px;
+    border-radius: 20px;
     padding: 14px 18px;
     margin-bottom: 24px;
   }
@@ -654,7 +654,7 @@
 
   .plant-card {
     background: var(--card);
-    border-radius: 14px;
+    border-radius: 20px;
     padding: 14px;
     box-shadow: var(--shadow);
     display: flex;
@@ -848,7 +848,7 @@
   }
   .modal {
     background: var(--card);
-    border-radius: 16px;
+    border-radius: 22px;
     padding: 28px;
     width: 360px;
     max-width: 90vw;
@@ -898,6 +898,10 @@
     cursor: pointer;
     font-family: 'Roboto', sans-serif;
   }
+  .mood-option-thriving { background: #EAF0DF; border-color: #D3DEC2; }
+  .mood-option-okay { background: #F4E9D2; border-color: #E7D4A8; }
+  .mood-option-struggling { background: #F3DCD3; border-color: #E6BFAE; }
+  .mood-option-recovering { background: #E8E2D4; border-color: #D6CBB2; }
   .mood-option-emoji { font-size: 20px; }
   .mood-option-label { font-size: 11px; color: var(--soil); font-weight: 600; }
   .mood-option-selected {
@@ -1229,6 +1233,35 @@
   }
 
   /* Species picker button in Add Plant modal */
+  .location-tile-group {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+  }
+  .location-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 14px 6px;
+    border: 1.5px solid var(--line);
+    border-radius: 16px;
+    background: var(--panel2);
+    color: var(--soil);
+    font-family: 'Roboto', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .location-tile-indoor { background: #EAF0DF; border-color: #D3DEC2; }
+  .location-tile-outdoor { background: #E2ECD9; border-color: #C4D6B2; }
+  .location-tile-balcony { background: #F4E9D2; border-color: #E7D4A8; }
+  .location-tile-active {
+    border-color: var(--sage);
+    box-shadow: 0 0 0 2px var(--sage) inset;
+    color: var(--ink);
+  }
+
   .species-picker-btn {
     width: 100%;
     text-align: left;
@@ -1297,8 +1330,8 @@
   }
   .guide-hero-back:hover { background: var(--panel3); }
   .guide-hero-title {
-    font-family: 'Nunito', sans-serif; font-weight: 700;
-    font-weight: 600;
+    font-family: 'Nunito', sans-serif;
+    font-weight: 800;
     font-size: 26px;
     background: linear-gradient(120deg, var(--sage), var(--clay));
     -webkit-background-clip: text;

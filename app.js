@@ -1532,7 +1532,7 @@ function renderCheckinModal() {
       <h3>How's ${p.name} doing?</h3>
       <div class="mood-picker">
         ${moods.map(m => `
-          <button class="mood-option ${state.checkinDraftMood === m.id ? 'mood-option-selected' : ''}" data-mood="${m.id}">
+          <button class="mood-option mood-option-${m.id} ${state.checkinDraftMood === m.id ? 'mood-option-selected' : ''}" data-mood="${m.id}">
             <span class="mood-option-emoji">${icon(m.emoji, 20)}</span>
             <span class="mood-option-label">${m.label}</span>
           </button>
@@ -2046,13 +2046,16 @@ function render() {
         if (!isDaily) document.getElementById('modalTwiceDailyInput').checked = false;
       });
     }
-    const locationSelect = document.getElementById('modalLocationType');
+    const locationHiddenInput = document.getElementById('modalLocationType');
+    const locationTiles = document.querySelectorAll('.location-tile');
     const roomDetailField = document.getElementById('roomDetailField');
     const roomDetailSelect = document.getElementById('modalRoomDetail');
     const roomCustomField = document.getElementById('roomCustomField');
-    if (locationSelect) {
-      locationSelect.addEventListener('change', () => {
-        const val = locationSelect.value;
+    locationTiles.forEach((tile) => {
+      tile.addEventListener('click', () => {
+        const val = tile.dataset.location;
+        locationHiddenInput.value = val;
+        locationTiles.forEach((t) => t.classList.toggle('location-tile-active', t === tile));
         if (val === 'Indoor' || val === 'Outdoor') {
           roomDetailField.style.display = '';
           roomDetailSelect.innerHTML = roomOptionsHtml(val, '');
@@ -2061,7 +2064,7 @@ function render() {
         }
         roomCustomField.style.display = 'none';
       });
-    }
+    });
     if (roomDetailSelect) {
       roomDetailSelect.addEventListener('change', () => {
         roomCustomField.style.display = roomDetailSelect.value === 'Other' ? '' : 'none';
@@ -3017,12 +3020,18 @@ function renderModal() {
       </div>
       <div class="field">
         <label>Where does it live?</label>
-        <select id="modalLocationType" aria-label="Location type">
-          <option value="" ${!locationType ? 'selected' : ''}>Choose one…</option>
-          <option value="Indoor" ${locationType === 'Indoor' ? 'selected' : ''}> Indoor</option>
-          <option value="Outdoor" ${locationType === 'Outdoor' ? 'selected' : ''}> Outdoor</option>
-          <option value="Balcony" ${locationType === 'Balcony' ? 'selected' : ''}> Balcony</option>
-        </select>
+        <input type="hidden" id="modalLocationType" value="${locationType}">
+        <div class="location-tile-group">
+          <button type="button" class="location-tile location-tile-indoor ${locationType === 'Indoor' ? 'location-tile-active' : ''}" data-location="Indoor">
+            ${icon('plants', 22)}<span>Indoor</span>
+          </button>
+          <button type="button" class="location-tile location-tile-outdoor ${locationType === 'Outdoor' ? 'location-tile-active' : ''}" data-location="Outdoor">
+            ${icon('garden', 22)}<span>Outdoor</span>
+          </button>
+          <button type="button" class="location-tile location-tile-balcony ${locationType === 'Balcony' ? 'location-tile-active' : ''}" data-location="Balcony">
+            ${icon('sprout', 22)}<span>Balcony</span>
+          </button>
+        </div>
       </div>
       <div class="field" id="roomDetailField" style="${(locationType === 'Indoor' || locationType === 'Outdoor') ? '' : 'display:none;'}">
         <label>Which ${locationType === 'Outdoor' ? 'area' : 'room'}?</label>
