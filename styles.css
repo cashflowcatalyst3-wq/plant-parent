@@ -2851,3 +2851,241 @@ body[data-mode="dark"] .guide-hero-banner {
 
 /* But not for toggle buttons or actions that aren't navigation */
 .settings-row button.toggle-switch::after { display: none; }
+
+/* ---------- Greeting header with avatar ---------- */
+.greeting-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 4px 0 20px;
+}
+.greeting-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.greeting-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: var(--sage-pale);
+  color: var(--sage);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.greeting-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+.greeting-hi {
+  font-family: 'Roboto', sans-serif;
+  font-weight: 500;
+  font-size: 12px;
+  color: var(--soil);
+}
+.greeting-name {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 20px;
+  color: var(--ink);
+  line-height: 1.1;
+}
+.greeting-actions {
+  display: flex;
+  gap: 8px;
+}
+.greeting-icon-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 14px;
+  border: none;
+  background: var(--card);
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: var(--shadow);
+  transition: transform 0.1s ease;
+}
+.greeting-icon-btn:active { transform: scale(0.94); }
+
+/* ---------- Shelf search bar ---------- */
+.shelf-search {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--card);
+  border-radius: 16px;
+  padding: 12px 16px;
+  margin-bottom: 14px;
+  box-shadow: var(--shadow);
+}
+.shelf-search input {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: 'Roboto', sans-serif;
+  font-size: 14px;
+  color: var(--ink);
+}
+.shelf-search input::placeholder { color: var(--soil); }
+.shelf-search .icon-wrap { color: var(--soil); flex-shrink: 0; }
+
+/* ---------- Category chip row ---------- */
+.category-row {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  margin-bottom: 14px;
+  scrollbar-width: none;
+}
+.category-row::-webkit-scrollbar { display: none; }
+.category-chip {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-family: 'Roboto', sans-serif;
+}
+.category-chip-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  background: var(--card);
+  color: var(--soil);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--shadow);
+  transition: all 0.15s ease;
+}
+.category-chip-label {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--soil);
+  white-space: nowrap;
+}
+.category-chip-active .category-chip-icon {
+  background: var(--sage);
+  color: #fff;
+}
+.category-chip-active .category-chip-label {
+  color: var(--sage);
+  font-weight: 700;
+}
+.category-chip:active .category-chip-icon { transform: scale(0.94); }
+
+/* ---------- Tinted plant cards ---------- */
+.plant-card-urgent { background: var(--tile-coral); }
+.plant-card-good { background: var(--tile-mint); }
+.plant-card-neutral { background: var(--card); }
+
+/* ---------- Garden spotlight card ---------- */
+.garden-spotlight {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  background: var(--sage);
+  color: #fff;
+  border-radius: 24px;
+  padding: 18px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow);
+  cursor: pointer;
+}
+.garden-spotlight-ring { flex-shrink: 0; }
+.garden-spotlight-info { flex: 1; min-width: 0; }
+.garden-spotlight-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  opacity: 0.85;
+}
+.garden-spotlight-name {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 22px;
+  margin-top: 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.garden-spotlight-stats {
+  display: flex;
+  gap: 16px;
+  margin-top: 8px;
+  font-size: 12px;
+  opacity: 0.95;
+}
+.garden-spotlight-stat strong {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 14px;
+  display: block;
+}
+
+/* ---------- Section label cleanup ---------- */
+.section-label {
+  font-family: 'Roboto', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--soil);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 24px 0 10px;
+  display: block;
+}
+.section-label::after { content: none; }
+
+/* ---------- Settings row chevrons ---------- */
+.settings-row button.secondary::after {
+  content: '';
+  display: inline-block;
+  width: 6px;
+  height: 6px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(-45deg);
+  margin-left: 6px;
+  margin-top: -2px;
+  opacity: 0.5;
+}
+.settings-row button.toggle-switch::after { display: none; }
+
+/* ---------- Guide banner hero ---------- */
+.guide-hero-banner {
+  background: linear-gradient(135deg, var(--tile-sage), var(--tile-mint));
+  border-radius: 24px;
+  padding: 28px 24px;
+  margin-bottom: 20px;
+  text-align: center;
+}
+body[data-mode="dark"] .guide-hero-banner {
+  background: linear-gradient(135deg, var(--tile-sage), var(--card));
+}
+.guide-hero-banner .guide-hero-title {
+  font-size: 26px;
+  margin-bottom: 4px;
+}
+.guide-hero-banner .guide-hero-sub { margin-top: 0; }
+
+/* ---------- Guide light chip active color ---------- */
+.guide-light-chips .room-chip-active {
+  background: var(--sage);
+  color: #fff;
+}
