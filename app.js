@@ -125,6 +125,8 @@ const state = {
   learningReturnTo: 'hub',
   sortBy: 'urgent',
   filterRoom: null,
+  filterLocationType: null,
+  shelfSearch: '',
   weatherEnabled: false,
   soundEnabled: true,
   weatherNudge: null,
@@ -249,6 +251,16 @@ function getVisiblePlants() {
   let list = state.plants.slice();
   if (state.filterRoom) {
     list = list.filter(p => (p.room || '').trim() === state.filterRoom);
+  }
+  if (state.filterLocationType) {
+    list = list.filter(p => {
+      const loc = deriveLocationFromRoom(p.room || '');
+      return loc.locationType.toLowerCase() === state.filterLocationType;
+    });
+  }
+  if (state.shelfSearch && state.shelfSearch.trim()) {
+    const q = state.shelfSearch.toLowerCase().trim();
+    list = list.filter(p => p.name.toLowerCase().includes(q) || (p.species || '').toLowerCase().includes(q));
   }
   if (state.sortBy === 'az') {
     list.sort((a, b) => a.name.localeCompare(b.name));
@@ -453,10 +465,13 @@ function renderHome() {
   const dueToday = state.plants.filter(p => daysLeft(p) === 0).length;
 
   div.innerHTML = `
-    <div class="app-topbar" style="justify-content:flex-start;gap:12px;">
-      <div class="app-topbar-greeting">
-        <span class="app-topbar-hi">Welcome</span>
-        <h1 class="app-topbar-title"><span class="brand-plant">Plant</span> <span class="brand-parent">Parent</span></h1>
+    <div class="greeting-header">
+      <div class="greeting-left">
+        <div class="greeting-avatar">${icon('leaf', 22)}</div>
+        <div class="greeting-text">
+          <span class="greeting-hi">Welcome</span>
+          <span class="greeting-name">Plant Parent</span>
+        </div>
       </div>
     </div>
 
@@ -671,7 +686,7 @@ function renderCommunity() {
         <input id="communityNicknameInput" placeholder="Your name" value="${escapeHtml(savedNickname)}" maxlength="20" aria-label="Your name">
       </div>
       <div class="field">
-        <textarea id="communityTipInput" placeholder="Something that's worked for your plants… (max 100 words)" maxlength="700" rows="3" aria-label="Your tip" style="width:100%;resize:vertical;font-family:inherit;padding:12px 14px;border-radius:14px;border:1.5px solid var(--line);background:var(--panel4);color:var(--ink);"></textarea>
+        <textarea id="communityTipInput" placeholder="Something that's worked for your plants (max 100 words)" maxlength="700" rows="3" aria-label="Your tip" style="width:100%;resize:vertical;font-family:inherit;padding:12px 14px;border-radius:14px;border:1.5px solid var(--line);background:var(--panel4);color:var(--ink);"></textarea>
       </div>
       ${state.communityError ? `<div class="identify-status identify-error">${escapeHtml(state.communityError)}</div>` : ''}
       <button class="primary welcome-btn" id="communitySubmitBtn" style="width:100%;margin-top:8px;">Post tip</button>
@@ -1762,13 +1777,16 @@ function render() {
   app.innerHTML = `
     <div class="main-content ${viewChanged ? 'view-enter' : ''}">
       ${state.currentView !== 'garden' && state.currentView !== 'dictionary' && state.currentView !== 'settings' && state.currentView !== 'tutorial' && state.currentView !== 'community' && state.currentView !== 'home' && state.currentView !== 'hub' && state.currentView !== 'learning' && state.currentView !== 'plantid' && state.currentView !== 'permissions' ? `
-        <header class="app-topbar">
-          <div class="app-topbar-greeting">
-            <span class="app-topbar-hi">Hello there</span>
-            <h1 class="app-topbar-title"><span class="brand-plant">Plant</span> <span class="brand-parent">Parent</span></h1>
+        <header class="greeting-header">
+          <div class="greeting-left">
+            <div class="greeting-avatar">${icon('leaf', 22)}</div>
+            <div class="greeting-text">
+              <span class="greeting-hi">Hello there</span>
+              <span class="greeting-name">Plant Parent</span>
+            </div>
           </div>
-          <div class="app-topbar-actions">
-            <button class="topbar-icon-btn" id="topbarSettingsBtn" aria-label="Settings">${icon('settings', 20)}</button>
+          <div class="greeting-actions">
+            <button class="greeting-icon-btn" id="topbarSettingsBtn" aria-label="Settings">${icon('settings', 20)}</button>
           </div>
         </header>
 
@@ -1809,6 +1827,30 @@ function render() {
       ${state.currentView === 'shelf' ? `
         <div class="layout ${state.mobileDetailOpen ? 'mobile-detail-open' : ''}">
           <div class="shelf-column">
+            <div class="shelf-search">
+              ${icon('search', 18)}
+              <input type="text" id="shelfSearchInput" placeholder="Search your plants" value="${escapeHtml(state.shelfSearch || '')}" aria-label="Search plants">
+            </div>
+
+            <div class="category-row">
+              <button class="category-chip ${(!state.filterRoom && !state.filterLocationType) ? 'category-chip-active' : ''}" data-cat="all">
+                <span class="category-chip-icon">${icon('plants', 22)}</span>
+                <span class="category-chip-label">All</span>
+              </button>
+              <button class="category-chip ${state.filterLocationType === 'indoor' ? 'category-chip-active' : ''}" data-cat="indoor">
+                <span class="category-chip-icon">${icon('plants', 22)}</span>
+                <span class="category-chip-label">Indoor</span>
+              </button>
+              <button class="category-chip ${state.filterLocationType === 'outdoor' ? 'category-chip-active' : ''}" data-cat="outdoor">
+                <span class="category-chip-icon">${icon('sun', 22)}</span>
+                <span class="category-chip-label">Outdoor</span>
+              </button>
+              <button class="category-chip ${state.filterLocationType === 'balcony' ? 'category-chip-active' : ''}" data-cat="balcony">
+                <span class="category-chip-icon">${icon('garden', 22)}</span>
+                <span class="category-chip-label">Balcony</span>
+              </button>
+            </div>
+
             <div class="shelf-controls">
               ${state.plants.length ? `<button class="primary water-all-btn" id="waterAllBtn">Water all plants</button>` : ''}
               <select class="sort-select" id="sortSelect" aria-label="Sort plants by">
@@ -1816,12 +1858,6 @@ function render() {
                 <option value="az" ${state.sortBy === 'az' ? 'selected' : ''}>Plant name (A to Z)</option>
                 <option value="room" ${state.sortBy === 'room' ? 'selected' : ''}>By room</option>
               </select>
-              ${getRoomList().length ? `
-                <div class="room-chips">
-                  <button class="room-chip ${!state.filterRoom ? 'room-chip-active' : ''}" data-room="">All</button>
-                  ${getRoomList().map(r => `<button class="room-chip ${state.filterRoom === r ? 'room-chip-active' : ''}" data-room="${r}">${r}</button>`).join('')}
-                </div>
-              ` : ''}
             </div>
             <div class="shelf" id="shelf"></div>
           </div>
@@ -1954,9 +1990,36 @@ function render() {
     panel.appendChild(active ? renderDetail(active) : renderEmpty());
 
     document.getElementById('sortSelect').onchange = (e) => { state.sortBy = e.target.value; render(); };
-    document.querySelectorAll('.room-chip').forEach(chip => {
-      chip.onclick = () => { state.filterRoom = chip.dataset.room || null; render(); };
+
+    const shelfSearchInput = document.getElementById('shelfSearchInput');
+    if (shelfSearchInput) {
+      shelfSearchInput.addEventListener('input', (e) => {
+        state.shelfSearch = e.target.value;
+        const shelf = document.getElementById('shelf');
+        shelf.innerHTML = '';
+        getVisiblePlants().forEach(p => shelf.appendChild(renderCard(p)));
+        const addBtn = document.createElement('div');
+        addBtn.className = 'add-btn';
+        addBtn.textContent = '+ Add a plant';
+        addBtn.onclick = () => { state.pendingModalPhoto = null; state.pendingSpecies = null; state.editingPlantId = null; state.modalDraft = null; state.identifyResults = null; state.identifyError = null; state.showAddModal = true; state.modalJustOpened = true; render(); };
+        shelf.appendChild(addBtn);
+      });
+    }
+
+    document.querySelectorAll('.category-chip').forEach(chip => {
+      chip.onclick = () => {
+        const cat = chip.dataset.cat;
+        if (cat === 'all') {
+          state.filterRoom = null;
+          state.filterLocationType = null;
+        } else {
+          state.filterRoom = null;
+          state.filterLocationType = (state.filterLocationType === cat) ? null : cat;
+        }
+        render();
+      };
     });
+
     const waterAllBtn = document.getElementById('waterAllBtn');
     if (waterAllBtn) waterAllBtn.onclick = (e) => {
       const count = waterAllPlants();
@@ -2275,10 +2338,10 @@ function buildDictionaryCardsHtml(list, search) {
     const diff = speciesDifficulty(s);
     return `
       <div class="dictionary-card dictionary-card-${diff.tier}" data-id="${s.id}">
-        <div class="dictionary-illustration">${speciesIllustrationSVG(s)}</div>
         <div class="dictionary-card-top">
           <div class="dictionary-difficulty-badge"><span class="difficulty-dot" style="background:${diff.dotColor};"></span> ${diff.label}</div>
         </div>
+        <div class="dictionary-illustration">${speciesIllustrationSVG(s)}</div>
         <div class="dictionary-name">${s.name}</div>
         ${s.latin ? `<div class="dictionary-latin">${s.latin}</div>` : ''}
         <div class="dictionary-meta-row">
@@ -2328,11 +2391,11 @@ function renderDictionary() {
   if (!state.dictionaryPage) state.dictionaryPage = 1;
   if (state.dictionaryPage > totalPages) state.dictionaryPage = totalPages;
 
-wrapper.innerHTML = `
-  <div class="guide-hero guide-hero-banner">
-    <div class="guide-hero-title">Species Guide</div>
-    <div class="guide-hero-sub">${species.length} plants, with care basics for each</div>
-  </div>
+  wrapper.innerHTML = `
+    <div class="guide-hero guide-hero-banner">
+      <div class="guide-hero-title">Species Guide</div>
+      <div class="guide-hero-sub">${species.length} plants, with care basics for each</div>
+    </div>
     <div class="guide-controls">
       <input type="text" id="guideSearchInput" class="guide-search" placeholder="Search by name" value="${search}">
       <div class="guide-light-chips">
@@ -2437,6 +2500,31 @@ function renderGarden() {
     wrapper.appendChild(renderGardenCuttings());
     return wrapper;
   }
+
+  const focus = state.plants.reduce((worst, p) =>
+    daysLeft(p) < daysLeft(worst) ? p : worst
+  , state.plants[0]);
+
+  const spotlight = document.createElement('div');
+  spotlight.className = 'garden-spotlight';
+  spotlight.innerHTML = `
+    <div class="garden-spotlight-ring">${ringPortrait(focus, 64, 6)}</div>
+    <div class="garden-spotlight-info">
+      <div class="garden-spotlight-label">Needs attention</div>
+      <div class="garden-spotlight-name">${focus.name}</div>
+      <div class="garden-spotlight-stats">
+        <div class="garden-spotlight-stat"><strong>${daysLeft(focus)}d</strong>until water</div>
+        <div class="garden-spotlight-stat"><strong>${calcStreak(focus)}</strong>streak</div>
+      </div>
+    </div>
+  `;
+  spotlight.onclick = () => {
+    state.activeId = focus.id;
+    state.currentView = 'shelf';
+    state.mobileDetailOpen = true;
+    render();
+  };
+  wrapper.appendChild(spotlight);
 
   const avgScore = state.plants.reduce((sum, p) => {
     const pct = ringPercent(p);
@@ -2631,12 +2719,17 @@ function ringPortrait(p, size, strokeWidth) {
 }
 
 function renderCard(p) {
+  const left = daysLeft(p);
+  const pct = ringPercent(p);
+  let statusClass = 'plant-card-neutral';
+  if (pct >= 1) statusClass = 'plant-card-urgent';
+  else if (pct < 0.5) statusClass = 'plant-card-good';
+
   const div = document.createElement('div');
-  div.className = 'plant-card' + (p.id === state.activeId ? ' active' : '');
+  div.className = 'plant-card ' + statusClass + (p.id === state.activeId ? ' active' : '');
   div.setAttribute('role', 'button');
   div.setAttribute('tabindex', '0');
-  div.setAttribute('aria-label', `${p.name}, ${daysLeft(p) === 0 ? 'water today' : daysLeft(p) + ' days until watering'}`);
-  const left = daysLeft(p);
+  div.setAttribute('aria-label', `${p.name}, ${left === 0 ? 'water today' : left + ' days until watering'}`);
   div.innerHTML = `
     ${ringPortrait(p, 54, 5)}
     <div class="info">
