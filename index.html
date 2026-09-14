@@ -6,7 +6,6 @@
 <title>Plant Parent</title>
 <meta name="description" content="A friendly plant-care app: watering reminders, care streaks, a species guide, and a little garden that grows as you take care of it.">
 
-<!-- Link preview when shared (iMessage, WhatsApp, Slack, social media) -->
 <meta property="og:title" content="Plant Parent">
 <meta property="og:description" content="A friendly plant-care app: watering reminders, care streaks, a species guide, and a little garden that grows as you take care of it.">
 <meta property="og:image" content="icons/icon-512.png?v=2">
@@ -18,20 +17,15 @@
 
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#8B9A6E">
-
-<!-- iOS "Add to Home Screen" support -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Plant Parent">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=3">
-
 <link rel="icon" href="icons/icon-192-any.png?v=4">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <script>
-  // Apply saved theme/dark-mode before the loading screen paints, so there's
-  // no flash of the wrong colors while app.js finishes loading and running.
   (function () {
     try {
       var theme = localStorage.getItem('plant-parent-theme') || 'sage';
@@ -41,9 +35,7 @@
         ? storedDark === '1'
         : (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
       document.body.dataset.mode = dark ? 'dark' : 'light';
-    } catch (err) {
-      // localStorage unavailable — defaults will apply once app.js runs
-    }
+    } catch (err) {}
   })();
 </script>
 <div id="loadingScreen">
@@ -53,13 +45,10 @@
 </div>
 <div class="app" id="app"></div>
 
-<script src="app.js?v=5"></script>
-<script src="game.js?v=5"></script>
-<script src="game2.js?v=5"></script>
+<script src="app.js?v=6"></script>
+<script src="game.js?v=6"></script>
+<script src="game2.js?v=6"></script>
 <script>
-  // Safety net: if something above ever throws before the app calls
-  // hideLoadingScreen() itself, don't leave the person staring at a frozen
-  // loading screen forever.
   setTimeout(function () {
     var el = document.getElementById('loadingScreen');
     if (el) el.remove();
