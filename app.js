@@ -2316,7 +2316,7 @@ function filterDictionary(species, search, lightFilter) {
   });
 }
 
-const GUIDE_PAGE_SIZE = 8;
+const GUIDE_PAGE_SIZE = 12;
 
 function renderDictionary() {
   const wrapper = document.createElement('div');
@@ -2328,11 +2328,11 @@ function renderDictionary() {
   if (!state.dictionaryPage) state.dictionaryPage = 1;
   if (state.dictionaryPage > totalPages) state.dictionaryPage = totalPages;
 
-  wrapper.innerHTML = `
-    <div class="guide-hero">
-      <div class="guide-hero-title">Species Guide</div>
-      <div class="guide-hero-sub">${species.length} plants, with care basics for each</div>
-    </div>
+wrapper.innerHTML = `
+  <div class="guide-hero guide-hero-banner">
+    <div class="guide-hero-title">Species Guide</div>
+    <div class="guide-hero-sub">${species.length} plants, with care basics for each</div>
+  </div>
     <div class="guide-controls">
       <input type="text" id="guideSearchInput" class="guide-search" placeholder="Search by name" value="${search}">
       <div class="guide-light-chips">
