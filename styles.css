@@ -3095,3 +3095,141 @@ body[data-mode="dark"] .guide-hero-banner {
 .memory-card-front {
   background: var(--tile-sage);
 }
+/* ---------- Plant ID tool ---------- */
+.plantid-card {
+  background: var(--card);
+  border-radius: 24px;
+  padding: 24px;
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.plantid-upload {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  padding: 40px 20px;
+  border: 2px dashed var(--line);
+  border-radius: 20px;
+  background: var(--panel4);
+  color: var(--ink);
+  cursor: pointer;
+  font-family: 'Roboto', sans-serif;
+  transition: all 0.15s ease;
+  width: 100%;
+}
+.plantid-upload:hover {
+  border-color: var(--sage);
+  background: var(--sage-pale);
+}
+.plantid-upload:active { transform: scale(0.98); }
+.plantid-upload-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+  background: var(--sage-pale);
+  color: var(--sage);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.plantid-upload-title {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 17px;
+  color: var(--ink);
+}
+.plantid-upload-sub {
+  font-size: 12px;
+  color: var(--soil);
+  text-align: center;
+  max-width: 240px;
+}
+
+.plantid-preview-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 20px;
+  overflow: hidden;
+  background: var(--panel4);
+}
+.plantid-preview {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.plantid-change-btn {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--ink);
+  border: none;
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-family: 'Roboto', sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.plantid-identify-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  border: none;
+  border-radius: 16px;
+  padding: 16px;
+  background: var(--sage);
+  color: #fff;
+  font-family: 'Roboto', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.plantid-identify-btn:hover { background: #7A9066; }
+.plantid-identify-btn:active { transform: scale(0.98); }
+
+.plantid-status {
+  text-align: center;
+  font-size: 13px;
+  color: var(--soil);
+  padding: 8px 0;
+}
+.plantid-status-error { color: var(--clay); }
+
+.plantid-done {
+  text-align: center;
+  padding: 32px 20px;
+}
+.plantid-done-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+  background: var(--sage-pale);
+  color: var(--sage);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 14px;
+}
+.plantid-done-title {
+  font-family: 'Nunito', sans-serif;
+  font-weight: 800;
+  font-size: 17px;
+  color: var(--ink);
+  margin-bottom: 4px;
+}
+.plantid-done-text {
+  font-size: 13px;
+  color: var(--soil);
+}
