@@ -1,4 +1,4 @@
-const CACHE_NAME = 'plant-parent-v50';
+const CACHE_NAME = 'plant-parent-v52';
 const ASSETS = [
   '/',
   '/index.html',
@@ -29,7 +29,12 @@ self.addEventListener('activate', (event) => {
 
 // Network-first: always try to get the freshest version when online,
 // only falling back to the cached copy if the network request fails (offline).
+// Only GET requests get cached — the Cache API throws on POST/PUT/DELETE,
+// and API calls shouldn't be cached anyway.
 self.addEventListener('fetch', (event) => {
+  if (event.request.method !== 'GET') {
+    return;
+  }
   event.respondWith(
     fetch(event.request)
       .then((response) => {
