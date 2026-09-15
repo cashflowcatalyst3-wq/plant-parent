@@ -800,11 +800,14 @@ function renderPlantId() {
       render();
       try {
         const dataUrl = await resizeImageToDataUrl(state.plantIdPhotoFile, 1024);
-        const res = await fetch('/api/identify', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ imageBase64: dataUrl, organ: 'leaf', deviceId: getDeviceId() }),
-        });
+    const res = await fetch('/api/identify', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Device-Token': getDeviceToken()
+      },
+      body: JSON.stringify({ imageBase64: dataUrl, organ: 'leaf', deviceId: getDeviceId() }),
+    });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Could not identify this photo.');
         state.plantIdResults = data.results || [];
@@ -3200,11 +3203,14 @@ async function identifyPhoto(file) {
   render();
   try {
     const dataUrl = await resizeImageToDataUrl(file, 1024);
-    const res = await fetch('/api/identify', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ imageBase64: dataUrl, organ: 'leaf', deviceId: getDeviceId() }),
-    });
+        const res = await fetch('/api/identify', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Device-Token': getDeviceToken()
+          },
+          body: JSON.stringify({ imageBase64: dataUrl, organ: 'leaf', deviceId: getDeviceId() }),
+        });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Could not identify this photo.');
     state.identifyResults = data.results || [];
@@ -3501,7 +3507,10 @@ async function syncToServer() {
   try {
     await fetch('/api/sync', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Device-Token': getDeviceToken()
+      },
       body: JSON.stringify({ deviceId: getDeviceId(), plants: state.plants, syncCode: state.syncCode || undefined })
     });
   } catch (err) {}
@@ -3579,7 +3588,10 @@ async function submitCommunityPost(nickname, tip) {
   try {
     const res = await fetch('/api/community', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Device-Token': getDeviceToken()
+      },
       body: JSON.stringify({ deviceId: getDeviceId(), nickname, tip }),
     });
     const data = await res.json();
@@ -3615,7 +3627,10 @@ async function joinLeaderboard(nickname) {
   try {
     const res = await fetch('/api/leaderboard', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Device-Token': getDeviceToken()
+      },
       body: JSON.stringify({
         deviceId: getDeviceId(),
         nickname,
@@ -3644,7 +3659,10 @@ async function refreshMyLeaderboardStats() {
   try {
     await fetch('/api/leaderboard', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Device-Token': getDeviceToken()
+      },
       body: JSON.stringify({
         deviceId: getDeviceId(),
         nickname: state.leaderboardNickname,
@@ -3663,7 +3681,10 @@ async function leaveLeaderboard() {
   try {
     await fetch('/api/leaderboard', {
       method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Device-Token': getDeviceToken()
+      },
       body: JSON.stringify({ deviceId: getDeviceId() }),
     });
   } catch (err) {}
@@ -3864,7 +3885,10 @@ async function enableNotifications() {
     }
     await fetch('/api/subscribe', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Device-Token': getDeviceToken()
+      },
       body: JSON.stringify({ deviceId: getDeviceId(), subscription })
     });
     await syncToServer();
