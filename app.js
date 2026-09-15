@@ -2359,26 +2359,24 @@ function buildDictionaryCardsHtml(list, search) {
   return list.map(s => {
     const diff = speciesDifficulty(s);
     return `
-      <div class="dictionary-card dictionary-card-${diff.tier}" data-id="${s.id}">
-        <div class="dictionary-card-top">
-          <div class="dictionary-difficulty-badge"><span class="difficulty-dot" style="background:${diff.dotColor};"></span> ${diff.label}</div>
+      <div class="dictionary-row" data-id="${s.id}">
+        <div class="dictionary-row-thumb">${speciesIllustrationSVG(s)}</div>
+        <div class="dictionary-row-info">
+          <div class="dictionary-row-name">
+            ${s.name}
+            <span class="dictionary-row-dot" style="background:${diff.dotColor};"></span>
+          </div>
+          ${s.latin ? `<div class="dictionary-row-latin">${s.latin}</div>` : ''}
+          <div class="dictionary-row-meta">${s.light} · every ${s.freq}d</div>
         </div>
-        <div class="dictionary-illustration">${speciesIllustrationSVG(s)}</div>
-        <div class="dictionary-name">${s.name}</div>
-        ${s.latin ? `<div class="dictionary-latin">${s.latin}</div>` : ''}
-        <div class="dictionary-meta-row">
-          <span class="dictionary-meta-pill">${icon('sun', 12)} ${s.light}</span>
-          <span class="dictionary-meta-pill">${icon('drop', 12)} every ${s.freq}d</span>
-        </div>
-        <div class="dictionary-desc">${s.desc}</div>
-        <button class="secondary dictionary-add-btn" data-id="${s.id}">+ Add one like this</button>
+        <button class="dictionary-row-add" data-id="${s.id}" aria-label="Add one like this">+</button>
       </div>
     `;
   }).join('');
 }
 
 function wireDictionaryAddButtons(grid) {
-  grid.querySelectorAll('.dictionary-add-btn').forEach(btn => {
+  grid.querySelectorAll('.dictionary-row-add').forEach(btn => {
     btn.onclick = (e) => {
       e.stopPropagation();
       const entry = SPECIES_DICTIONARY.find(s => s.id === btn.dataset.id);
@@ -2392,7 +2390,6 @@ function wireDictionaryAddButtons(grid) {
     };
   });
 }
-
 function filterDictionary(species, search, lightFilter) {
   return species.filter(s => {
     const matchesSearch = !search || s.name.toLowerCase().includes(search.toLowerCase()) || (s.latin || '').toLowerCase().includes(search.toLowerCase());
@@ -2401,7 +2398,7 @@ function filterDictionary(species, search, lightFilter) {
   });
 }
 
-const GUIDE_PAGE_SIZE = 12;
+const GUIDE_PAGE_SIZE = 20;
 
 function renderDictionary() {
   const wrapper = document.createElement('div');
