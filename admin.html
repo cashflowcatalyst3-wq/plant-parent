@@ -535,7 +535,7 @@ function renderDevices(devices) {
       const title = row.querySelector('[data-field="msg-title"]').value.trim();
       const msgBody = row.querySelector('[data-field="msg-body"]').value.trim();
       if (!title || !msgBody) return;
-      sendPush(deviceId, title, msgBody, `msgStatus-${deviceId}`);
+              sendPush(deviceId, title, msgBody);
     });
   });
   body.querySelectorAll('button[data-act="wipe"]').forEach(btn => {
