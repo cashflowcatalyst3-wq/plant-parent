@@ -2820,7 +2820,8 @@ body[data-mode="dark"] .guide-hero-banner {
 }
 /* Opt out for buttons that aren't navigation links. */
 .settings-row button.secondary[data-no-chevron]::after,
-.settings-row button.secondary#copySyncCode::after {
+.settings-row button.secondary#copySyncCode::after,
+.settings-row button.secondary#copyInviteLink::after {
   content: none;
 }
 
