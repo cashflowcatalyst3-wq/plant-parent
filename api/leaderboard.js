@@ -9,6 +9,28 @@ import {
 } from '../lib/nickname.js';
 import { getTokenFromRequest, verifyDeviceToken, registerDeviceToken } from '../lib/deviceAuth.js';
 
+function daysBetween(aIso, bIso) {
+  return Math.floor((new Date(bIso) - new Date(aIso)) / (1000 * 60 * 60 * 24));
+}
+
+// Mirrors the streak calculation in app.js so the server reports the same
+// number the person sees in the app.
+function serverCalcStreak(plant) {
+  const log = plant.waterLog || [];
+  if (log.length === 0) return 0;
+  let streak = 1;
+  for (let i = log.length - 1; i > 0; i--) {
+    const gap = daysBetween(log[i - 1], log[i]);
+    if (gap <= (plant.frequency || 7) + 2) streak++;
+    else break;
+  }
+  return streak;
+}
+
+function bestStreakFromPlants(plants) {
+  return plants.reduce((best, p) => Math.max(best, serverCalcStreak(p)), 0);
+}
+
 const redis = Redis.fromEnv();
 
 export default async function handler(req, res) {
@@ -86,13 +108,23 @@ export default async function handler(req, res) {
         await registerDeviceToken(redis, deviceId, token);
       }
 
+      // Fetch the actual plants this device has stored. The server computes
+      // streak and plant count from real data instead of trusting the client.
+      const storedPlants = (await redis.get(`plants:${deviceId}`)) || [];
+      const serverBestStreak = bestStreakFromPlants(storedPlants);
+      const serverPlantCount = storedPlants.length;
+
       const locked = !!priorEntry?.adminOverride;
       const entry = {
         deviceId,
         nickname: cleanNickname,
         normalized,
-        bestStreak: locked ? (priorEntry.bestStreak || 0) : Math.max(0, parseInt(bestStreak, 10) || 0),
-        plantCount: locked ? (priorEntry.plantCount || 0) : Math.max(0, parseInt(plantCount, 10) || 0),
+        // If an admin has locked this entry, keep their numbers.
+        // Otherwise use the server-computed values for streak and count.
+        bestStreak: locked ? (priorEntry.bestStreak || 0) : serverBestStreak,
+        plantCount: locked ? (priorEntry.plantCount || 0) : serverPlantCount,
+        // Game scores still come from the client — the server doesn't store
+        // enough data to recompute them without replaying the whole game.
         gameHighScore: locked ? (priorEntry.gameHighScore || 0) : Math.max(0, parseInt(gameHighScore, 10) || 0),
         memoryHighScore: locked ? (priorEntry.memoryHighScore || 0) : Math.max(0, parseInt(memoryHighScore, 10) || 0),
         adminOverride: locked,
