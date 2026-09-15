@@ -916,142 +916,112 @@ button.secondary:hover { background: var(--panel3); }
   color: var(--soil);
 }
 
-/* ---------- Dictionary cards (compact grid) ---------- */
+/* ---------- Dictionary list (compact rows) ---------- */
 .dictionary-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 14px;
-}
-
-.dictionary-card {
-  background: var(--card);
-  border-radius: 20px;
-  padding: 14px;
-  box-shadow: var(--shadow);
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  transition: transform 0.15s ease;
-  position: relative;
+  gap: 10px;
 }
-.dictionary-card:hover { transform: translateY(-2px); }
 
-/* Small illustration thumbnail at top of card */
-.dictionary-illustration {
-  width: 100%;
-  aspect-ratio: 1.5;
+.dictionary-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: var(--card);
+  border-radius: 20px;
+  padding: 12px 14px;
+  box-shadow: var(--shadow);
+  transition: transform 0.12s ease, background 0.15s ease;
+  cursor: pointer;
+}
+.dictionary-row:hover {
+  transform: translateY(-1px);
+  background: var(--sage-pale);
+}
+
+.dictionary-row-thumb {
+  width: 56px;
+  height: 56px;
+  flex-shrink: 0;
+  border-radius: 16px;
   background: linear-gradient(180deg, var(--tile-sage), var(--tile-mint));
-  border-radius: 14px;
-  margin-bottom: 8px;
-  overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 6px;
+  overflow: hidden;
 }
-body[data-mode="dark"] .dictionary-illustration {
+body[data-mode="dark"] .dictionary-row-thumb {
   background: linear-gradient(180deg, var(--tile-sage), var(--card));
 }
-.dictionary-illustration svg {
+.dictionary-row-thumb svg {
+  width: 100%;
+  height: 100%;
   display: block;
-  width: 70%;
-  height: 70%;
 }
 
-.dictionary-card-top {
-  display: flex;
-  justify-content: flex-end;
-  position: absolute;
-  top: 20px;
-  right: 20px;
+.dictionary-row-info {
+  flex: 1;
+  min-width: 0;
 }
 
-.dictionary-difficulty-badge {
-  font-size: 9.5px;
-  font-weight: 700;
-  color: var(--ink);
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 8px;
-  padding: 4px 8px;
-  white-space: nowrap;
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08);
-}
-body[data-mode="dark"] .dictionary-difficulty-badge {
-  background: rgba(28, 27, 22, 0.85);
-  color: var(--ink);
-}
-
-.difficulty-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-}
-
-.dictionary-name {
+.dictionary-row-name {
   font-family: 'Nunito', sans-serif;
   font-weight: 700;
   font-size: 15px;
-  margin-top: 2px;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 8px;
   line-height: 1.2;
 }
 
-.dictionary-latin {
-  font-size: 11px;
-  color: var(--soil);
-  margin-top: 0;
+.dictionary-row-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  display: inline-block;
+}
+
+.dictionary-row-latin {
+  font-size: 11.5px;
   font-style: italic;
-  line-height: 1.3;
+  color: var(--soil);
+  margin-top: 1px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.dictionary-meta-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  margin: 6px 0 2px;
-}
-
-.dictionary-meta-pill {
-  font-size: 10px;
-  font-weight: 600;
+.dictionary-row-meta {
+  font-size: 11.5px;
   color: var(--soil);
-  background: var(--panel4);
-  border-radius: 7px;
-  padding: 4px 8px;
-  display: inline-flex;
-  align-items: center;
-  gap: 3px;
-}
-
-.dictionary-meta-pill svg {
-  width: 10px;
-  height: 10px;
-}
-
-.dictionary-desc {
-  font-size: 12px;
-  line-height: 1.45;
-  color: var(--soil);
-  margin: 4px 0 10px;
-  flex: 1;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
+  margin-top: 4px;
+  white-space: nowrap;
   overflow: hidden;
+  text-overflow: ellipsis;
 }
 
-.dictionary-add-btn {
-  align-self: stretch;
-  font-size: 12px;
-  padding: 9px 12px;
-  border-radius: 12px;
-  text-align: center;
+.dictionary-row-add {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 14px;
+  border: none;
+  background: var(--sage);
+  color: #fff;
+  font-size: 22px;
+  font-weight: 400;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease, transform 0.1s ease;
 }
+.dictionary-row-add:hover { background: #7A9066; }
+.dictionary-row-add:active { transform: scale(0.92); }
 
 /* ---------- Room chips ---------- */
 .room-chips { display: flex; flex-wrap: wrap; gap: 6px; }
