@@ -4006,10 +4006,17 @@ function initApp() {
         });
         const data = await res.json();
         if (res.ok && Array.isArray(data.plants)) {
-          state.plants = data.plants;
-          nextId = state.plants.length ? Math.max(...state.plants.map(p => p.id)) + 1 : 1;
-          render();
-          savePlantsLocalOnly();
+          // Guard: don't let a stale or empty server response wipe local plants.
+          // If the server says "zero plants" but we have some locally, treat it
+          // as suspicious and keep the local data.
+          if (data.plants.length === 0 && state.plants.length > 0) {
+            console.warn('Sync returned empty list; keeping local plants as a safeguard.');
+          } else {
+            state.plants = data.plants;
+            nextId = state.plants.length ? Math.max(...state.plants.map(p => p.id)) + 1 : 1;
+            render();
+            savePlantsLocalOnly();
+          }
         }
       } catch (err) {}
     })();
