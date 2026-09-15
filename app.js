@@ -744,36 +744,56 @@ function renderPlantId() {
     </div>
   ` : '';
 
+  let contentHtml;
+  if (usedToday) {
+    contentHtml = `
+      <div class="plantid-done">
+        <div class="plantid-done-icon">${icon('check', 28)}</div>
+        <div class="plantid-done-title">You've used your check today</div>
+        <div class="plantid-done-text">Come back tomorrow for another free identification.</div>
+      </div>
+    `;
+  } else if (!state.plantIdPhoto) {
+    contentHtml = `
+      <button class="plantid-upload" id="plantIdPhotoBtn" type="button">
+        <div class="plantid-upload-icon">${icon('camera', 32)}</div>
+        <div class="plantid-upload-title">Add a photo</div>
+        <div class="plantid-upload-sub">Take a clear shot of a single leaf, in good light</div>
+      </button>
+    `;
+  } else {
+    contentHtml = `
+      <div class="plantid-preview-wrap">
+        <img src="${state.plantIdPhoto}" alt="Selected plant photo" class="plantid-preview">
+        <button class="plantid-change-btn" id="plantIdPhotoBtn" type="button">Change photo</button>
+      </div>
+      <button class="plantid-identify-btn" id="plantIdGoBtn" type="button">
+        ${icon('search', 20)} <span>Identify this plant</span>
+      </button>
+    `;
+  }
+
   div.innerHTML = `
     <div class="guide-hero">
       <button class="guide-hero-back" id="plantIdBackBtn" aria-label="Back">${icon('back', 18)}</button>
       <div class="guide-hero-title">What plant is this?</div>
-      <div class="guide-hero-sub">Snap a photo of any plant to find out what it is, no need to add it to your shelf.</div>
+      <div class="guide-hero-sub">Snap a photo to identify any plant</div>
     </div>
-    <div class="settings-section">
-      ${usedToday ? `
-        <div class="identify-hint" style="padding:16px 0;">You've already used this today. Come back tomorrow for another free check.</div>
-      ` : `
-        <button class="id-photo-btn" id="plantIdPhotoBtn" type="button">${icon('camera', 16)} ${state.plantIdPhoto ? 'Change photo' : 'Take or choose a photo'}</button>
-        <input type="file" id="plantIdPhotoInput" accept="image/*" capture="environment" style="display:none;">
-        ${state.plantIdPhoto ? `<img src="${state.plantIdPhoto}" alt="Selected plant photo preview" class="modal-photo-preview">` : ''}
-        ${state.plantIdPhoto ? `
-          <button class="identify-cta-btn" id="plantIdGoBtn" type="button">
-            <span class="identify-cta-emoji">${icon('search', 20)}</span>
-            <span class="identify-cta-text">
-              <span class="identify-cta-title">Identify this plant</span>
-              <span class="identify-cta-sub">Uses today's one free check</span>
-            </span>
-          </button>
-        ` : ''}
-      `}
-      ${state.plantIdLoading ? `<div class="identify-status">Identifying…</div>` : ''}
-      ${state.plantIdError ? `<div class="identify-status identify-error">${escapeHtml(state.plantIdError)}</div>` : ''}
+
+    <div class="plantid-card">
+      ${contentHtml}
+      ${state.plantIdLoading ? `<div class="plantid-status">Identifying…</div>` : ''}
+      ${state.plantIdError ? `<div class="plantid-status plantid-status-error">${escapeHtml(state.plantIdError)}</div>` : ''}
       ${resultsHtml}
     </div>
+
+    <input type="file" id="plantIdPhotoInput" accept="image/*" capture="environment" style="display:none;">
   `;
 
-  div.querySelector('#plantIdBackBtn').onclick = () => { state.currentView = state.plantIdReturnTo || 'shelf'; render(); };
+  div.querySelector('#plantIdBackBtn').onclick = () => {
+    state.currentView = state.plantIdReturnTo || 'shelf';
+    render();
+  };
 
   const photoBtn = div.querySelector('#plantIdPhotoBtn');
   const photoInput = div.querySelector('#plantIdPhotoInput');
@@ -785,7 +805,7 @@ function renderPlantId() {
       state.plantIdPhotoFile = file;
       state.plantIdResults = null;
       state.plantIdError = null;
-      state.plantIdPhoto = await resizeImageToDataUrl(file, 300);
+      state.plantIdPhoto = await resizeImageToDataUrl(file, 400);
       render();
     };
   }
@@ -800,19 +820,19 @@ function renderPlantId() {
       render();
       try {
         const dataUrl = await resizeImageToDataUrl(state.plantIdPhotoFile, 1024);
-    const res = await fetch('/api/identify', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Device-Token': getDeviceToken()
-      },
-      body: JSON.stringify({ imageBase64: dataUrl, organ: 'leaf', deviceId: getDeviceId() }),
-    });
+        const res = await fetch('/api/identify', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Device-Token': getDeviceToken()
+          },
+          body: JSON.stringify({ imageBase64: dataUrl, organ: 'leaf', deviceId: getDeviceId() }),
+        });
         const data = await res.json();
         if (!res.ok) throw new Error(data.error || 'Could not identify this photo.');
         state.plantIdResults = data.results || [];
         if (!state.plantIdResults.length) {
-          state.plantIdError = "Couldn't find a confident match, try a clearer, closer photo of a leaf.";
+          state.plantIdError = "Couldn't find a confident match. Try a clearer photo of a single leaf.";
         }
         localStorage.setItem('plant-parent-plantid-last-used', todayStr());
       } catch (err) {
@@ -825,7 +845,6 @@ function renderPlantId() {
 
   return div;
 }
-
 function renderAboutModal() {
   const speciesCount = SPECIES_DICTIONARY.length - 1;
   const totalWaterings = state.plants.reduce((sum, p) => sum + (p.waterLog || []).length, 0);
