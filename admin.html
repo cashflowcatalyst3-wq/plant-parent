@@ -40,13 +40,36 @@
   .push-yes { color: #8B9A6E; font-weight: 700; }
   .push-no { color: #B7AF9D; }
   .password-field { position: relative; display: block; width: 100%; }
-  .password-field input { padding-right: 46px !important; width: 100%; box-sizing: border-box; }
-  .password-toggle {
-    position: absolute; right: 4px; top: 50%; transform: translateY(-50%);
-    background: #EEEEEE; border: none; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: 700;
-    padding: 5px 8px; line-height: 1; color: #6B6B62; font-family: 'Roboto', sans-serif;
-  }
-  .password-toggle:hover { background: #EAE2D6; color: #2B2B26; }
+  .password-field input { padding-right: 52px !important; width: 100%; box-sizing: border-box; }
+.password-toggle {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6B6B62;
+  padding: 0;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+.password-toggle:hover {
+  background: #EEEEEE;
+  color: #2B2B26;
+}
+.password-toggle .eye-open,
+.password-toggle .eye-closed {
+  display: block;
+  flex-shrink: 0;
+}
+.password-toggle[data-state="hidden"] .eye-open { display: none; }
+.password-toggle[data-state="shown"] .eye-closed { display: none; }
   .test-badge { font-size: 10px; background: #EAF0DF; color: #4B5A38; padding: 2px 6px; border-radius: 10px; margin-left: 6px; }
   .plants-editor { width: 100%; box-sizing: border-box; font-family: monospace; font-size: 11px; min-height: 90px; padding: 8px; border: 1.5px solid #EAE2D6; border-radius: 12px; margin-top: 6px; }
   .tip-cell { max-width: 320px; }
@@ -59,7 +82,10 @@
   <p class="hint">Enter your ADMIN_SECRET (set in Vercel env vars).</p>
   <div class="password-field">
     <input type="password" id="secretInput" placeholder="Admin secret">
-    <button type="button" class="password-toggle" id="secretToggle" aria-label="Show password">Show</button>
+    <button type="button" class="password-toggle" id="secretToggle" aria-label="Show password" data-state="hidden">
+  <svg class="eye-open" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/></svg>
+  <svg class="eye-closed" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+</button>
   </div>
   <button class="primary" id="loginBtn" style="width:100%;">Enter</button>
   <div id="loginError" style="color:#C97B63;font-size:13px;margin-top:8px;"></div>
@@ -99,7 +125,10 @@
   <div class="announce-box">
     <div class="password-field">
       <input type="password" id="cronSecretInput" placeholder="CRON_SECRET">
-     <button type="button" class="password-toggle" id="cronSecretToggle" aria-label="Show password">Show</button>
+    <button type="button" class="password-toggle" id="cronSecretToggle" aria-label="Show password" data-state="hidden">
+  <svg class="eye-open" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/></svg>
+  <svg class="eye-closed" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+</button>
     </div>
     <button class="secondary" id="runOverdueBtn">Run daily check (overdue + Sunday digest)</button>
     <button class="secondary" id="runTipBtn">Send a random check-in tip</button>
@@ -700,7 +729,7 @@ function wirePasswordToggle(inputId, toggleId) {
   toggle.addEventListener('click', () => {
     const showing = input.type === 'text';
     input.type = showing ? 'password' : 'text';
-    toggle.textContent = showing ? 'Show' : 'Hide';
+    toggle.dataset.state = showing ? 'hidden' : 'shown';
     toggle.setAttribute('aria-label', showing ? 'Show password' : 'Hide password');
   });
 }
