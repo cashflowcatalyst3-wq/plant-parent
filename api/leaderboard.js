@@ -7,6 +7,7 @@ import {
   NICKNAME_INDEX_KEY,
   BANNED_KEY,
 } from '../lib/nickname.js';
+import { getTokenFromRequest, verifyDeviceToken, registerDeviceToken } from '../lib/deviceAuth.js';
 
 const redis = Redis.fromEnv();
 
@@ -43,6 +44,12 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: 'Missing deviceId or nickname' });
       }
 
+      const token = getTokenFromRequest(req);
+      const check = await verifyDeviceToken(redis, deviceId, token);
+      if (!check.ok) {
+        return res.status(403).json({ error: check.error });
+      }
+
       const isBanned = await redis.hexists(BANNED_KEY, deviceId);
       if (isBanned) {
         return res.status(403).json({ error: 'This device has been removed from the leaderboard and cannot rejoin.' });
@@ -52,9 +59,6 @@ export default async function handler(req, res) {
 
       let cleanNickname, normalized;
       if (priorEntry?.adminOverride) {
-        // An admin has locked this entry — keep the nickname (and stats)
-        // exactly as they set it, rather than letting this device's own
-        // periodic self-refresh silently revert the change.
         cleanNickname = priorEntry.nickname;
         normalized = priorEntry.normalized;
       } else {
@@ -73,10 +77,13 @@ export default async function handler(req, res) {
           return res.status(409).json({ error: 'That nickname is already taken — try another one.' });
         }
 
-        // free up this device's previous nickname reservation, if it's changing
         if (priorEntry?.normalized && priorEntry.normalized !== normalized) {
           await redis.hdel(NICKNAME_INDEX_KEY, priorEntry.normalized);
         }
+      }
+
+      if (check.isFirstUse && token) {
+        await registerDeviceToken(redis, deviceId, token);
       }
 
       const locked = !!priorEntry?.adminOverride;
@@ -104,6 +111,13 @@ export default async function handler(req, res) {
       if (!deviceId) {
         return res.status(400).json({ error: 'Missing deviceId' });
       }
+
+      const token = getTokenFromRequest(req);
+      const check = await verifyDeviceToken(redis, deviceId, token);
+      if (!check.ok) {
+        return res.status(403).json({ error: check.error });
+      }
+
       const entry = await redis.get(`leaderboard-entry:${deviceId}`);
       if (entry && entry.normalized) {
         await redis.hdel(NICKNAME_INDEX_KEY, entry.normalized);
