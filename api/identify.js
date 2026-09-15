@@ -2,6 +2,7 @@
 // Free tier: 500 identifications/day, no cost. Needs a free API key.
 import { Redis } from '@upstash/redis';
 import { checkRateLimit, todayKey } from '../lib/rateLimit.js';
+import { getTokenFromRequest, verifyDeviceToken, registerDeviceToken } from '../lib/deviceAuth.js';
 
 const redis = Redis.fromEnv();
 
@@ -17,6 +18,17 @@ export default async function handler(req, res) {
   }
 
   const { imageBase64, organ, deviceId } = req.body || {};
+
+  const token = getTokenFromRequest(req);
+  if (deviceId) {
+    const check = await verifyDeviceToken(redis, deviceId, token);
+    if (!check.ok) {
+      return res.status(403).json({ error: check.error });
+    }
+    if (check.isFirstUse && token) {
+      await registerDeviceToken(redis, deviceId, token);
+    }
+  }
 
   try {
     const today = todayKey();
