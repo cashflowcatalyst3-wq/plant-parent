@@ -73,6 +73,34 @@
   .test-badge { font-size: 10px; background: #EAF0DF; color: #4B5A38; padding: 2px 6px; border-radius: 10px; margin-left: 6px; }
   .plants-editor { width: 100%; box-sizing: border-box; font-family: monospace; font-size: 11px; min-height: 90px; padding: 8px; border: 1.5px solid #EAE2D6; border-radius: 12px; margin-top: 6px; }
   .tip-cell { max-width: 320px; }
+  .tip-editor {
+  width: 100%;
+  min-height: 70px;
+  padding: 8px 10px;
+  border: 1.5px solid #EAE2D6;
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 13px;
+  line-height: 1.5;
+  resize: vertical;
+  color: #2B2B26;
+  background: #FFF;
+  box-sizing: border-box;
+}
+.tip-editor:focus {
+  outline: 2px solid #8B9A6E;
+  border-color: transparent;
+}
+.edited-badge {
+  display: inline-block;
+  font-size: 10px;
+  background: #F4E9D2;
+  color: #6B5A2E;
+  padding: 2px 6px;
+  border-radius: 10px;
+  margin-left: 6px;
+  vertical-align: middle;
+}
 </style>
 </head>
 <body>
@@ -575,18 +603,79 @@ function renderCommunityPosts(posts) {
         ${escapeHtml(p.nickname)}<br>
         <span class="device-id">${escapeHtml(p.deviceId || 'unknown')}</span>
       </td>
-      <td class="tip-cell">${escapeHtml(p.tip)}</td>
+      <td class="tip-cell">
+        <span class="tip-view">${escapeHtml(p.tip)}</span>
+        ${p.editedAt ? `<span class="edited-badge">edited</span>` : ''}
+        <textarea class="tip-editor" style="display:none;">${escapeHtml(p.tip)}</textarea>
+      </td>
       <td>${p.createdAt ? new Date(p.createdAt).toLocaleString() : ''}</td>
-      <td><button class="danger" data-act="deletePost">Delete</button></td>
+      <td>
+        <div class="row-actions">
+          <button class="secondary" data-act="editPost">Edit</button>
+          <button class="primary" data-act="savePost" style="display:none;">Save</button>
+          <button class="secondary" data-act="cancelPost" style="display:none;">Cancel</button>
+          <button class="danger" data-act="deletePost">Delete</button>
+        </div>
+      </td>
     </tr>
   `).join('');
 
+  // Wire up the Delete button.
   body.querySelectorAll('button[data-act="deletePost"]').forEach(btn => {
     btn.addEventListener('click', () => {
       const postId = btn.closest('tr').dataset.post;
       if (confirm('Delete this community post? This removes it from the live feed immediately.')) {
         deleteCommunityPost(postId);
       }
+    });
+  });
+
+  // Wire up Edit / Save / Cancel.
+  body.querySelectorAll('button[data-act="editPost"]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const row = btn.closest('tr');
+      const view = row.querySelector('.tip-view');
+      const editor = row.querySelector('.tip-editor');
+      const saveBtn = row.querySelector('button[data-act="savePost"]');
+      const cancelBtn = row.querySelector('button[data-act="cancelPost"]');
+      const editBtn = btn;
+      view.style.display = 'none';
+      editor.style.display = 'block';
+      editor.focus();
+      editBtn.style.display = 'none';
+      saveBtn.style.display = 'inline-block';
+      cancelBtn.style.display = 'inline-block';
+    });
+  });
+
+  body.querySelectorAll('button[data-act="cancelPost"]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const row = btn.closest('tr');
+      const view = row.querySelector('.tip-view');
+      const editor = row.querySelector('.tip-editor');
+      const saveBtn = row.querySelector('button[data-act="savePost"]');
+      const cancelBtn = btn;
+      const editBtn = row.querySelector('button[data-act="editPost"]');
+      editor.value = view.textContent;
+      editor.style.display = 'none';
+      view.style.display = '';
+      saveBtn.style.display = 'none';
+      cancelBtn.style.display = 'none';
+      editBtn.style.display = 'inline-block';
+    });
+  });
+
+  body.querySelectorAll('button[data-act="savePost"]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const row = btn.closest('tr');
+      const postId = row.dataset.post;
+      const editor = row.querySelector('.tip-editor');
+      const newTip = editor.value.trim();
+      if (!newTip) {
+        alert('Tip cannot be empty.');
+        return;
+      }
+      editCommunityPost(postId, newTip);
     });
   });
 }
@@ -607,7 +696,22 @@ async function deleteCommunityPost(postId) {
     errorEl.textContent = err.message;
   }
 }
-
+async function editCommunityPost(postId, newTip) {
+  const errorEl = document.getElementById('globalError');
+  errorEl.textContent = '';
+  try {
+    const res = await fetch('/api/admin', {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ action: 'editCommunityPost', postId, tip: newTip })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed to save edit');
+    loadDevices();
+  } catch (err) {
+    errorEl.textContent = err.message;
+  }
+} 
 document.getElementById('createTestDeviceBtn').addEventListener('click', createTestDevice);
 
 async function sendPush(deviceId, title, msgBody) {
