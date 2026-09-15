@@ -2818,6 +2818,11 @@ body[data-mode="dark"] .guide-hero-banner {
   margin-top: -2px;
   opacity: 0.5;
 }
+/* Opt out for buttons that aren't navigation links. */
+.settings-row button.secondary[data-no-chevron]::after,
+.settings-row button.secondary#copySyncCode::after {
+  content: none;
+}
 
 /* But not for toggle buttons or actions that aren't navigation */
 .settings-row button.toggle-switch::after { display: none; }
