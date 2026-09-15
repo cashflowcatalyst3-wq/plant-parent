@@ -30,8 +30,9 @@ An installable plant-watering tracker with plant photos, care streaks/history, a
 **4. Add the notification keys**
 - Still in your project settings, go to **Settings → Environment Variables**
 - Add these two:
-  - Name: `VAPID_PUBLIC_KEY` → Value: `BN4ieWQBco1u_esfncKASD5n51MKDrjGJoDafo4eJP7FwjzxIRUq-2xsJEGRoMzZ-tyipIrn8zh2Kzy1H5pukrQ`
-  - Name: `VAPID_PRIVATE_KEY` → Value: `7U_oDSRBDK1RPWxCgLkwPWUXE_XBZE9Y4XGNc3VWUHQ`
+- Name: `VAPID_PUBLIC_KEY` → Value: your generated public key
+- Name: `VAPID_PRIVATE_KEY` → Value: your generated private key
+- Name: `CRON_SECRET` → Value: your generated cron secret
 - Go to the **Deployments** tab, click the **⋯** menu on the latest deployment, and choose **Redeploy** so the new variables take effect
 
 **5. Install it on your phone**
