@@ -3865,6 +3865,39 @@ function urlBase64ToUint8Array(base64String) {
 }
 
 async function enableNotifications() {
+  // If already enabled, this acts as a toggle-off.
+  if (state.notificationsEnabled) {
+    try {
+      const registration = await navigator.serviceWorker.ready;
+      const subscription = await registration.pushManager.getSubscription();
+      if (subscription) {
+        await subscription.unsubscribe();
+      }
+      // Tell the server to forget this device's subscription so it stops
+      // trying to push to it. Best-effort; if it fails, the server will
+      // drop the subscription on the next push anyway (410/404).
+      try {
+        await fetch('/api/unsubscribe', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Device-Token': getDeviceToken()
+          },
+          body: JSON.stringify({ deviceId: getDeviceId() })
+        });
+      } catch (err) {
+        // ignore — local state is cleared regardless
+      }
+    } catch (err) {
+      console.error(err);
+    }
+    state.notificationsEnabled = false;
+    localStorage.setItem('plant-parent-notifications-enabled', '0');
+    render();
+    return;
+  }
+
+  // Otherwise, turn notifications on.
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
     alert("This browser doesn't support push notifications.");
     return;
