@@ -4007,8 +4007,8 @@ function initApp() {
         const data = await res.json();
         if (res.ok && Array.isArray(data.plants)) {
           // Guard: don't let a stale or empty server response wipe local plants.
-          // If the server says "zero plants" but we have some locally, treat it
-          // as suspicious and keep the local data.
+          // If the server says "zero plants" but we have some locally, treat
+          // it as suspicious and keep local data.
           if (data.plants.length === 0 && state.plants.length > 0) {
             console.warn('Sync returned empty list; keeping local plants as a safeguard.');
           } else {
