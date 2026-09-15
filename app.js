@@ -3455,7 +3455,18 @@ function getDeviceId() {
   }
   return id;
 }
-
+function getDeviceToken() {
+  let token = localStorage.getItem('plant-parent-device-token');
+  if (!token) {
+    // Generate a random token. crypto.randomUUID isn't enough entropy alone,
+    // so concatenate a few.
+    const random = (crypto.getRandomValues(new Uint8Array(32)))
+      .reduce((s, b) => s + b.toString(16).padStart(2, '0'), '');
+    token = random;
+    localStorage.setItem('plant-parent-device-token', token);
+  }
+  return token;
+}
 function savePlants() {
   try {
     localStorage.setItem('plant-parent-plants', JSON.stringify(state.plants));
