@@ -467,7 +467,7 @@ function renderHome() {
   div.innerHTML = `
     <div class="greeting-header">
       <div class="greeting-left">
-        <div class="greeting-avatar">${icon('leaf', 22)}</div>
+        <div class="greeting-avatar">${icon('sprout', 22)}</div>
         <div class="greeting-text">
           <span class="greeting-hi">Welcome</span>
           <span class="greeting-name">Plant Parent</span>
@@ -1801,7 +1801,7 @@ function render() {
       ${state.currentView !== 'garden' && state.currentView !== 'dictionary' && state.currentView !== 'settings' && state.currentView !== 'tutorial' && state.currentView !== 'community' && state.currentView !== 'home' && state.currentView !== 'hub' && state.currentView !== 'learning' && state.currentView !== 'plantid' && state.currentView !== 'permissions' ? `
         <header class="greeting-header">
           <div class="greeting-left">
-            <div class="greeting-avatar">${icon('leaf', 22)}</div>
+            <div class="greeting-avatar">${icon('sprout', 22)}</div>
             <div class="greeting-text">
               <span class="greeting-hi">Hello there</span>
               <span class="greeting-name">Plant Parent</span>
