@@ -90,6 +90,21 @@ export default async function handler(req, res) {
         await redis.del(`community-post:${postId}`);
         return res.status(200).json({ ok: true });
       }
+            if (action === 'editCommunityPost') {
+        if (!postId) return res.status(400).json({ error: 'Missing postId' });
+        const { tip: newTip } = req.body || {};
+        if (!newTip || !String(newTip).trim()) {
+          return res.status(400).json({ error: 'Tip cannot be empty' });
+        }
+        const existing = await redis.get(`community-post:${postId}`);
+        if (!existing) {
+          return res.status(404).json({ error: 'Post not found' });
+        }
+        const cleanTip = String(newTip).trim().slice(0, 700);
+        const updated = { ...existing, tip: cleanTip, editedAt: new Date().toISOString() };
+        await redis.set(`community-post:${postId}`, updated);
+        return res.status(200).json({ ok: true, post: updated });
+      }
 
       if (action === 'wipeDevice') {
         if (!deviceId) return res.status(400).json({ error: 'Missing deviceId' });
