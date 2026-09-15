@@ -1,18 +1,12 @@
 import { Redis } from '@upstash/redis';
 import { sanitizeNickname, containsBlockedWord } from '../lib/nickname.js';
-
-// MOCKUP NOTE: this is a lightweight, demo-scale community wall built for
-// a competition presentation — not hardened for public production use.
-// It reuses the leaderboard's existing nickname sanitizing/blocklist for
-// basic decency, but has no per-device rate limiting, no edit/delete UI,
-// and no real moderation queue. Good enough to demo live; would need
-// hardening (rate limits, reporting, admin moderation) before real users.
+import { getTokenFromRequest, verifyDeviceToken, registerDeviceToken } from '../lib/deviceAuth.js';
 
 const redis = Redis.fromEnv();
-const POSTS_KEY = 'community-posts'; // sorted set of post ids, scored by time
+const POSTS_KEY = 'community-posts';
 const MAX_POSTS_RETURNED = 30;
-const MAX_STORED_POSTS = 200; // keep the feed bounded so this stays a mockup, not an unbounded store
-const MAX_TIP_LENGTH = 700; // generous byte cap; the ~100-word limit itself is enforced client-side
+const MAX_STORED_POSTS = 200;
+const MAX_TIP_LENGTH = 700;
 
 export default async function handler(req, res) {
   try {
@@ -22,8 +16,6 @@ export default async function handler(req, res) {
         return res.status(200).json({ ok: true, posts: [] });
       }
       const posts = await Promise.all(ids.map((id) => redis.get(`community-post:${id}`)));
-      // Public feed never exposes which device a post came from — that's
-      // admin-only, surfaced separately via /api/admin for moderation.
       const publicPosts = posts.filter(Boolean).map(({ deviceId, ...rest }) => rest);
       return res.status(200).json({ ok: true, posts: publicPosts });
     }
@@ -32,6 +24,12 @@ export default async function handler(req, res) {
       const { deviceId, nickname, tip } = req.body || {};
       if (!deviceId || !nickname || !tip) {
         return res.status(400).json({ error: 'Missing deviceId, nickname, or tip' });
+      }
+
+      const token = getTokenFromRequest(req);
+      const check = await verifyDeviceToken(redis, deviceId, token);
+      if (!check.ok) {
+        return res.status(403).json({ error: check.error });
       }
 
       const cleanNickname = sanitizeNickname(nickname);
@@ -50,6 +48,10 @@ export default async function handler(req, res) {
         return res.status(400).json({ error: "That message isn't allowed — please rephrase." });
       }
 
+      if (check.isFirstUse && token) {
+        await registerDeviceToken(redis, deviceId, token);
+      }
+
       const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
       const post = {
         id,
@@ -63,7 +65,6 @@ export default async function handler(req, res) {
       await redis.set(`community-post:${id}`, post);
       await redis.zadd(POSTS_KEY, { score: Date.now(), member: id });
 
-      // Trim old posts once the feed grows past the demo-scale cap.
       const count = await redis.zcard(POSTS_KEY);
       if (count > MAX_STORED_POSTS) {
         const excess = await redis.zrange(POSTS_KEY, 0, count - MAX_STORED_POSTS - 1);
