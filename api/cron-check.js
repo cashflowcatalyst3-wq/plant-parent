@@ -144,7 +144,7 @@ export default async function handler(req, res) {
         const elapsed = daysSince(plant.lastWatered);
         const overdue = elapsed >= plant.frequency;
         const alreadyNotifiedToday = plant.lastNotified === today;
-        if (false && overdue && !alreadyNotifiedToday) {
+        if (overdue && !alreadyNotifiedToday) {
           const payload = JSON.stringify({
             title: `${plant.name} is thirsty`,
             body: `It's been ${elapsed} day${elapsed === 1 ? '' : 's'} since the last watering.`
