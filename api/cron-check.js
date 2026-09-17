@@ -117,11 +117,34 @@ export default async function handler(req, res) {
       ]);
       if (!plants || !subscription) continue;
 
+      // Count how many plants are overdue and not already notified today.
+      // If two or more are overdue, send a single summary notification
+      // before the per-plant ones, so the person sees the big picture first.
+      const overduePlants = plants.filter(p => {
+        const elapsed = daysSince(p.lastWatered);
+        return elapsed >= p.frequency && p.lastNotified !== today;
+      });
+
+      if (overduePlants.length >= 2) {
+        const summaryPayload = JSON.stringify({
+          title: `You have ${overduePlants.length} plants overdue`,
+          body: `Water them today so their streaks don't reset.`
+        });
+        try {
+          await webpush.sendNotification(subscription, summaryPayload);
+          sent++;
+        } catch (err) {
+          if (err.statusCode === 410 || err.statusCode === 404) {
+            await redis.del(`sub:${deviceId}`);
+          }
+        }
+      }
+
       for (const plant of plants) {
         const elapsed = daysSince(plant.lastWatered);
         const overdue = elapsed >= plant.frequency;
         const alreadyNotifiedToday = plant.lastNotified === today;
-        if (overdue && !alreadyNotifiedToday) {
+        if (false && overdue && !alreadyNotifiedToday) {
           const payload = JSON.stringify({
             title: `${plant.name} is thirsty`,
             body: `It's been ${elapsed} day${elapsed === 1 ? '' : 's'} since the last watering.`
