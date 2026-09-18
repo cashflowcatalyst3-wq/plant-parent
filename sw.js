@@ -1,4 +1,4 @@
-const CACHE_NAME = 'plant-parent-v52';
+const CACHE_NAME = 'plant-parent-v53';
 const ASSETS = [
   '/',
   '/index.html',
@@ -57,7 +57,7 @@ self.addEventListener('push', (event) => {
     self.registration.showNotification(data.title, {
       body: data.body,
       icon: 'icons/icon-192.png',
-      badge: 'icons/icon-192.png'
+      badge: 'icons/notification-icon.png',
     })
   );
 });
