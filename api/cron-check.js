@@ -1,3 +1,4 @@
+import { logNotification } from '../lib/notificationLog.js';
 import { Redis } from '@upstash/redis';
 import webpush from 'web-push';
 
@@ -133,7 +134,20 @@ export default async function handler(req, res) {
         try {
           await webpush.sendNotification(subscription, summaryPayload);
           sent++;
+          await logNotification(redis, {
+            type: 'daily-check-summary',
+            deviceId,
+            title: `You have ${overduePlants.length} plants overdue`,
+            status: 'sent',
+          });
         } catch (err) {
+          await logNotification(redis, {
+            type: 'daily-check-summary',
+            deviceId,
+            title: `You have ${overduePlants.length} plants overdue`,
+            status: 'failed',
+            error: err.statusCode ? `${err.statusCode}` : (err.message || 'unknown'),
+          });
           if (err.statusCode === 410 || err.statusCode === 404) {
             await redis.del(`sub:${deviceId}`);
           }
@@ -152,8 +166,20 @@ export default async function handler(req, res) {
           try {
             await webpush.sendNotification(subscription, payload);
             sent++;
+            await logNotification(redis, {
+              type: 'daily-check-plant',
+              deviceId,
+              title: `${plant.name} is thirsty`,
+              status: 'sent',
+            });
           } catch (err) {
-            // subscription may be expired/invalid — remove it so we stop retrying
+            await logNotification(redis, {
+              type: 'daily-check-plant',
+              deviceId,
+              title: `${plant.name} is thirsty`,
+              status: 'failed',
+              error: err.statusCode ? `${err.statusCode}` : (err.message || 'unknown'),
+            });
             if (err.statusCode === 410 || err.statusCode === 404) {
               await redis.del(`sub:${deviceId}`);
             }
@@ -168,7 +194,20 @@ export default async function handler(req, res) {
           const digest = weeklyDigestPayload(plants);
           await webpush.sendNotification(subscription, JSON.stringify(digest));
           digestsSent++;
+          await logNotification(redis, {
+            type: 'weekly-digest',
+            deviceId,
+            title: digest.title,
+            status: 'sent',
+          });
         } catch (err) {
+          await logNotification(redis, {
+            type: 'weekly-digest',
+            deviceId,
+            title: 'Weekly digest',
+            status: 'failed',
+            error: err.statusCode ? `${err.statusCode}` : (err.message || 'unknown'),
+          });
           if (err.statusCode === 410 || err.statusCode === 404) {
             await redis.del(`sub:${deviceId}`);
           }
@@ -180,9 +219,27 @@ export default async function handler(req, res) {
       await redis.set('last-digest-date', today);
     }
 
+    await redis.set('last-cron-run', new Date().toISOString());
+    await logNotification(redis, {
+      type: 'cron-run',
+      deviceId: 'all',
+      title: `Checked ${(deviceIds || []).length} devices, sent ${sent}`,
+      status: 'sent',
+    });
+
     return res.status(200).json({ ok: true, checked: (deviceIds || []).length, sent, digestsSent });
   } catch (err) {
     console.error('Cron check failed:', err);
+    try {
+      await logNotification(redis, {
+        type: 'cron-error',
+        deviceId: 'all',
+        title: 'Cron check failed',
+        status: 'failed',
+        error: err.message || 'unknown',
+      });
+    } catch (logErr) {
+      console.error('Could not log cron failure:', logErr);
+    }
     return res.status(500).json({ error: `Cron check failed: ${err.message}` });
   }
-}
