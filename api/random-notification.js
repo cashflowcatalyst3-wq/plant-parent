@@ -1,3 +1,4 @@
+import { logNotification } from '../lib/notificationLog.js';
 import { Redis } from '@upstash/redis';
 import webpush from 'web-push';
 
