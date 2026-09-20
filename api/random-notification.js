@@ -114,7 +114,20 @@ export default async function handler(req, res) {
       try {
         await webpush.sendNotification(subscription, JSON.stringify(message));
         sent++;
+        await logNotification(redis, {
+          type: 'random-tip',
+          deviceId,
+          title: message.title,
+          status: 'sent',
+        });
       } catch (err) {
+        await logNotification(redis, {
+          type: 'random-tip',
+          deviceId,
+          title: message.title,
+          status: 'failed',
+          error: err.statusCode ? `${err.statusCode}` : (err.message || 'unknown'),
+        });
         if (err.statusCode === 410 || err.statusCode === 404) {
           await redis.del(`sub:${deviceId}`);
         }
