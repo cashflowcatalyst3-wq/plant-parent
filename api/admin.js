@@ -1,3 +1,4 @@
+import { logNotification, readNotificationLog, clearNotificationLog } from '../lib/notificationLog.js';
 import { Redis } from '@upstash/redis';
 import webpush from 'web-push';
 import { NICKNAME_INDEX_KEY, MEMBERS_KEY as LEADERBOARD_MEMBERS_KEY } from '../lib/nickname.js';
@@ -53,7 +54,9 @@ export default async function handler(req, res) {
         ? (await Promise.all(postIds.map((id) => redis.get(`community-post:${id}`)))).filter(Boolean)
         : [];
 
-      return res.status(200).json({ ok: true, devices, communityPosts });
+      const lastCronRun = await redis.get('last-cron-run');
+      const notificationLog = await readNotificationLog(redis, 50);
+      return res.status(200).json({ ok: true, devices, communityPosts, lastCronRun, notificationLog });
     }
 
     if (req.method === 'POST') {
@@ -83,7 +86,11 @@ export default async function handler(req, res) {
         await redis.sadd(DEVICES_KEY, deviceId); // in case this is a brand-new id being seeded directly
         return res.status(200).json({ ok: true, plants });
       }
-
+            if (action === 'clearNotificationLog') {
+        await clearNotificationLog(redis);
+        return res.status(200).json({ ok: true });
+      }
+      
       if (action === 'deleteCommunityPost') {
         if (!postId) return res.status(400).json({ error: 'Missing postId' });
         await redis.zrem(COMMUNITY_POSTS_KEY, postId);
@@ -142,7 +149,7 @@ export default async function handler(req, res) {
           targets = [deviceId];
         }
 
-        let sent = 0;
+         let sent = 0;
         let failed = 0;
         for (const id of targets) {
           const sub = await redis.get(`sub:${id}`);
@@ -150,8 +157,21 @@ export default async function handler(req, res) {
           try {
             await webpush.sendNotification(sub, JSON.stringify({ title, body }));
             sent++;
+            await logNotification(redis, {
+              type: 'manual',
+              deviceId: id,
+              title,
+              status: 'sent',
+            });
           } catch (err) {
             failed++;
+            await logNotification(redis, {
+              type: 'manual',
+              deviceId: id,
+              title,
+              status: 'failed',
+              error: err.statusCode ? `${err.statusCode}` : (err.message || 'unknown'),
+            });
             if (err.statusCode === 410 || err.statusCode === 404) {
               await redis.del(`sub:${id}`);
             }
