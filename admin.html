@@ -195,6 +195,20 @@
   </table>
 </div>
 
+  <h2>Notification log</h2>
+  <p class="hint">The last 50 notifications sent, newest first. Automatic daily checks, random tips, and manual messages from this page all appear here.</p>
+  <div id="cronStatus" class="hint" style="margin-bottom:6px;"></div>
+  <table>
+    <thead>
+      <tr><th>Time</th><th>Type</th><th>Device</th><th>Title</th><th>Status</th></tr>
+    </thead>
+    <tbody id="notificationLogBody"></tbody>
+  </table>
+  <div style="margin-top:10px;">
+    <button class="secondary" id="clearLogBtn">Clear log</button>
+    <span id="clearLogStatus" class="hint" style="margin-left:8px;"></span>
+  </div>
+  
 <script>
 let secret = sessionStorage.getItem('pp-admin-secret') || '';
 let allEntries = [];
@@ -456,12 +470,38 @@ async function loadDevices() {
     if (!res.ok) throw new Error(data.error || 'Failed to load devices');
     allDevices = data.devices || [];
     renderDevices(allDevices);
-    renderCommunityPosts(data.communityPosts || []);
+    renderCommunityPosts(data.communityPosts || [], data.lastCronRun);
     statusEl.textContent = `${allDevices.length} device${allDevices.length === 1 ? '' : 's'}`;
   } catch (err) {
     statusEl.textContent = '';
     errorEl.textContent = err.message;
   }
+}
+  function renderNotificationLog(entries, lastCronRun) {
+  const cronEl = document.getElementById('cronStatus');
+  if (cronEl) {
+    cronEl.textContent = lastCronRun
+      ? `Last automatic check: ${new Date(lastCronRun).toLocaleString()}`
+      : 'Last automatic check: never run yet';
+  }
+
+  const body = document.getElementById('notificationLogBody');
+  if (!entries.length) {
+    body.innerHTML = `<tr><td colspan="5" style="color:#7A7566;">No notifications logged yet.</td></tr>`;
+    return;
+  }
+
+  body.innerHTML = entries.map(e => `
+    <tr>
+      <td>${e.at ? new Date(e.at).toLocaleString() : ''}</td>
+      <td>${escapeHtml(e.type || '')}</td>
+      <td><span class="device-id">${escapeHtml(e.deviceId || '')}</span></td>
+      <td class="tip-cell">${escapeHtml(e.title || '')}</td>
+      <td>${e.status === 'sent'
+        ? '<span style="color:#8B9A6E;font-weight:700;">Sent</span>'
+        : `<span style="color:#C97B63;font-weight:700;">Failed${e.error ? ' (' + escapeHtml(e.error) + ')' : ''}</span>`}</td>
+    </tr>
+  `).join('');
 }
 
 function renderDevices(devices) {
