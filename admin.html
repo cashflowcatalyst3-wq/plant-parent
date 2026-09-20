@@ -41,66 +41,57 @@
   .push-no { color: #B7AF9D; }
   .password-field { position: relative; display: block; width: 100%; }
   .password-field input { padding-right: 52px !important; width: 100%; box-sizing: border-box; }
-.password-toggle {
-  position: absolute;
-  right: 6px;
-  top: 50%;
-  transform: translateY(-50%);
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  width: 32px;
-  height: 32px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #6B6B62;
-  padding: 0;
-  transition: background 0.15s ease, color 0.15s ease;
-}
-.password-toggle:hover {
-  background: #EEEEEE;
-  color: #2B2B26;
-}
-.password-toggle .eye-open,
-.password-toggle .eye-closed {
-  display: block;
-  flex-shrink: 0;
-}
-.password-toggle[data-state="hidden"] .eye-open { display: none; }
-.password-toggle[data-state="shown"] .eye-closed { display: none; }
+  .password-toggle {
+    position: absolute;
+    right: 6px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #6B6B62;
+    padding: 0;
+    transition: background 0.15s ease, color 0.15s ease;
+  }
+  .password-toggle:hover { background: #EEEEEE; color: #2B2B26; }
+  .password-toggle .eye-open,
+  .password-toggle .eye-closed { display: block; flex-shrink: 0; }
+  .password-toggle[data-state="hidden"] .eye-open { display: none; }
+  .password-toggle[data-state="shown"] .eye-closed { display: none; }
   .test-badge { font-size: 10px; background: #EAF0DF; color: #4B5A38; padding: 2px 6px; border-radius: 10px; margin-left: 6px; }
   .plants-editor { width: 100%; box-sizing: border-box; font-family: monospace; font-size: 11px; min-height: 90px; padding: 8px; border: 1.5px solid #EAE2D6; border-radius: 12px; margin-top: 6px; }
   .tip-cell { max-width: 320px; }
   .tip-editor {
-  width: 100%;
-  min-height: 70px;
-  padding: 8px 10px;
-  border: 1.5px solid #EAE2D6;
-  border-radius: 10px;
-  font-family: inherit;
-  font-size: 13px;
-  line-height: 1.5;
-  resize: vertical;
-  color: #2B2B26;
-  background: #FFF;
-  box-sizing: border-box;
-}
-.tip-editor:focus {
-  outline: 2px solid #8B9A6E;
-  border-color: transparent;
-}
-.edited-badge {
-  display: inline-block;
-  font-size: 10px;
-  background: #F4E9D2;
-  color: #6B5A2E;
-  padding: 2px 6px;
-  border-radius: 10px;
-  margin-left: 6px;
-  vertical-align: middle;
-}
+    width: 100%;
+    min-height: 70px;
+    padding: 8px 10px;
+    border: 1.5px solid #EAE2D6;
+    border-radius: 10px;
+    font-family: inherit;
+    font-size: 13px;
+    line-height: 1.5;
+    resize: vertical;
+    color: #2B2B26;
+    background: #FFF;
+    box-sizing: border-box;
+  }
+  .tip-editor:focus { outline: 2px solid #8B9A6E; border-color: transparent; }
+  .edited-badge {
+    display: inline-block;
+    font-size: 10px;
+    background: #F4E9D2;
+    color: #6B5A2E;
+    padding: 2px 6px;
+    border-radius: 10px;
+    margin-left: 6px;
+    vertical-align: middle;
+  }
 </style>
 </head>
 <body>
@@ -111,9 +102,9 @@
   <div class="password-field">
     <input type="password" id="secretInput" placeholder="Admin secret">
     <button type="button" class="password-toggle" id="secretToggle" aria-label="Show password" data-state="hidden">
-  <svg class="eye-open" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/></svg>
-  <svg class="eye-closed" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
-</button>
+      <svg class="eye-open" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/></svg>
+      <svg class="eye-closed" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+    </button>
   </div>
   <button class="primary" id="loginBtn" style="width:100%;">Enter</button>
   <div id="loginError" style="color:#C97B63;font-size:13px;margin-top:8px;"></div>
@@ -153,16 +144,30 @@
   <div class="announce-box">
     <div class="password-field">
       <input type="password" id="cronSecretInput" placeholder="CRON_SECRET">
-    <button type="button" class="password-toggle" id="cronSecretToggle" aria-label="Show password" data-state="hidden">
-  <svg class="eye-open" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/></svg>
-  <svg class="eye-closed" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
-</button>
+      <button type="button" class="password-toggle" id="cronSecretToggle" aria-label="Show password" data-state="hidden">
+        <svg class="eye-open" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8Z"/><circle cx="12" cy="12" r="3"/></svg>
+        <svg class="eye-closed" viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>
+      </button>
     </div>
     <button class="secondary" id="runOverdueBtn">Run daily check (overdue + Sunday digest)</button>
     <button class="secondary" id="runTipBtn">Send a random check-in tip</button>
   </div>
   <p class="hint" style="margin-top:6px;">The weekly digest only actually sends on Sundays regardless, this runs the same job your cron runs daily either way.</p>
   <div id="testStatus" class="hint"></div>
+
+  <h2>Notification log</h2>
+  <p class="hint">The last 50 notifications sent, newest first. Automatic daily checks, random tips, and manual messages from this page all appear here.</p>
+  <div id="cronStatus" class="hint" style="margin-bottom:6px;"></div>
+  <table>
+    <thead>
+      <tr><th>Time</th><th>Type</th><th>Device</th><th>Title</th><th>Status</th></tr>
+    </thead>
+    <tbody id="notificationLogBody"></tbody>
+  </table>
+  <div style="margin-top:10px;">
+    <button class="secondary" id="clearLogBtn">Clear log</button>
+    <span id="clearLogStatus" class="hint" style="margin-left:8px;"></span>
+  </div>
 
   <h2>Community posts</h2>
   <p class="hint">Every tip posted to the public Community wall, including which device it came from, the device ID is never shown to the public, only here. Delete removes it from the live feed immediately.</p>
@@ -195,21 +200,6 @@
   </table>
 </div>
 
-  <h2>Notification log</h2>
-  <p class="hint">The last 50 notifications sent, newest first. Automatic daily checks, random tips, and manual messages from this page all appear here.</p>
-  <div id="cronStatus" class="hint" style="margin-bottom:6px;"></div>
-  <table>
-    <thead>
-      <tr><th>Time</th><th>Type</th><th>Device</th><th>Title</th><th>Status</th></tr>
-    </thead>
-    <tbody id="notificationLogBody"></tbody>
-  </table>
-  <div style="margin-top:10px;">
-    <button class="secondary" id="clearLogBtn">Clear log</button>
-    <span id="clearLogStatus" class="hint" style="margin-left:8px;"></span>
-  </div>
-  
-</div>
 <script>
 let secret = sessionStorage.getItem('pp-admin-secret') || '';
 let allEntries = [];
@@ -471,14 +461,16 @@ async function loadDevices() {
     if (!res.ok) throw new Error(data.error || 'Failed to load devices');
     allDevices = data.devices || [];
     renderDevices(allDevices);
-    renderCommunityPosts(data.communityPosts || [], data.lastCronRun);
+    renderCommunityPosts(data.communityPosts || []);
+    renderNotificationLog(data.notificationLog || [], data.lastCronRun);
     statusEl.textContent = `${allDevices.length} device${allDevices.length === 1 ? '' : 's'}`;
   } catch (err) {
     statusEl.textContent = '';
     errorEl.textContent = err.message;
   }
 }
-  function renderNotificationLog(entries, lastCronRun) {
+
+function renderNotificationLog(entries, lastCronRun) {
   const cronEl = document.getElementById('cronStatus');
   if (cronEl) {
     cronEl.textContent = lastCronRun
@@ -487,6 +479,7 @@ async function loadDevices() {
   }
 
   const body = document.getElementById('notificationLogBody');
+  if (!body) return;
   if (!entries.length) {
     body.innerHTML = `<tr><td colspan="5" style="color:#7A7566;">No notifications logged yet.</td></tr>`;
     return;
@@ -661,7 +654,6 @@ function renderCommunityPosts(posts) {
     </tr>
   `).join('');
 
-  // Wire up the Delete button.
   body.querySelectorAll('button[data-act="deletePost"]').forEach(btn => {
     btn.addEventListener('click', () => {
       const postId = btn.closest('tr').dataset.post;
@@ -671,7 +663,6 @@ function renderCommunityPosts(posts) {
     });
   });
 
-  // Wire up Edit / Save / Cancel.
   body.querySelectorAll('button[data-act="editPost"]').forEach(btn => {
     btn.addEventListener('click', () => {
       const row = btn.closest('tr');
@@ -679,11 +670,10 @@ function renderCommunityPosts(posts) {
       const editor = row.querySelector('.tip-editor');
       const saveBtn = row.querySelector('button[data-act="savePost"]');
       const cancelBtn = row.querySelector('button[data-act="cancelPost"]');
-      const editBtn = btn;
       view.style.display = 'none';
       editor.style.display = 'block';
       editor.focus();
-      editBtn.style.display = 'none';
+      btn.style.display = 'none';
       saveBtn.style.display = 'inline-block';
       cancelBtn.style.display = 'inline-block';
     });
@@ -695,13 +685,12 @@ function renderCommunityPosts(posts) {
       const view = row.querySelector('.tip-view');
       const editor = row.querySelector('.tip-editor');
       const saveBtn = row.querySelector('button[data-act="savePost"]');
-      const cancelBtn = btn;
       const editBtn = row.querySelector('button[data-act="editPost"]');
       editor.value = view.textContent;
       editor.style.display = 'none';
       view.style.display = '';
       saveBtn.style.display = 'none';
-      cancelBtn.style.display = 'none';
+      btn.style.display = 'none';
       editBtn.style.display = 'inline-block';
     });
   });
@@ -737,6 +726,7 @@ async function deleteCommunityPost(postId) {
     errorEl.textContent = err.message;
   }
 }
+
 async function editCommunityPost(postId, newTip) {
   const errorEl = document.getElementById('globalError');
   errorEl.textContent = '';
@@ -752,7 +742,8 @@ async function editCommunityPost(postId, newTip) {
   } catch (err) {
     errorEl.textContent = err.message;
   }
-} 
+}
+
 document.getElementById('createTestDeviceBtn').addEventListener('click', createTestDevice);
 
 async function sendPush(deviceId, title, msgBody) {
@@ -829,6 +820,26 @@ async function runTestEndpoint(path, label) {
 document.getElementById('runOverdueBtn').addEventListener('click', () => runTestEndpoint('/api/cron-check', 'Daily check'));
 document.getElementById('runTipBtn').addEventListener('click', () => runTestEndpoint('/api/random-notification', 'Random tip'));
 
+document.getElementById('clearLogBtn').addEventListener('click', async () => {
+  const statusEl = document.getElementById('clearLogStatus');
+  if (!confirm('Clear the entire notification log?')) return;
+  statusEl.textContent = 'Clearing…';
+  try {
+    const res = await fetch('/api/admin', {
+      method: 'POST',
+      headers: authHeaders(),
+      body: JSON.stringify({ action: 'clearNotificationLog' })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error || 'Failed');
+    statusEl.textContent = 'Cleared.';
+    loadDevices();
+    setTimeout(() => { statusEl.textContent = ''; }, 2000);
+  } catch (err) {
+    statusEl.textContent = err.message;
+  }
+});
+
 function escapeHtml(str) {
   return String(str || '')
     .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
@@ -848,7 +859,6 @@ document.getElementById('loginBtn').onclick = async () => {
   if (!secret) return;
   const errorEl = document.getElementById('loginError');
   errorEl.textContent = 'Checking…';
-  // verify before committing to the panel
   try {
     const res = await fetch('/api/leaderboard-admin', { headers: authHeaders() });
     const data = await res.json().catch(() => ({}));
