@@ -97,6 +97,7 @@ export default async function handler(req, res) {
   try {
     const today = new Date().toISOString().slice(0, 10);
     let sent = 0;
+    let totalFailed = 0;
     let digestsSent = 0;
 
     // Weekly digest piggybacks on this same daily cron — no extra scheduler
@@ -141,6 +142,7 @@ export default async function handler(req, res) {
             status: 'sent',
           });
         } catch (err) {
+          totalFailed++;
           await logNotification(redis, {
             type: 'daily-check-summary',
             deviceId,
@@ -173,6 +175,7 @@ export default async function handler(req, res) {
               status: 'sent',
             });
           } catch (err) {
+            totalFailed++;
             await logNotification(redis, {
               type: 'daily-check-plant',
               deviceId,
@@ -201,6 +204,7 @@ export default async function handler(req, res) {
             status: 'sent',
           });
         } catch (err) {
+          totalFailed++;
           await logNotification(redis, {
             type: 'weekly-digest',
             deviceId,
@@ -223,8 +227,9 @@ export default async function handler(req, res) {
     await logNotification(redis, {
       type: 'cron-run',
       deviceId: 'all',
-      title: `Checked ${(deviceIds || []).length} devices, sent ${sent}`,
-      status: 'sent',
+      title: `Run summary: ${(deviceIds || []).length} devices checked, ${sent} sent, ${totalFailed} failed`,
+      status: totalFailed > 0 ? 'failed' : 'sent',
+      error: totalFailed > 0 ? `${totalFailed} failed` : undefined,
     });
 
     return res.status(200).json({ ok: true, checked: (deviceIds || []).length, sent, digestsSent });
