@@ -1,6 +1,6 @@
-import { logNotification } from '../lib/notificationLog.js';
 import { Redis } from '@upstash/redis';
 import webpush from 'web-push';
+import { logNotification } from '../lib/notificationLog.js';
 
 function daysSince(dateStr) {
   const then = new Date(dateStr);
@@ -48,20 +48,20 @@ function weeklyDigestPayload(plants) {
 
   if (wateringsThisWeek === 0 && plants.length > 0) {
     return {
-      title: '🌱 Your week in review',
-      body: `No waterings logged this week across your ${plants.length} plant${plants.length === 1 ? '' : 's'} — might be worth a check-in.`,
+      title: 'Your week in review',
+      body: `No waterings logged this week across your ${plants.length} plant${plants.length === 1 ? '' : 's'}. Might be worth a check-in.`,
     };
   }
 
   let body = `${wateringsThisWeek} watering${wateringsThisWeek === 1 ? '' : 's'} logged this week across ${plants.length} plant${plants.length === 1 ? '' : 's'}.`;
   if (bestStreakPlant && bestStreak > 1) {
-    body += ` ${bestStreakPlant} is on a ${bestStreak}-watering streak 🔥`;
+    body += ` ${bestStreakPlant} is on a ${bestStreak}-watering streak.`;
   }
   if (overdueCount > 0) {
     body += ` ${overdueCount} plant${overdueCount === 1 ? ' is' : 's are'} overdue right now.`;
   }
 
-  return { title: '🌱 Your week in review', body };
+  return { title: 'Your week in review', body };
 }
 
 export default async function handler(req, res) {
@@ -77,7 +77,7 @@ export default async function handler(req, res) {
   if (!process.env.UPSTASH_REDIS_REST_URL && !process.env.KV_REST_API_URL) missing.push('UPSTASH_REDIS_REST_URL (or KV_REST_API_URL)');
   if (!process.env.UPSTASH_REDIS_REST_TOKEN && !process.env.KV_REST_API_TOKEN) missing.push('UPSTASH_REDIS_REST_TOKEN (or KV_REST_API_TOKEN)');
   if (missing.length) {
-    return res.status(500).json({ error: `Missing environment variable(s): ${missing.join(', ')}. Add them in Vercel → Settings → Environment Variables, then redeploy.` });
+    return res.status(500).json({ error: `Missing environment variable(s): ${missing.join(', ')}. Add them in Vercel -> Settings -> Environment Variables, then redeploy.` });
   }
 
   let redis, deviceIds;
@@ -100,7 +100,7 @@ export default async function handler(req, res) {
     let totalFailed = 0;
     let digestsSent = 0;
 
-    // Weekly digest piggybacks on this same daily cron — no extra scheduler
+    // Weekly digest piggybacks on this same daily cron - no extra scheduler
     // needed. It only fires on Sundays, and only once per day even if this
     // endpoint gets triggered more than once (e.g. manual testing).
     const isDigestDay = new Date().getUTCDay() === 0; // Sunday
@@ -118,8 +118,9 @@ export default async function handler(req, res) {
         redis.get(`sub:${deviceId}`)
       ]);
       if (!plants || !subscription) continue;
-      
-      // Look up the device's nickname for a friendlier log entry.
+
+      // Look up the device's leaderboard nickname (if any) for friendlier
+      // log entries.
       const lbEntry = await redis.get(`leaderboard-entry:${deviceId}`);
       const deviceLabel = lbEntry?.nickname
         ? `${lbEntry.nickname} (${deviceId})`
@@ -143,7 +144,7 @@ export default async function handler(req, res) {
           sent++;
           await logNotification(redis, {
             type: 'daily-check-summary',
-            deviceLabel,
+            deviceId: deviceLabel,
             title: `You have ${overduePlants.length} plants overdue`,
             status: 'sent',
           });
@@ -151,7 +152,7 @@ export default async function handler(req, res) {
           totalFailed++;
           await logNotification(redis, {
             type: 'daily-check-summary',
-            deviceLabel,
+            deviceId: deviceLabel,
             title: `You have ${overduePlants.length} plants overdue`,
             status: 'failed',
             error: err.statusCode ? `${err.statusCode}` : (err.message || 'unknown'),
@@ -176,7 +177,7 @@ export default async function handler(req, res) {
             sent++;
             await logNotification(redis, {
               type: 'daily-check-plant',
-              deviceLabel,
+              deviceId: deviceLabel,
               title: `${plant.name} is thirsty`,
               status: 'sent',
             });
@@ -184,7 +185,7 @@ export default async function handler(req, res) {
             totalFailed++;
             await logNotification(redis, {
               type: 'daily-check-plant',
-              deviceLabel,
+              deviceId: deviceLabel,
               title: `${plant.name} is thirsty`,
               status: 'failed',
               error: err.statusCode ? `${err.statusCode}` : (err.message || 'unknown'),
@@ -205,7 +206,7 @@ export default async function handler(req, res) {
           digestsSent++;
           await logNotification(redis, {
             type: 'weekly-digest',
-            deviceId,
+            deviceId: deviceLabel,
             title: digest.title,
             status: 'sent',
           });
@@ -213,7 +214,7 @@ export default async function handler(req, res) {
           totalFailed++;
           await logNotification(redis, {
             type: 'weekly-digest',
-            deviceId,
+            deviceId: deviceLabel,
             title: 'Weekly digest',
             status: 'failed',
             error: err.statusCode ? `${err.statusCode}` : (err.message || 'unknown'),
@@ -235,10 +236,15 @@ export default async function handler(req, res) {
       deviceId: 'all',
       title: `Run summary: ${(deviceIds || []).length} devices checked, ${sent} sent, ${totalFailed} failed`,
       status: totalFailed > 0 ? 'failed' : 'sent',
-      error: totalFailed > 0 ? `${totalFailed} failed` : undefined,
     });
 
-    return res.status(200).json({ ok: true, checked: (deviceIds || []).length, sent, digestsSent });
+    return res.status(200).json({
+      ok: true,
+      checked: (deviceIds || []).length,
+      sent,
+      failed: totalFailed,
+      digestsSent
+    });
   } catch (err) {
     console.error('Cron check failed:', err);
     try {
@@ -254,3 +260,4 @@ export default async function handler(req, res) {
     }
     return res.status(500).json({ error: `Cron check failed: ${err.message}` });
   }
+}
