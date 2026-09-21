@@ -111,19 +111,25 @@ export default async function handler(req, res) {
     for (const deviceId of deviceIds || []) {
       const subscription = await redis.get(`sub:${deviceId}`);
       if (!subscription) continue;
+
+      const lbEntry = await redis.get(`leaderboard-entry:${deviceId}`);
+      const deviceLabel = lbEntry?.nickname
+        ? `${lbEntry.nickname} (${deviceId})`
+        : deviceId;
+
       try {
         await webpush.sendNotification(subscription, JSON.stringify(message));
         sent++;
         await logNotification(redis, {
           type: 'random-tip',
-          deviceId,
+          deviceId: deviceLabel,
           title: message.title,
           status: 'sent',
         });
       } catch (err) {
         await logNotification(redis, {
           type: 'random-tip',
-          deviceId,
+          deviceId: deviceLabel,
           title: message.title,
           status: 'failed',
           error: err.statusCode ? `${err.statusCode}` : (err.message || 'unknown'),
