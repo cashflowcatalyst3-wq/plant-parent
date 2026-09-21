@@ -118,6 +118,12 @@ export default async function handler(req, res) {
         redis.get(`sub:${deviceId}`)
       ]);
       if (!plants || !subscription) continue;
+      
+      // Look up the device's nickname for a friendlier log entry.
+      const lbEntry = await redis.get(`leaderboard-entry:${deviceId}`);
+      const deviceLabel = lbEntry?.nickname
+        ? `${lbEntry.nickname} (${deviceId})`
+        : deviceId;
 
       // Count how many plants are overdue and not already notified today.
       // If two or more are overdue, send a single summary notification
@@ -137,7 +143,7 @@ export default async function handler(req, res) {
           sent++;
           await logNotification(redis, {
             type: 'daily-check-summary',
-            deviceId,
+            deviceLabel,
             title: `You have ${overduePlants.length} plants overdue`,
             status: 'sent',
           });
@@ -145,7 +151,7 @@ export default async function handler(req, res) {
           totalFailed++;
           await logNotification(redis, {
             type: 'daily-check-summary',
-            deviceId,
+            deviceLabel,
             title: `You have ${overduePlants.length} plants overdue`,
             status: 'failed',
             error: err.statusCode ? `${err.statusCode}` : (err.message || 'unknown'),
@@ -170,7 +176,7 @@ export default async function handler(req, res) {
             sent++;
             await logNotification(redis, {
               type: 'daily-check-plant',
-              deviceId,
+              deviceLabel,
               title: `${plant.name} is thirsty`,
               status: 'sent',
             });
@@ -178,7 +184,7 @@ export default async function handler(req, res) {
             totalFailed++;
             await logNotification(redis, {
               type: 'daily-check-plant',
-              deviceId,
+              deviceLabel,
               title: `${plant.name} is thirsty`,
               status: 'failed',
               error: err.statusCode ? `${err.statusCode}` : (err.message || 'unknown'),
