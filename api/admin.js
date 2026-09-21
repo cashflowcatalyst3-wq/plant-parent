@@ -154,12 +154,18 @@ export default async function handler(req, res) {
         for (const id of targets) {
           const sub = await redis.get(`sub:${id}`);
           if (!sub) continue;
+
+          const lbEntry = await redis.get(`leaderboard-entry:${id}`);
+          const deviceLabel = lbEntry?.nickname
+            ? `${lbEntry.nickname} (${id})`
+            : id;
+
           try {
             await webpush.sendNotification(sub, JSON.stringify({ title, body }));
             sent++;
             await logNotification(redis, {
               type: 'manual',
-              deviceId: id,
+              deviceId: deviceLabel,
               title,
               status: 'sent',
             });
@@ -167,7 +173,7 @@ export default async function handler(req, res) {
             failed++;
             await logNotification(redis, {
               type: 'manual',
-              deviceId: id,
+              deviceId: deviceLabel,
               title,
               status: 'failed',
               error: err.statusCode ? `${err.statusCode}` : (err.message || 'unknown'),
@@ -177,6 +183,12 @@ export default async function handler(req, res) {
             }
           }
         }
+        await logNotification(redis, {
+          type: 'manual-summary',
+          deviceId: 'all',
+          title: `Manual send: ${sent} sent, ${failed} failed out of ${targets.length} devices`,
+          status: failed > 0 ? 'failed' : 'sent',
+        });
         return res.status(200).json({ ok: true, sent, failed, checked: targets.length });
       }
 
