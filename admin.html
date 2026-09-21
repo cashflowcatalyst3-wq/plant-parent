@@ -477,7 +477,22 @@ function renderNotificationLog(entries, lastCronRun) {
       ? `Last automatic check: ${new Date(lastCronRun).toLocaleString()}`
       : 'Last automatic check: never run yet';
   }
-
+  
+  body.innerHTML = entries.map(e => {
+    const isSummary = e.type === 'cron-run' || e.type === 'manual-summary' || e.type === 'cron-error';
+    return `
+      <tr style="${isSummary ? 'background:#F4E9D2;font-weight:600;' : ''}">
+        <td>${e.at ? new Date(e.at).toLocaleString() : ''}</td>
+        <td>${escapeHtml(e.type || '')}</td>
+        <td><span class="device-id">${escapeHtml(e.deviceId || '')}</span></td>
+        <td class="tip-cell">${escapeHtml(e.title || '')}</td>
+        <td>${e.status === 'sent'
+          ? '<span style="color:#8B9A6E;font-weight:700;">Sent</span>'
+          : `<span style="color:#C97B63;font-weight:700;">Failed${e.error ? ' (' + escapeHtml(e.error) + ')' : ''}</span>`}</td>
+      </tr>
+    `;
+  }).join('');
+  
   const body = document.getElementById('notificationLogBody');
   if (!body) return;
   if (!entries.length) {
