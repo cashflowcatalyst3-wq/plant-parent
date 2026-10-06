@@ -8,28 +8,20 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
   const { deviceId, plants, syncCode } = req.body || {};
-  if (!deviceId || !Array.isArray(plants)) {
-    return res.status(400).json({ error: 'Missing deviceId or plants' });
+  if (!deviceId || typeof deviceId !== 'string') {
+    return res.status(400).json({ error: 'Missing deviceId' });
   }
-
-  const token = getTokenFromRequest(req);
-  const check = await verifyDeviceToken(redis, deviceId, token);
-  if (!check.ok) {
-    return res.status(403).json({ error: check.error });
+  if (!/^[a-zA-Z0-9_-]{8,64}$/.test(deviceId)) {
+    return res.status(400).json({ error: 'Invalid deviceId format' });
   }
-
-  try {
-    if (check.isFirstUse && token) {
-      await registerDeviceToken(redis, deviceId, token);
+  if (!Array.isArray(plants)) {
+    return res.status(400).json({ error: 'plants must be an array' });
+  }
+  if (plants.length > 500) {
+    return res.status(400).json({ error: 'Too many plants' });
+  }
+  for (const p of plants) {
+    if (!p || typeof p !== 'object' || typeof p.name !== 'string' || !p.name.trim()) {
+      return res.status(400).json({ error: 'Each plant must be an object with a name' });
     }
-    await redis.set(`plants:${deviceId}`, plants);
-    await redis.sadd('devices', deviceId);
-    if (syncCode) {
-      await redis.set(`synced:${syncCode}`, { plants, updatedAt: new Date().toISOString() });
-    }
-    return res.status(200).json({ ok: true });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ error: 'Could not sync' });
   }
-}
