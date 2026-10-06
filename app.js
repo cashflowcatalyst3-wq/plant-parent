@@ -4004,11 +4004,23 @@ function initApp() {
         });
         const data = await res.json();
         if (res.ok && Array.isArray(data.plants)) {
-          // Guard: don't let a stale or empty server response wipe local plants.
-          // If the server says "zero plants" but we have some locally, treat
-          // it as suspicious and keep local data.
-          if (data.plants.length === 0 && state.plants.length > 0) {
+          // If the server has fewer plants than we do locally, ask before
+          // overwriting, since that usually means another device deleted
+          // things and we don't want to lose local data silently.
+          const serverCount = data.plants.length;
+          const localCount = state.plants.length;
+          if (serverCount === 0 && localCount > 0) {
             console.warn('Sync returned empty list; keeping local plants as a safeguard.');
+          } else if (serverCount < localCount) {
+            const overwrite = confirm(
+              `Another device may have deleted ${localCount - serverCount} plant(s). Pull the server list and lose local changes?`
+            );
+            if (overwrite) {
+              state.plants = data.plants;
+              nextId = state.plants.length ? Math.max(...state.plants.map(p => p.id)) + 1 : 1;
+              render();
+              savePlantsLocalOnly();
+            }
           } else {
             state.plants = data.plants;
             nextId = state.plants.length ? Math.max(...state.plants.map(p => p.id)) + 1 : 1;
