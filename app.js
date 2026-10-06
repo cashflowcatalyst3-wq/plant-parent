@@ -1235,6 +1235,9 @@ function buildJournalEvents() {
     if (p.notesUpdatedAt) {
       events.push({ date: p.notesUpdatedAt, emoji: 'journal', text: `Updated notes on <strong>${safeName}</strong>` });
     }
+  });
+  return events.sort((a, b) => new Date(b.date) - new Date(a.date));
+}
 
 function formatJournalGroup(iso) {
   const days = daysSince(iso);
