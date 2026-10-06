@@ -60,7 +60,7 @@ self.addEventListener('fetch', (event) => {
 });
 
 self.addEventListener('push', (event) => {
-  let data = { title: 'Plant Parent', body: 'One of your plants needs attention.' };
+  let data = { title: 'Plant Parent', body: 'One of your plants needs attention.', tag: 'plant-parent' };
   try {
     if (event.data) data = event.data.json();
   } catch (err) {
@@ -71,6 +71,7 @@ self.addEventListener('push', (event) => {
       body: data.body,
       icon: 'icons/icon-192.png',
       badge: 'icons/notification-icon.png',
+      tag: data.tag || 'plant-parent'
     })
   );
 });
