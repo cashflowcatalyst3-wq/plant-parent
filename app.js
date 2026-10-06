@@ -1237,7 +1237,7 @@ function buildJournalEvents() {
     }
   });
   return events.sort((a, b) => new Date(b.date) - new Date(a.date));
-}
+}  
 
 function formatJournalGroup(iso) {
   const days = daysSince(iso);
