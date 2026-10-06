@@ -172,7 +172,7 @@ if (!bearerOk && !queryOk) {
           const payload = JSON.stringify({
             title: `${plant.name} is thirsty`,
             body: `It's been ${elapsed} day${elapsed === 1 ? '' : 's'} since the last watering.`,
-            tag: 'plant-parent-overdue'
+            tag: `plant-parent-overdue-${plant.name}`
           });
           try {
             await webpush.sendNotification(subscription, payload);
