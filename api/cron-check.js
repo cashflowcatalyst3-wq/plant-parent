@@ -137,7 +137,8 @@ if (!bearerOk && !queryOk) {
       if (overduePlants.length >= 2) {
         const summaryPayload = JSON.stringify({
           title: `You have ${overduePlants.length} plants overdue`,
-          body: `Water them today so their streaks don't reset.`
+          body: `Water them today so their streaks don't reset.`,
+          tag: 'plant-parent-summary'
         });
         try {
           await webpush.sendNotification(subscription, summaryPayload);
@@ -170,7 +171,8 @@ if (!bearerOk && !queryOk) {
         if (overdue && !alreadyNotifiedToday) {
           const payload = JSON.stringify({
             title: `${plant.name} is thirsty`,
-            body: `It's been ${elapsed} day${elapsed === 1 ? '' : 's'} since the last watering.`
+            body: `It's been ${elapsed} day${elapsed === 1 ? '' : 's'} since the last watering.`,
+            tag: 'plant-parent-overdue'
           });
           try {
             await webpush.sendNotification(subscription, payload);
