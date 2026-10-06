@@ -845,6 +845,7 @@ function renderPlantId() {
 
   return div;
 }
+
 function renderAboutModal() {
   const speciesCount = SPECIES_DICTIONARY.length - 1;
   const totalWaterings = state.plants.reduce((sum, p) => sum + (p.waterLog || []).length, 0);
@@ -1237,7 +1238,7 @@ function buildJournalEvents() {
     }
   });
   return events.sort((a, b) => new Date(b.date) - new Date(a.date));
-}  
+}
 
 function formatJournalGroup(iso) {
   const days = daysSince(iso);
@@ -2391,6 +2392,7 @@ function wireDictionaryAddButtons(grid) {
     };
   });
 }
+
 function filterDictionary(species, search, lightFilter) {
   return species.filter(s => {
     const matchesSearch = !search || s.name.toLowerCase().includes(search.toLowerCase()) || (s.latin || '').toLowerCase().includes(search.toLowerCase());
@@ -3220,14 +3222,14 @@ async function identifyPhoto(file) {
   render();
   try {
     const dataUrl = await resizeImageToDataUrl(file, 1024);
-        const res = await fetch('/api/identify', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'X-Device-Token': getDeviceToken()
-          },
-          body: JSON.stringify({ imageBase64: dataUrl, organ: 'leaf', deviceId: getDeviceId() }),
-        });
+    const res = await fetch('/api/identify', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Device-Token': getDeviceToken()
+      },
+      body: JSON.stringify({ imageBase64: dataUrl, organ: 'leaf', deviceId: getDeviceId() }),
+    });
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || 'Could not identify this photo.');
     state.identifyResults = data.results || [];
@@ -3478,11 +3480,10 @@ function getDeviceId() {
   }
   return id;
 }
+
 function getDeviceToken() {
   let token = localStorage.getItem('plant-parent-device-token');
   if (!token) {
-    // Generate a random token. crypto.randomUUID isn't enough entropy alone,
-    // so concatenate a few.
     const random = (crypto.getRandomValues(new Uint8Array(32)))
       .reduce((s, b) => s + b.toString(16).padStart(2, '0'), '');
     token = random;
@@ -3490,6 +3491,7 @@ function getDeviceToken() {
   }
   return token;
 }
+
 function savePlants() {
   try {
     localStorage.setItem('plant-parent-plants', JSON.stringify(state.plants));
@@ -3882,7 +3884,6 @@ function urlBase64ToUint8Array(base64String) {
 }
 
 async function enableNotifications() {
-  // If already enabled, this acts as a toggle-off.
   if (state.notificationsEnabled) {
     try {
       const registration = await navigator.serviceWorker.ready;
@@ -3890,9 +3891,6 @@ async function enableNotifications() {
       if (subscription) {
         await subscription.unsubscribe();
       }
-      // Tell the server to forget this device's subscription so it stops
-      // trying to push to it. Best-effort; if it fails, the server will
-      // drop the subscription on the next push anyway (410/404).
       try {
         await fetch('/api/unsubscribe', {
           method: 'POST',
@@ -3902,9 +3900,7 @@ async function enableNotifications() {
           },
           body: JSON.stringify({ deviceId: getDeviceId() })
         });
-      } catch (err) {
-        // ignore — local state is cleared regardless
-      }
+      } catch (err) {}
     } catch (err) {
       console.error(err);
     }
@@ -3914,7 +3910,6 @@ async function enableNotifications() {
     return;
   }
 
-  // Otherwise, turn notifications on.
   if (!('serviceWorker' in navigator) || !('PushManager' in window)) {
     alert("This browser doesn't support push notifications.");
     return;
@@ -4007,9 +4002,6 @@ function initApp() {
         });
         const data = await res.json();
         if (res.ok && Array.isArray(data.plants)) {
-          // If the server has fewer plants than we do locally, ask before
-          // overwriting, since that usually means another device deleted
-          // things and we don't want to lose local data silently.
           const serverCount = data.plants.length;
           const localCount = state.plants.length;
           if (serverCount === 0 && localCount > 0) {
