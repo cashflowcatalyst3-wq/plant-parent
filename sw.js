@@ -1,4 +1,4 @@
-const CACHE_NAME = 'plant-parent-v53';
+const CACHE_NAME = 'plant-parent-v54';
 const ASSETS = [
   '/',
   '/index.html',
@@ -38,11 +38,24 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     fetch(event.request)
       .then((response) => {
-        const clone = response.clone();
-        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+        // Only cache successful responses.
+        if (response.ok) {
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+        }
         return response;
       })
-      .catch(() => caches.match(event.request))
+      .catch(async () => {
+        const cached = await caches.match(event.request);
+        if (cached) return cached;
+        // Network and cache both missed. Return a minimal offline response
+        // instead of throwing.
+        return new Response('Offline', {
+          status: 503,
+          statusText: 'Offline',
+          headers: { 'Content-Type': 'text/plain' },
+        });
+      })
   );
 });
 
