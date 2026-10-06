@@ -939,7 +939,7 @@ function renderDeleteConfirmModal() {
   return `
   <div class="modal-backdrop" id="deleteConfirmBackdrop">
     <div class="modal delete-confirm-modal">
-      <h3>Remove ${plant.name}?</h3>
+      <h3>Remove ${escapeHtml(plant.name)}?</h3>
       <p class="delete-confirm-text">This deletes its photo, notes, and full watering history. This can't be undone after a few seconds, but you'll get a brief chance to undo right after.</p>
       <div class="modal-actions">
         <button class="secondary" id="cancelDeletePlant">Cancel</button>
@@ -1225,18 +1225,16 @@ async function shareCard(plant) {
 function buildJournalEvents() {
   const events = [];
   state.plants.forEach(p => {
+    const safeName = escapeHtml(p.name);
     if (p.createdAt) {
-      events.push({ date: p.createdAt, emoji: 'sprout', text: `Added <strong>${p.name}</strong> to your shelf` });
+      events.push({ date: p.createdAt, emoji: 'sprout', text: `Added <strong>${safeName}</strong> to your shelf` });
     }
     (p.waterLog || []).forEach(iso => {
-      events.push({ date: iso, emoji: 'drop', text: `Watered <strong>${p.name}</strong>` });
+      events.push({ date: iso, emoji: 'drop', text: `Watered <strong>${safeName}</strong>` });
     });
     if (p.notesUpdatedAt) {
-      events.push({ date: p.notesUpdatedAt, emoji: 'journal', text: `Updated notes on <strong>${p.name}</strong>` });
+      events.push({ date: p.notesUpdatedAt, emoji: 'journal', text: `Updated notes on <strong>${safeName}</strong>` });
     }
-  });
-  return events.sort((a, b) => new Date(b.date) - new Date(a.date));
-}
 
 function formatJournalGroup(iso) {
   const days = daysSince(iso);
@@ -1466,9 +1464,9 @@ function renderPropagation() {
       <div class="prop-card" data-id="${prop.id}">
         <div class="prop-emoji">${icon('sprout', 28)}</div>
         <div class="prop-info">
-          <div class="prop-name">${prop.name}</div>
+          <div class="prop-name">${escapeHtml(prop.name)}</div>
           <div class="prop-days">Rooting for ${daysRooting(prop)} day${daysRooting(prop) === 1 ? '' : 's'}</div>
-          ${prop.notes ? `<div class="prop-notes">${prop.notes}</div>` : ''}
+          ${prop.notes ? `<div class="prop-notes">${escapeHtml(prop.notes)}</div>` : ''}
         </div>
         <div class="prop-actions">
           <button class="secondary prop-graduate-btn" data-id="${prop.id}">Graduate</button>
@@ -1533,7 +1531,7 @@ function renderCheckinModal() {
   return `
   <div class="modal-backdrop" id="checkinBackdrop">
     <div class="modal">
-      <h3>How's ${p.name} doing?</h3>
+      <h3>How's ${escapeHtml(p.name)} doing?</h3>
       <div class="mood-picker">
         ${moods.map(m => `
           <button class="mood-option mood-option-${m.id} ${state.checkinDraftMood === m.id ? 'mood-option-selected' : ''}" data-mood="${m.id}">
@@ -2354,7 +2352,7 @@ function lightCategory(lightText) {
 
 function buildDictionaryCardsHtml(list, search) {
   if (list.length === 0) {
-    return `<div class="guide-no-results">No plants match "${search}". Try a different search or filter.</div>`;
+    return `<div class="guide-no-results">No plants match "${escapeHtml(search)}". Try a different search or filter.</div>`;
   }
   return list.map(s => {
     const diff = speciesDifficulty(s);
@@ -2416,7 +2414,7 @@ function renderDictionary() {
       <div class="guide-hero-sub">${species.length} plants, with care basics for each</div>
     </div>
     <div class="guide-controls">
-      <input type="text" id="guideSearchInput" class="guide-search" placeholder="Search by name" value="${search}">
+      <input type="text" id="guideSearchInput" class="guide-search" placeholder="Search by name" value="${escapeHtml(search)}">
       <div class="guide-light-chips">
         <button class="room-chip ${!lightFilter ? 'room-chip-active' : ''}" data-light="">All light</button>
         <button class="room-chip ${lightFilter === 'low' ? 'room-chip-active' : ''}" data-light="low">Low light</button>
@@ -2530,7 +2528,7 @@ function renderGarden() {
     <div class="garden-spotlight-ring">${ringPortrait(focus, 64, 6)}</div>
     <div class="garden-spotlight-info">
       <div class="garden-spotlight-label">Needs attention</div>
-      <div class="garden-spotlight-name">${focus.name}</div>
+      <div class="garden-spotlight-name">${escapeHtml(focus.name)}</div>
       <div class="garden-spotlight-stats">
         <div class="garden-spotlight-stat"><strong>${daysLeft(focus)}d</strong>until water</div>
         <div class="garden-spotlight-stat"><strong>${calcStreak(focus)}</strong>streak</div>
@@ -2580,11 +2578,11 @@ function renderGarden() {
         ${state.plants.map(p => {
           const tier = gardenTier(p);
           return `
-            <div class="garden-plant" data-id="${p.id}" title="${p.name}, ${tier.label}" role="button" tabindex="0" aria-label="${p.name}, ${tier.label}">
+            <div class="garden-plant" data-id="${p.id}" title="${escapeHtml(p.name)}, ${tier.label}" role="button" tabindex="0" aria-label="${escapeHtml(p.name)}, ${tier.label}">
               <div class="garden-plant-emoji" style="width:${tier.size}px;height:${tier.size}px;">${gardenTierIllustration(tier.label)}</div>
               <div class="garden-pot"></div>
               <div class="garden-plant-shadow"></div>
-              <div class="garden-plant-name">${p.name}</div>
+              <div class="garden-plant-name">${escapeHtml(p.name)}</div>
             </div>
           `;
         }).join('')}
@@ -2637,12 +2635,12 @@ function renderGardenStats() {
     <div class="garden-stat-card garden-stat-highlight">
       <div class="garden-stat-icon">${icon('trophy', 22)}</div>
       <div class="garden-stat-title">Star of the garden</div>
-      <div class="garden-stat-name">${star.name}</div>
+      <div class="garden-stat-name">${escapeHtml(star.name)}</div>
     </div>
     <div class="garden-stat-card garden-stat-highlight">
       <div class="garden-stat-icon">${icon('drop', 22)}</div>
       <div class="garden-stat-title">Needs attention</div>
-      <div class="garden-stat-name">${needsAttention.name}</div>
+      <div class="garden-stat-name">${escapeHtml(needsAttention.name)}</div>
     </div>
   `;
 
@@ -2664,9 +2662,9 @@ function renderGardenCuttings() {
     ` : `
       <div class="garden-cuttings-row">
         ${state.propagations.map(prop => `
-          <div class="garden-cutting-chip" data-id="${prop.id}" role="button" tabindex="0" aria-label="${prop.name}, rooting ${daysRooting(prop)} day${daysRooting(prop) === 1 ? '' : 's'}">
+          <div class="garden-cutting-chip" data-id="${prop.id}" role="button" tabindex="0" aria-label="${escapeHtml(prop.name)}, rooting ${daysRooting(prop)} day${daysRooting(prop) === 1 ? '' : 's'}">
             <span class="garden-cutting-emoji">${icon('sprout', 16)}</span>
-            <span class="garden-cutting-name">${prop.name}</span>
+            <span class="garden-cutting-name">${escapeHtml(prop.name)}</span>
             <span class="garden-cutting-days">${daysRooting(prop)}d</span>
           </div>
         `).join('')}
@@ -2722,7 +2720,7 @@ function ringPortrait(p, size, strokeWidth) {
   const offset = c * (1 - pct);
   const photoSize = size - strokeWidth * 2.6;
   const inner = p.photo
-    ? `<img src="${p.photo}" alt="Photo of ${p.name}" class="ring-photo" style="width:${photoSize}px;height:${photoSize}px;">`
+    ? `<img src="${p.photo}" alt="Photo of ${escapeHtml(p.name)}" class="ring-photo" style="width:${photoSize}px;height:${photoSize}px;">`
     : `<div class="ring-photo ring-photo-placeholder" style="width:${photoSize}px;height:${photoSize}px;" role="img" aria-label="No photo yet">${icon('leaf', Math.round(photoSize * 0.45))}</div>`;
   return `
     <div class="ring-wrap" style="width:${size}px;height:${size}px;">
@@ -2752,8 +2750,8 @@ function renderCard(p) {
   div.innerHTML = `
     ${ringPortrait(p, 54, 5)}
     <div class="info">
-      <p class="name">${p.name} <span class="mood">${moodEmoji(p)}</span></p>
-      <div class="species">${p.species || 'unlabeled'}${p.room ? ` · ${p.room}` : ''}</div>
+      <p class="name">${escapeHtml(p.name)} <span class="mood">${moodEmoji(p)}</span></p>
+      <div class="species">${escapeHtml(p.species) || 'unlabeled'}${p.room ? ` · ${escapeHtml(p.room)}` : ''}</div>
     </div>
     <div class="days-badge">${left === 0 ? 'today' : left + 'd'}</div>
   `;
@@ -2838,8 +2836,8 @@ function renderDetail(p) {
       </div>
       <input type="file" id="detailPhotoInput" accept="image/*" capture="environment" style="display:none;">
       <div class="detail-title">
-        <h2>${p.name} <span class="mood">${moodEmoji(p)}</span></h2>
-        <div class="species">${p.species || 'species unlabeled'}</div>
+        <h2>${escapeHtml(p.name)} <span class="mood">${moodEmoji(p)}</span></h2>
+        <div class="species">${escapeHtml(p.species) || 'species unlabeled'}</div>
         <div class="row-actions">
           ${p.twiceDaily ? `
             <button class="primary ${wateredSlotToday(p, 'morning') ? 'water-done' : ''}" id="waterMorningBtn">Morning${wateredSlotToday(p, 'morning') ? ' (done)' : ''}</button>
@@ -2860,7 +2858,7 @@ function renderDetail(p) {
       last watered ${daysSince(p.lastWatered)} day${daysSince(p.lastWatered)===1?'':'s'} ago ·
       ${left} day${left===1?'':'s'} left
     </div>
-    <input class="room-input" id="roomInput" placeholder="Add a room (e.g. Kitchen)" value="${p.room || ''}" aria-label="Room">
+    <input class="room-input" id="roomInput" placeholder="Add a room (e.g. Kitchen)" value="${escapeHtml(p.room)}" aria-label="Room">
 
     <div class="settings-row">
       <div class="settings-row-label">
@@ -2882,8 +2880,8 @@ function renderDetail(p) {
     </div>
 
     <div class="section-label">Notes</div>
-    <textarea class="notes-input" id="notesInput" aria-label="Notes" placeholder="e.g. repot in spring, keep away from cold drafts…">${p.notes || ''}</textarea>
-    ${p.speciesDesc ? `<div class="species-desc">${icon('leaf', 14)} <strong>${p.species}:</strong> ${p.speciesDesc}</div>` : ''}
+    <textarea class="notes-input" id="notesInput" aria-label="Notes" placeholder="e.g. repot in spring, keep away from cold drafts…">${escapeHtml(p.notes)}</textarea>
+    ${p.speciesDesc ? `<div class="species-desc">${icon('leaf', 14)} <strong>${escapeHtml(p.species)}:</strong> ${escapeHtml(p.speciesDesc)}</div>` : ''}
 
     <div class="section-label">Streak</div>
     <div class="streak-row">
@@ -2907,7 +2905,7 @@ function renderDetail(p) {
     </div>
     ${healthLog.length ? `
       <ul class="history-list">
-        ${healthLog.map(h => `<li>${moodLabel(h.mood)} · ${formatHistoryDate(h.date)}${h.note ? `, ${escapeHtml(h.note)}` : ''}</li>`).join('')}
+        ${healthLog.map(h => `<li>${escapeHtml(moodLabel(h.mood))} · ${formatHistoryDate(h.date)}${h.note ? `, ${escapeHtml(h.note)}` : ''}</li>`).join('')}
       </ul>
     ` : `<div style="font-size:13px;color:var(--soil);">No check-ins yet.</div>`}
   `;
@@ -3101,12 +3099,12 @@ function renderModal() {
       </div>
       <div class="field">
         <label>Name</label>
-        <input id="modalNameInput" placeholder="e.g. Fig in the corner" value="${nameVal}" aria-label="Plant name">
+        <input id="modalNameInput" placeholder="e.g. Fig in the corner" value="${escapeHtml(nameVal)}" aria-label="Plant name">
       </div>
       <div class="field">
         <label>Species</label>
         <button class="species-picker-btn" id="openSpeciesPicker" type="button">
-          ${species ? `<span class="species-picker-emoji">${speciesIllustrationSVG(species)}</span> ${species.name}` : (isEditing && editingPlant.species ? editingPlant.species : 'Choose from the guide (optional)')}
+          ${species ? `<span class="species-picker-emoji">${speciesIllustrationSVG(species)}</span> ${escapeHtml(species.name)}` : (isEditing && editingPlant.species ? escapeHtml(editingPlant.species) : 'Choose from the guide (optional)')}
         </button>
       </div>
       <div class="field">
@@ -3132,7 +3130,7 @@ function renderModal() {
       </div>
       <div class="field" id="roomCustomField" style="${roomDetail === 'Other' ? '' : 'display:none;'}">
         <label>Name it</label>
-        <input id="modalRoomCustom" placeholder="e.g. Front room" value="${roomCustom || ''}" aria-label="Custom room name">
+        <input id="modalRoomCustom" placeholder="e.g. Front room" value="${escapeHtml(roomCustom)}" aria-label="Custom room name">
       </div>
       <div class="field">
         <label>Water every how many days?</label>
@@ -3166,8 +3164,8 @@ function renderSpeciesPicker() {
           <div class="species-picker-row" data-id="${s.id}">
             <span class="species-picker-row-emoji">${speciesIllustrationSVG(s)}</span>
             <div>
-              <div class="species-picker-row-name">${s.name}</div>
-              ${s.latin ? `<div class="species-picker-row-latin">${s.latin}</div>` : ''}
+              <div class="species-picker-row-name">${escapeHtml(s.name)}</div>
+              ${s.latin ? `<div class="species-picker-row-latin">${escapeHtml(s.latin)}</div>` : ''}
             </div>
           </div>
         `).join('')}
