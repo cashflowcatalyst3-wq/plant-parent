@@ -12,8 +12,7 @@ function daysBetween(aIso, bIso) {
   return Math.floor((new Date(bIso) - new Date(aIso)) / (1000 * 60 * 60 * 24));
 }
 
-// Mirrors the streak calculation in app.js so the weekly digest reports the
-// same numbers the person sees in the app.
+
 function calcStreak(plant) {
   const log = plant.waterLog || [];
   if (log.length === 0) return 0;
@@ -65,7 +64,7 @@ function weeklyDigestPayload(plants) {
 }
 
 export default async function handler(req, res) {
-  // Vercel Cron sends a special header; also allow manual testing via a secret query param
+
 const secret = process.env.CRON_SECRET;
 if (!secret) {
   return res.status(500).json({ error: 'CRON_SECRET is not configured' });
@@ -106,9 +105,6 @@ if (!bearerOk && !queryOk) {
     let totalFailed = 0;
     let digestsSent = 0;
 
-    // Weekly digest piggybacks on this same daily cron - no extra scheduler
-    // needed. It only fires on Sundays, and only once per day even if this
-    // endpoint gets triggered more than once (e.g. manual testing).
     const isDigestDay = new Date().getUTCDay() === 0; // Sunday
     let shouldSendDigests = false;
     if (isDigestDay) {
@@ -123,18 +119,16 @@ if (!bearerOk && !queryOk) {
         redis.get(`plants:${deviceId}`),
         redis.get(`sub:${deviceId}`)
       ]);
-      if (!plants || !subscription) continue;
+      if (!Array.isArray(plants) || !subscription) continue;
+      const validPlants = plants.filter(p => p && typeof p === 'object' && typeof p.name === 'string');
 
-      // Look up the device's leaderboard nickname (if any) for friendlier
-      // log entries.
+
       const lbEntry = await redis.get(`leaderboard-entry:${deviceId}`);
       const deviceLabel = lbEntry?.nickname
         ? `${lbEntry.nickname} (${deviceId})`
         : deviceId;
 
-      // Count how many plants are overdue and not already notified today.
-      // If two or more are overdue, send a single summary notification
-      // before the per-plant ones, so the person sees the big picture first.
+
       const overduePlants = plants.filter(p => {
         const elapsed = daysSince(p.lastWatered);
         return elapsed >= p.frequency && p.lastNotified !== today;
