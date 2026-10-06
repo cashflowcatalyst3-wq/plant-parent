@@ -124,7 +124,10 @@ export default async function handler(req, res) {
         : deviceId;
 
       try {
-        await webpush.sendNotification(subscription, JSON.stringify(message));
+        await webpush.sendNotification(subscription, JSON.stringify({
+          ...message,
+          tag: 'plant-parent-tip'
+        }));
         sent++;
         await logNotification(redis, {
           type: 'random-tip',
