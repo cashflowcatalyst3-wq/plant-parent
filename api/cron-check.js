@@ -66,10 +66,16 @@ function weeklyDigestPayload(plants) {
 
 export default async function handler(req, res) {
   // Vercel Cron sends a special header; also allow manual testing via a secret query param
-  const isCron = req.headers['x-vercel-cron'] || req.query.secret === process.env.CRON_SECRET;
-  if (!isCron) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
+const secret = process.env.CRON_SECRET;
+if (!secret) {
+  return res.status(500).json({ error: 'CRON_SECRET is not configured' });
+}
+const authHeader = req.headers['authorization'] || '';
+const bearerOk = authHeader === `Bearer ${secret}`;
+const queryOk = req.query.secret === secret;
+if (!bearerOk && !queryOk) {
+  return res.status(401).json({ error: 'Unauthorized' });
+}
 
   const missing = [];
   if (!process.env.VAPID_PUBLIC_KEY) missing.push('VAPID_PUBLIC_KEY');
