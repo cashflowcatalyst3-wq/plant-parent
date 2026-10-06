@@ -241,7 +241,7 @@ document.getElementById('searchInput').addEventListener('input', (e) => {
 function renderEntries(entries) {
   const body = document.getElementById('entriesBody');
   body.innerHTML = entries.map(e => `
-    <tr data-device="${e.deviceId}">
+    <tr data-device="${escapeHtml(e.deviceId)}">
       <td>${escapeHtml(e.nickname)}${e.adminOverride ? '<span class="override-badge">admin set</span>' : ''}</td>
       <td>${e.bestStreak || 0}</td>
       <td>${e.plantCount || 0}</td>
@@ -316,7 +316,7 @@ function renderBanned(banned) {
     return;
   }
   body.innerHTML = banned.map(b => `
-    <tr data-device="${b.deviceId}">
+    <tr data-device="${escapeHtml(b.deviceId)}">
       <td>${escapeHtml(b.nickname)}</td>
       <td style="font-family:monospace;font-size:11px;color:#999;">${escapeHtml(b.deviceId)}</td>
       <td><button class="secondary" data-act="unban">Unban</button></td>
@@ -520,7 +520,7 @@ function renderDevices(devices) {
     return;
   }
   body.innerHTML = devices.map(d => `
-    <tr data-device="${d.deviceId}">
+    <tr data-device="${escapeHtml(d.deviceId)}">
       <td>
         ${d.nickname ? escapeHtml(d.nickname) + '<br>' : ''}
         <span class="device-id">${escapeHtml(d.deviceId)}</span>
