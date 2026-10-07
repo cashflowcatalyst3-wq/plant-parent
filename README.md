@@ -18,7 +18,7 @@ An installable plant-care PWA that tracks watering, feeding, rotation, and overa
 
 ## Live app
 
-Once deployed, the app is at `https://your-app-name.vercel.app/`. Open it on a phone, add it to the home screen, and it installs like a native app.
+Once deployed, the app is at `[https://your-app-name.vercel.app/](https://plant-parent-beryl.vercel.app/)`. Open it on a phone, add it to the home screen, and it installs like a native app.
 
 ## Tech stack
 
