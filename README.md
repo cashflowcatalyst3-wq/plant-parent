@@ -1,127 +1,132 @@
 # Plant Parent
 
-An installable plant-watering tracker with plant photos, care streaks/history, and real push notifications.
+An installable plant-care PWA that tracks watering, feeding, rotation, and overall health for houseplants — with real push notifications, a public leaderboard, two mini-games, photo-based species identification, multi-device sync, and an admin moderation panel. Runs entirely on free-tier infrastructure with no backend server to maintain.
 
-## What's here
-- `index.html`, `styles.css`, `app.js` — the app itself
-- `game.js`, `game2.js` — the two mini-games (Raindrop Catch, Memory Match)
-- `manifest.json`, `sw.js`, `icons/` — what makes it installable on a phone (PWA)
-- `api/` — small backend functions for syncing plant data and sending push reminders
-- `vercel.json` — schedules a daily check for overdue plants
+## What it does
 
-## Go live in about 10 minutes
+- **Track every plant.** Name, species, room, photo, watering frequency, feeding schedule, rotation reminders, health check-ins, and a full watering history. Streaks count consecutive on-time waterings.
+- **Real push notifications.** Actual OS-level notifications that arrive when the app is closed, using Web Push with VAPID keys, a service worker, and a scheduled daily job.
+- **Photo-based species ID.** Snap a photo of an unknown plant and get a species guess, powered by the free Pl@ntNet API.
+- **Garden view.** A visual scene that grows the better you keep up with care, with a spotlight card showing the plant that needs attention most.
+- **Species guide.** Compact reference for 27 common houseplants with light needs, watering frequency, and difficulty rating.
+- **Two mini-games.** Raindrop Catch and Memory Match, both with leaderboard integration.
+- **Community wall.** Public tips from other users, with nickname sanitization and profanity filtering.
+- **Leaderboard.** Four rankings (streak, plant count, Raindrop high score, Memory high score). Streak and plant count are recomputed server-side from stored plant data.
+- **Multi-device sync.** A 6-character code links two devices to the same plant list, no account needed.
+- **Weather-aware tips.** Uses Open-Meteo with the device's location to nudge watering based on recent rain and heat.
+- **Admin panel.** Password-protected moderation tools: view every device, message or wipe specific devices, ban from the leaderboard, manually override leaderboard stats, and trigger the daily/weekly notification jobs on demand.
 
-**1. Put this project on GitHub**
-- Create a new repo at https://github.com/new
-- Upload all the files in this folder to it (drag-and-drop works, or `git push` if you're comfortable with git)
+## Live app
 
-**2. Deploy with Vercel (free)**
-- Go to https://vercel.com, sign up with your GitHub account
-- Click "Add New Project" → pick the repo you just created → click **Deploy**
-- It'll finish deploying (the push notification pieces won't work yet — that's steps 3–4 below)
+Once deployed, the app is at `https://your-app-name.vercel.app/`. Open it on a phone, add it to the home screen, and it installs like a native app.
 
-**3. Add a free database (for notifications to work)**
-- On your project's page in Vercel, click the **Storage** tab
-- Click **"Marketplace Database Providers"** (or **"Browse Marketplace"** / **"Connect Database"** — wording varies slightly)
-- Find **Upstash** and select it → choose the **Redis** product
-- Follow the prompts: create a free database, then **connect it to this project**
-- Vercel automatically adds the needed environment variables for you — no copying/pasting required
+## Tech stack
 
-**4. Add the notification keys**
-- Still in your project settings, go to **Settings → Environment Variables**
-- Add these two:
-- Name: `VAPID_PUBLIC_KEY` → Value: your generated public key
-- Name: `VAPID_PRIVATE_KEY` → Value: your generated private key
-- Name: `CRON_SECRET` → Value: your generated cron secret
-- Go to the **Deployments** tab, click the **⋯** menu on the latest deployment, and choose **Redeploy** so the new variables take effect
+**Frontend**
+- Plain JavaScript, HTML, CSS — no framework, no build step
+- Progressive Web App: `manifest.json` + service worker for installability and offline caching
+- All app state lives in localStorage; server sync is opt-in
 
-**5. Install it on your phone**
-- Open your `.vercel.app` URL in Safari (iPhone) or Chrome (Android)
-- iPhone: Share icon → "Add to Home Screen"
-- Android: ⋮ menu → "Install app"
-- Open the installed app and tap **"🔕 Enable reminders"** at the top, then allow notifications when prompted
+**Backend**
+- Vercel serverless functions in `api/` — one file per endpoint
+- Upstash Redis (free tier, added via Vercel marketplace) as the only database
+- Web Push via `web-push` for notification delivery
+- Vercel Cron for the daily overdue check
+- External scheduler (cron-job.org) for 5-hour random tips, since Vercel's free tier only allows once-daily cron
 
-That's it — once enabled, the app checks once a day and sends you a real notification for any plant that's overdue for water, even if the app is closed.
+**External services** (all free)
+- Pl@ntNet for plant species identification (500 requests/day, rate-limited per device)
+- Open-Meteo for weather data (no API key required)
 
-## Random check-in notifications (every 5 hours)
+**Nothing runs continuously.** Every backend piece wakes up only when a request or a cron hits it.
 
-Heads up on a real platform limit: Vercel's free plan only allows cron jobs to run **once per day** — a schedule like "every 5 hours" isn't allowed there and fails at deploy time. To get real 5-hour notifications without paying for anything, this uses a free external scheduler (cron-job.org) to call a new endpoint on that schedule instead.
+## Project layout
+├── index.html The app shell
+├── admin.html Admin panel (separate page, not linked from the app)
+├── styles.css All app styling
+├── app.js The entire client application
+├── game.js Raindrop Catch
+├── game2.js Memory Match
+├── sw.js Service worker (caching + push handling)
+├── manifest.json PWA manifest
+├── vercel.json Cron schedule + redirects
+├── package.json Backend dependencies
+├── icons/ App icons (including notification badge)
+├── lib/
+│ ├── nickname.js Nickname sanitization + profanity blocklist + Redis keys
+│ ├── rateLimit.js Simple fixed-window rate limiter
+│ └── deviceAuth.js Device token hashing and verification
+└── api/
+├── sync.js Save a device's plant list
+├── sync-pull.js Fetch another device's plants by sync code
+├── subscribe.js Save a push subscription
+├── unsubscribe.js Delete a push subscription
+├── leaderboard.js Public leaderboard (GET / POST / DELETE)
+├── leaderboard-admin.js Admin overrides for the leaderboard
+├── community.js Community tips wall
+├── identify.js Pl@ntNet proxy with rate limiting
+├── cron-check.js Daily job: overdue notifications + Sunday digest
+├── random-notification.js 5-hour tips
+└── admin.js Admin panel backend
 
-**1. Add one more environment variable**
-- In Vercel: **Settings → Environment Variables**
-- Add: Name: `CRON_SECRET` → Value: `382cc14e3e193d325dc04096faa4f04fd2869afac4bcc459`
-- Redeploy (same **⋯ → Redeploy** step as before) so it takes effect
+## Deployment
 
-**2. Set up the free scheduler**
-- Go to https://cron-job.org and create a free account (no credit card)
-- Click **Create cronjob**
-- Title: anything, e.g. "Plant Parent check-in"
-- URL: `https://YOUR-APP-NAME.vercel.app/api/random-notification?secret=382cc14e3e193d325dc04096faa4f04fd2869afac4bcc459`
-  (replace `YOUR-APP-NAME` with your actual Vercel URL)
-- Schedule: choose "Every 5 hours" (or use the custom cron expression `0 */5 * * *`)
-- Save
+1. **Push to GitHub**, then import the repo at [vercel.com](https://vercel.com) and deploy. The frontend works immediately.
 
-That's it — every 5 hours, cron-job.org pings your app, which picks a random plant tip or check-in message and sends it as a real push notification to everyone who's enabled reminders.
+2. **Add Upstash Redis** via Vercel's Storage tab → Marketplace → Upstash → Redis. Vercel adds the environment variables automatically.
 
-## Plant photo identification (optional)
+3. **Add environment variables** in Vercel → Settings → Environment Variables:
+   - `VAPID_PUBLIC_KEY` — generate with `npx web-push generate-vapid-keys`
+   - `VAPID_PRIVATE_KEY` — from the same command
+   - `CRON_SECRET` — any random string (e.g. `openssl rand -hex 24`)
+   - `PLANTNET_API_KEY` — free key from [my.plantnet.org](https://my.plantnet.org)
+   - `ADMIN_SECRET` — pick your own password for the admin panel
 
-Snap a photo of an unlabeled plant when adding it, and get a species guess instead of typing it in. Powered by [Pl@ntNet](https://plantnet.org), a nonprofit plant identification project — genuinely free, 500 identifications/day.
+   Then update the `VAPID_PUBLIC_KEY` constant at the top of `app.js` to match.
 
-**1. Get a free API key**
-- Go to https://my.plantnet.org and create a free account
-- Find your API key in your account dashboard
+4. **Redeploy** so the new environment variables take effect.
 
-**2. Add it to Vercel**
-- In Vercel: **Settings → Environment Variables**
-- Add: Name: `PLANTNET_API_KEY` → Value: the key you just copied
-- Redeploy so it takes effect
+5. **Schedule the daily check.** Either use Vercel's built-in cron (once per day, per `vercel.json`) or point an external scheduler at `https://your-app.vercel.app/api/cron-check?secret=YOUR_CRON_SECRET`. The second option is required for the 5-hour tips, which need `https://your-app.vercel.app/api/random-notification?secret=YOUR_CRON_SECRET`.
 
-That's it — when adding or editing a plant, tap "🔍 Identify from a photo" next to the Species field.
+6. **Open the app on a phone** and add it to the home screen. Then open Settings and turn on push reminders.
 
-This app is public, with no login — since Pl@ntNet's free tier (500/day) is shared across everyone who uses it, this feature is rate-limited per device and per network (20/device/day, 40/network/day) so no single visitor can use up the shared quota. No setup needed for this — it's automatic.
+## Admin panel
 
-## Community leaderboard (optional)
+Available at `https://your-app.vercel.app/admin.html`. Requires `ADMIN_SECRET`. Not linked from anywhere in the app itself.
 
-Anyone using the app can opt in to a public leaderboard (nicknames only — no other plant data is shared) ranking longest watering streak and total plants. To also get admin controls for it (adjust or zero out someone's streak, remove entries):
+What you can do from there:
 
-**1. Add one more environment variable**
-- In Vercel: **Settings → Environment Variables**
-- Add: Name: `ADMIN_SECRET` → Value: pick your own private password (don't reuse the `CRON_SECRET` above)
-- Redeploy so it takes effect
+- See every device that has ever synced — plant counts, overdue counts, whether notifications are on
+- Create test devices with sample overdue plants for testing notifications
+- Send targeted pushes to a single device, or broadcast to everyone
+- Wipe a device completely (plants + subscription + leaderboard entry)
+- Edit any device's plant data directly (useful for testing overdue states)
+- Edit or delete community posts
+- Manually adjust leaderboard stats with a real "clear override" restore mechanism
+- Ban or unban devices from the leaderboard
+- Manually trigger the daily check and the random tip jobs
 
-**2. Open the admin page**
-- Go to `https://YOUR-APP-NAME.vercel.app/admin.html`
-- Enter the secret you just set
-- From there you can zero out or add to anyone's streak, set an exact plant count, clear an admin override so their own device's real numbers resume syncing, or remove someone from the board entirely
+## Security notes
 
-This page isn't linked from anywhere in the app itself — only people with the direct URL and your secret can reach it.
+- **Device tokens.** Every write endpoint requires an `X-Device-Token` header that matches a per-device token stored (hashed) in Redis. Prevents anyone from writing to a device ID they don't own.
+- **Server-verified leaderboard.** Streak and plant count are recomputed server-side from the device's actual stored plant data; the client can't claim fake numbers for those two.
+- **Rate limiting.** `/api/identify` (shared Pl@ntNet quota) and `/api/sync-pull` (brute-force protection on 6-character codes) are both rate-limited per device and per IP.
+- **XSS prevention.** User-supplied text (plant names, notes, room names, community tips, nicknames) is escaped before being inserted into the DOM.
+- **Cron auth.** Both `/api/cron-check` and `/api/random-notification` require a bearer token or a matching `?secret=` query param, and fail closed if `CRON_SECRET` is unset.
+- **Nickname moderation.** Nicknames are sanitized, checked against a profanity blocklist, and must be unique across the leaderboard.
 
-## What's new in this version
-- **Fair-use rate limiting on plant ID**: since this app is public, the free Pl@ntNet identification quota is now protected with per-device and per-network daily limits, so no single visitor can use it all up. Automatic, no setup needed.
-- **Photo-based plant identification**: tap "🔍 Identify from a photo" when adding/editing a plant to get a species guess from a real photo, powered by the free Pl@ntNet API (see setup above).
-- **Two more leaderboards**: Raindrop Catch and Memory Match high scores, alongside the existing streak and plant-count boards.
-- **Water all plants button**: one tap waters everything that hasn't been done yet today, skipping anything already logged.
-- **Community leaderboard**: opt-in public rankings for longest streak and total plants, with unique appropriate nicknames, plus an admin page to manage entries (see above).
-- **Fertilizing & rotation trackers**: each plant's detail view now has its own "Feed now" and "Rotate now" buttons with day-based reminders, separate from watering.
-- **Health check-ins**: log how a plant is doing (thriving/okay/struggling/recovering) with an optional note, and see the history for that plant.
-- **Weekly digest notification**: every Sunday, alongside the usual overdue check, you get one extra push summarizing the week — waterings logged, best streak, and anything overdue.
-- **Seasonal care tips**: a quiet banner on your shelf with a nudge based on the time of year (Settings → Reminders → Seasonal tips to turn off).
-- **Sound toggle**: Settings → Appearance → Sound effects, to mute taps/chimes/game sounds.
-- **Memory Match overhaul**: now a leveled, timed game — the board gets bigger and the memorize-window shrinks each round, mismatches cost you time, and matching streaks build a score multiplier. No plant photos in this game anymore, just species icons. Your best score is saved and shown in the menu.
-- **Cuttings in the Garden view**: propagations you're currently rooting now show up as a small chip list right in the Garden tab, so you don't have to dig through the menu to check on them.
-- **Redesigned top logo/wordmark**: replaced the old placeholder-style header with a compact mark using the app's own icon set.
-- **Next plant button**: in a plant's detail view, jump straight to the next plant on your shelf without going back to the list first. The detail view also fits small phone screens better now.
+## Known limitations
 
-## What's new in previous versions
-- **Multi-device sync**: More menu → "Sync devices" → create a 6-character code on one device, enter it on another, and both stay linked to the same plant list. No account or password needed. Uses the same free Upstash database already set up for notifications — no new setup required.
-- **Random check-ins**: a rotating pool of plant tips and gentle nudges, sent every 5 hours via a free external scheduler
-- **Photos**: tap the ring in a plant's detail view (or add one when creating a plant) to give it a portrait — it shows right inside the watering ring
-- **Streaks & history**: every "Water now" is logged, with a streak counter for consecutive on-time waterings and a short history list
-- **Push notifications**: a daily automated check sends a real phone notification for anything overdue
-## What's new in this version
-- **Full visual redesign**: sage green and cream palette, rounded tile cards, circular progress rings, and a cleaner grouped settings layout. Every emoji in the UI has been replaced with a consistent line-icon set, and the home screen is now a tile grid showing your plants, garden health, due-today count, and species guide at a glance.
-- **Two game visuals updated**: Raindrop Catch and Memory Match now use SVG plant icons instead of emoji, keeping the whole app visually consistent.
-## Notes
-- The VAPID keys above are safe to use — they're specific to this app and don't cost anything or require any account beyond what's already set up.
-- Push notification support on iPhone requires iOS 16.4 or later and only works after the app is added to your home screen (not from a regular Safari tab).
-- Everything here — GitHub, Vercel, Vercel KV, and web push — is free at personal-use scale.
+- **Leaderboard game scores are self-reported.** Streak and plant count are server-verified, but Raindrop and Memory scores come from the client. Preventing this would require server-side game replay, which is out of scope for this project.
+- **The Pl@ntNet free tier is 500 identifications per day**, shared across everyone using the app. Rate limiting exists specifically so no single device can consume the whole quota.
+- **The daily cron runs once per day on Vercel's free tier.** The 5-hour tips rely on an external scheduler as a workaround.
+- **Sync codes are 6 characters**, so they're not cryptographically secure. They're meant for linking your own devices, not for public sharing.
+- **`app.js` is a single file** by design — no build step means no bundler, so all client code lives in one place. This keeps deployment trivial but trades off file organization.
+
+## Credits
+
+Built by Aaron Shibu as a solo project. Design and features by me; implementation assisted by Claude.
+
+Species identification powered by [Pl@ntNet](https://plantnet.org) — a free nonprofit plant-ID service run by a French research consortium.
+
+Weather data from [Open-Meteo](https://open-meteo.com).
