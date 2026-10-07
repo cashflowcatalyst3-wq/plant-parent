@@ -41,33 +41,37 @@ Once deployed, the app is at `[https://your-app-name.vercel.app/](https://plant-
 **Nothing runs continuously.** Every backend piece wakes up only when a request or a cron hits it.
 
 ## Project layout
-├── index.html The app shell
-├── admin.html Admin panel (separate page, not linked from the app)
-├── styles.css All app styling
-├── app.js The entire client application
-├── game.js Raindrop Catch
-├── game2.js Memory Match
-├── sw.js Service worker (caching + push handling)
-├── manifest.json PWA manifest
-├── vercel.json Cron schedule + redirects
-├── package.json Backend dependencies
-├── icons/ App icons (including notification badge)
+
+```
+.
+├── index.html              The app shell
+├── admin.html              Admin panel (separate page, not linked from the app)
+├── styles.css              All app styling
+├── app.js                  The entire client application
+├── game.js                 Raindrop Catch
+├── game2.js                Memory Match
+├── sw.js                   Service worker (caching + push handling)
+├── manifest.json           PWA manifest
+├── vercel.json             Cron schedule + redirects
+├── package.json            Backend dependencies
+├── icons/                  App icons (including notification badge)
 ├── lib/
-│ ├── nickname.js Nickname sanitization + profanity blocklist + Redis keys
-│ ├── rateLimit.js Simple fixed-window rate limiter
-│ └── deviceAuth.js Device token hashing and verification
+│   ├── nickname.js         Nickname sanitization + profanity blocklist + Redis keys
+│   ├── rateLimit.js        Simple fixed-window rate limiter
+│   └── deviceAuth.js       Device token hashing and verification
 └── api/
-├── sync.js Save a device's plant list
-├── sync-pull.js Fetch another device's plants by sync code
-├── subscribe.js Save a push subscription
-├── unsubscribe.js Delete a push subscription
-├── leaderboard.js Public leaderboard (GET / POST / DELETE)
-├── leaderboard-admin.js Admin overrides for the leaderboard
-├── community.js Community tips wall
-├── identify.js Pl@ntNet proxy with rate limiting
-├── cron-check.js Daily job: overdue notifications + Sunday digest
-├── random-notification.js 5-hour tips
-└── admin.js Admin panel backend
+    ├── sync.js             Save a device's plant list
+    ├── sync-pull.js        Fetch another device's plants by sync code
+    ├── subscribe.js        Save a push subscription
+    ├── unsubscribe.js      Delete a push subscription
+    ├── leaderboard.js      Public leaderboard (GET / POST / DELETE)
+    ├── leaderboard-admin.js Admin overrides for the leaderboard
+    ├── community.js        Community tips wall
+    ├── identify.js         Pl@ntNet proxy with rate limiting
+    ├── cron-check.js       Daily job: overdue notifications + Sunday digest
+    ├── random-notification.js 5-hour tips
+    └── admin.js            Admin panel backend
+```
 
 ## Deployment
 
